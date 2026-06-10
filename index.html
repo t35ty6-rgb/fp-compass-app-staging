@@ -1058,7 +1058,45 @@ window.fpReadyAfterAuth = function() {
   ];
   legacyDemoKeys.forEach(k => { try { localStorage.removeItem(k); } catch (_) {} });
 
-  const ver = "20260610N-cleanup-dead-paths";
+  // ★ エラーバウンダリ: 何か壊れたら 全画面 を「復旧中…」に切替 + 30秒後 自動再読込
+  //   お客様に 真っ白画面 や 赤いJSエラー を 絶対 見せない
+  (function setupErrorBoundary() {
+    let shown = false;
+    function showRecoveryScreen(reason) {
+      if (shown) return;
+      shown = true;
+      try {
+        document.body.innerHTML = `
+          <div style="position:fixed;inset:0;background:linear-gradient(135deg,#1B3A5C,#284f7d);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:'Hiragino Sans','Inter',sans-serif;padding:20px;text-align:center;z-index:999999;">
+            <div style="font-size:48px;margin-bottom:18px;">🛠</div>
+            <div style="font-family:'Noto Serif JP',serif;font-size:22px;font-weight:700;letter-spacing:0.06em;margin-bottom:10px;">復旧作業中です</div>
+            <div style="font-size:14px;line-height:1.7;opacity:0.85;max-width:420px;">システムの更新作業を行っております。<br>このページは <strong>30 秒後 に 自動で 再読み込み</strong> されます。</div>
+            <button onclick="location.reload()" style="margin-top:24px;background:#FFE9A8;color:#1F1A12;border:none;padding:11px 28px;border-radius:7px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;letter-spacing:0.04em;">今すぐ再読み込み</button>
+            <div style="margin-top:24px;font-size:11px;opacity:0.55;">10分以上 復旧しない場合は <a href="mailto:support@skeleton-inc.jp" style="color:#FFE9A8;text-decoration:underline;">support@skeleton-inc.jp</a> まで</div>
+          </div>
+        `;
+      } catch (_) {}
+      setTimeout(() => { try { location.reload(); } catch (_) {} }, 30000);
+    }
+    window.addEventListener('error', (e) => {
+      // 軽微な ResizeObserver / 画像ロード失敗 等は無視
+      const msg = String(e?.message || '');
+      if (/ResizeObserver|loading.*chunk|Loading CSS chunk|Script error\.?$/i.test(msg)) return;
+      console.error('[errorBoundary]', e);
+      showRecoveryScreen('uncaught');
+    });
+    window.addEventListener('unhandledrejection', (e) => {
+      const r = e?.reason;
+      const msg = String(r?.message || r || '');
+      // 軽微なものは無視
+      if (/AbortError|NetworkError when attempting/i.test(msg)) return;
+      console.error('[errorBoundary] unhandled rejection:', r);
+      // PROMISE 拒否は 連続発火しがち → 画面切替トリガは 2秒以上の遅延 で 真の壊れ のみ捕捉
+      setTimeout(() => { if (!document.querySelector('.tab')) showRecoveryScreen('rejection'); }, 2000);
+    });
+  })();
+
+  const ver = "20260610O-error-boundary-stg";
   const scripts = [
     "life-events.js?v=" + ver,
     "recommender.js?v=" + ver,
@@ -1374,7 +1412,7 @@ window.fpReadyAfterAuth = function() {
 <script>
 (function(){
   // 最新の ver を 1 箇所に集約 (fpReadyAfterAuth 側と一致させる必要あり)
-  const FP_VERSION = "20260610N-cleanup-dead-paths";
+  const FP_VERSION = "20260610O-error-boundary-stg";
   const loadTime = new Date();
   const hhmm = String(loadTime.getHours()).padStart(2,'0') + ':' + String(loadTime.getMinutes()).padStart(2,'0');
   const dateLabel = (FP_VERSION.match(/^(\d{4})(\d{2})(\d{2})/) || []).slice(1).join('/').replace(/^(\d{4})\//,'$1/').replace(/\/(\d{2})\/(\d{2})$/,'/$1/$2') || FP_VERSION;
