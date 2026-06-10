@@ -1,0 +1,428 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>アカウント設定 — FP Compass</title>
+<link rel="icon" type="image/svg+xml" href="./favicon.svg">
+<link rel="apple-touch-icon" href="./favicon.svg">
+<meta name="theme-color" content="#0E1116">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&family=Noto+Sans+JP:wght@400;500;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink:#0F172A; --ink-2:#475569; --ink-3:#94A3B8;
+    --indigo:#5B5BF0; --indigo-deep:#3838CC;
+    --ok:#10B981; --warn:#F59E0B; --err:#E11D48;
+    --bg:#F7F8FC; --paper:#fff; --line:#E2E8F0;
+  }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family:'Noto Sans JP',sans-serif; background:var(--bg); color:var(--ink);
+    -webkit-font-smoothing:antialiased; font-feature-settings:"palt"; }
+
+  #login { min-height:100vh; display:grid; place-items:center; padding:20px;
+    background:radial-gradient(ellipse at top, #EEF2FF, var(--bg)); }
+  .login-card { max-width:420px; width:100%; background:#fff; border:1px solid var(--line);
+    border-radius:18px; padding:36px 32px; box-shadow:0 20px 50px rgba(15,23,42,0.10); }
+  .lbl { display:block; font-weight:700; font-size:12px; margin:14px 0 6px; }
+  .lin { width:100%; padding:12px 14px; font-size:14px; border:1.5px solid var(--line);
+    border-radius:10px; font-family:inherit; }
+  .lin:focus { outline:none; border-color:var(--indigo); box-shadow:0 0 0 4px rgba(91,91,240,0.12); }
+  .lbtn { width:100%; padding:13px; margin-top:18px; background:var(--ink); color:#fff;
+    border:none; border-radius:10px; font-family:'Manrope',sans-serif; font-weight:800;
+    font-size:14px; cursor:pointer; }
+  .lmsg { margin-top:14px; padding:12px 14px; border-radius:8px; font-size:13px; display:none; }
+  .lmsg.err { background:#FEF2F2; color:#991B1B; display:block; }
+  .lmsg.ok { background:#ECFDF5; color:#065F46; display:block; }
+
+  #app { display:none; }
+  .topbar { background:#fff; border-bottom:1px solid var(--line); padding:14px 28px;
+    display:flex; justify-content:space-between; align-items:center; }
+  .topbar-h { font-family:'Manrope',sans-serif; font-weight:800; font-size:16px;
+    display:flex; align-items:center; gap:8px; }
+  .topbar-dot { width:11px; height:11px; border-radius:3px;
+    background:linear-gradient(135deg,var(--indigo),var(--indigo-deep)); }
+  .topbar-actions { display:flex; gap:8px; font-size:13px; }
+  .link { padding:6px 12px; font-size:12px; font-weight:600; color:var(--ink-2);
+    border:1px solid var(--line); border-radius:6px; text-decoration:none; cursor:pointer;
+    background:#fff; font-family:inherit; }
+  .link:hover { background:var(--bg); }
+
+  .main { max-width:760px; margin:0 auto; padding:32px 24px 80px; }
+  .page-h { font-family:'Manrope',sans-serif; font-weight:800; font-size:24px; margin:0 0 6px;
+    letter-spacing:-0.015em; }
+  .page-sub { color:var(--ink-2); font-size:13.5px; margin-bottom:28px; }
+
+  .section { background:#fff; border:1px solid var(--line); border-radius:14px;
+    margin-bottom:18px; overflow:hidden; }
+  .section-h { padding:18px 24px; border-bottom:1px solid var(--line); }
+  .section-title { font-family:'Manrope',sans-serif; font-weight:800; font-size:15px;
+    margin:0 0 4px; }
+  .section-sub { font-size:12.5px; color:var(--ink-3); margin:0; }
+  .section-body { padding:22px 24px; }
+  .row { display:grid; grid-template-columns:140px 1fr; gap:18px; padding:10px 0;
+    align-items:center; font-size:13.5px; }
+  .row + .row { border-top:1px dashed var(--line); }
+  .row-lbl { color:var(--ink-3); font-family:'JetBrains Mono',monospace; font-size:11px;
+    letter-spacing:0.1em; text-transform:uppercase; }
+  .row-val { font-weight:600; }
+  .row-val small { display:block; font-weight:500; color:var(--ink-3); font-size:11.5px; margin-top:2px; }
+
+  .btn { padding:10px 18px; border:1px solid var(--ink); background:#fff; color:var(--ink);
+    border-radius:8px; font-family:'Manrope',sans-serif; font-weight:700; font-size:13px;
+    cursor:pointer; }
+  .btn:hover { background:var(--ink); color:#fff; }
+  .btn.danger { border-color:var(--err); color:var(--err); }
+  .btn.danger:hover { background:var(--err); color:#fff; }
+  .btn.primary { background:var(--ink); color:#fff; }
+  .btn.primary:hover { background:#000; }
+  .btn-row { display:flex; gap:10px; flex-wrap:wrap; margin-top:14px; }
+
+  .danger-zone { border-color:#FCA5A5; }
+  .danger-zone .section-h { background:#FEF2F2; border-bottom-color:#FCA5A5; }
+  .danger-zone .section-title { color:var(--err); }
+
+  .msg { margin-top:12px; padding:12px 14px; border-radius:8px; font-size:13px; display:none; line-height:1.6; }
+  .msg.ok { background:#ECFDF5; color:#065F46; border:1px solid #A7F3D0; display:block; }
+  .msg.err { background:#FEF2F2; color:#991B1B; border:1px solid #FECACA; display:block; }
+  .msg.info { background:#FEF7E1; color:#92400E; border:1px solid #FBBF24; display:block; }
+</style>
+</head>
+<body>
+
+<div id="login">
+  <div class="login-card">
+    <div style="font-family:'Manrope',sans-serif;font-weight:800;font-size:18px;display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+      <span style="width:14px;height:14px;border-radius:4px;background:linear-gradient(135deg,var(--indigo),var(--indigo-deep));"></span>
+      FP Compass · アカウント
+    </div>
+    <div style="font-size:13px;color:var(--ink-2);margin-bottom:18px;line-height:1.7;">
+      アカウント設定 / 紹介リンク / データダウンロード / サブスク管理
+    </div>
+    <label class="lbl" for="email">メールアドレス</label>
+    <input id="email" class="lin" type="email">
+    <label class="lbl" for="pw">パスワード</label>
+    <input id="pw" class="lin" type="password">
+    <button id="login-btn" class="lbtn">ログイン</button>
+    <div id="lmsg" class="lmsg"></div>
+  </div>
+</div>
+
+<div id="app">
+  <div class="topbar">
+    <div class="topbar-h"><span class="topbar-dot"></span>FP Compass · アカウント設定</div>
+    <div class="topbar-actions">
+      <a class="link" href="./">CRM に戻る</a>
+      <button class="link" id="logout-btn">ログアウト</button>
+    </div>
+  </div>
+
+  <div class="main">
+    <h1 class="page-h">アカウント設定</h1>
+    <p class="page-sub">ログイン情報・紹介リンク・データ管理・サブスク管理</p>
+
+    <!-- 基本情報 -->
+    <div class="section">
+      <div class="section-h">
+        <div class="section-title">基本情報</div>
+        <p class="section-sub">あなたのアカウント</p>
+      </div>
+      <div class="section-body">
+        <div class="row"><div class="row-lbl">事務所名</div><div class="row-val" id="info-fpname">—</div></div>
+        <div class="row"><div class="row-lbl">メアド</div><div class="row-val" id="info-email">—</div></div>
+        <div class="row"><div class="row-lbl">テナント ID</div><div class="row-val" id="info-tenant" style="font-family:'JetBrains Mono',monospace;font-size:12px;">—</div></div>
+        <div class="row"><div class="row-lbl">プラン</div><div class="row-val" id="info-plan">—</div></div>
+        <div class="row"><div class="row-lbl">契約日</div><div class="row-val" id="info-since">—</div></div>
+        <div class="row"><div class="row-lbl">課金状態</div><div class="row-val" id="info-billing">—</div></div>
+      </div>
+    </div>
+
+    <!-- データダウンロード -->
+    <div class="section">
+      <div class="section-h">
+        <div class="section-title">データダウンロード</div>
+        <p class="section-sub">あなたのテナントの全データを JSON 形式で取得</p>
+      </div>
+      <div class="section-body">
+        <p style="font-size:13px;color:var(--ink-2);margin:0 0 12px;line-height:1.7;">
+          顧客情報・LINE 履歴・キャンセル履歴・議事録など、 あなたが本サービスに保存した全データを
+          JSON 形式でダウンロードします。 個人情報保護法第33条 (開示請求権) に対応。
+        </p>
+        <button class="btn primary" id="dl-btn">📥 全データを JSON でダウンロード</button>
+        <div id="dl-msg" class="msg"></div>
+      </div>
+    </div>
+
+    <!-- 紹介リンク -->
+    <div class="section">
+      <div class="section-h">
+        <div class="section-title">紹介リンク・割引状況</div>
+        <p class="section-sub">同業の FP を紹介すると 1 人あたり 月 ¥3,500 割引 (6 人で実質無料)</p>
+      </div>
+      <div class="section-body">
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:18px;">
+          <div style="background:#FAFAF7;border:1px solid var(--line);border-radius:8px;padding:14px 16px;">
+            <div style="font-family:'Manrope',sans-serif;font-weight:800;font-size:10px;letter-spacing:0.18em;color:var(--ink-3);text-transform:uppercase;margin-bottom:6px;">active 紹介</div>
+            <div style="font-family:'Manrope',sans-serif;font-weight:900;font-size:24px;color:var(--ink);letter-spacing:-0.02em;" id="ref-count">—</div>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--ink-3);margin-top:4px;">人</div>
+          </div>
+          <div style="background:#FAFAF7;border:1px solid var(--line);border-radius:8px;padding:14px 16px;">
+            <div style="font-family:'Manrope',sans-serif;font-weight:800;font-size:10px;letter-spacing:0.18em;color:var(--ink-3);text-transform:uppercase;margin-bottom:6px;">今月の割引</div>
+            <div style="font-family:'Manrope',sans-serif;font-weight:900;font-size:24px;color:#E63946;letter-spacing:-0.02em;" id="ref-discount">—</div>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--ink-3);margin-top:4px;">割引額</div>
+          </div>
+          <div style="background:#FAFAF7;border:1px solid var(--line);border-radius:8px;padding:14px 16px;">
+            <div style="font-family:'Manrope',sans-serif;font-weight:800;font-size:10px;letter-spacing:0.18em;color:var(--ink-3);text-transform:uppercase;margin-bottom:6px;">来月の請求</div>
+            <div style="font-family:'Manrope',sans-serif;font-weight:900;font-size:24px;color:var(--ink);letter-spacing:-0.02em;" id="ref-next">—</div>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--ink-3);margin-top:4px;">引き落とし額</div>
+          </div>
+        </div>
+        <div style="background:#fff;border:1px solid var(--line);border-radius:8px;padding:14px 16px;margin-bottom:14px;">
+          <div style="font-family:'Manrope',sans-serif;font-weight:800;font-size:10.5px;letter-spacing:0.18em;color:var(--ink-3);text-transform:uppercase;margin-bottom:8px;">あなた専用 紹介リンク</div>
+          <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+            <code id="ref-url" style="flex:1;min-width:240px;background:#F0EFEA;padding:10px 14px;border-radius:6px;font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:600;color:var(--ink);word-break:break-all;">—</code>
+            <button class="btn primary" id="ref-copy" style="padding:10px 18px;font-size:13px;">URL コピー</button>
+          </div>
+          <div style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap;">
+            <a id="ref-line" class="btn" style="background:#06C755;color:#fff;padding:9px 18px;font-size:12.5px;border-radius:6px;text-decoration:none;font-weight:700;">LINE で送る</a>
+            <a id="ref-mail" class="btn" style="background:var(--ink-2);color:#fff;padding:9px 18px;font-size:12.5px;border-radius:6px;text-decoration:none;font-weight:700;">メールで送る</a>
+          </div>
+        </div>
+        <p style="font-size:12px;color:var(--ink-3);margin:0;line-height:1.75;">
+          ※ 月初 (毎月1日 9時) に自動再計算。 紹介された FP が解約すると 翌月から ¥3,500 元に戻ります。
+        </p>
+        <div id="ref-msg" class="msg"></div>
+      </div>
+    </div>
+
+    <!-- パスワード変更 (将来) -->
+    <div class="section">
+      <div class="section-h">
+        <div class="section-title">セキュリティ</div>
+        <p class="section-sub">パスワード変更</p>
+      </div>
+      <div class="section-body">
+        <p style="font-size:13px;color:var(--ink-2);margin:0 0 12px;line-height:1.7;">
+          パスワード変更は Skeleton 管理者にご連絡ください: <a href="mailto:support@skeleton-inc.jp" style="color:var(--indigo);">support@skeleton-inc.jp</a><br>
+          <small style="color:var(--ink-3);">※ セルフサービスの変更機能は次回アップデートで実装予定</small>
+        </p>
+      </div>
+    </div>
+
+    <!-- サブスク管理 -->
+    <div class="section danger-zone">
+      <div class="section-h">
+        <div class="section-title">サブスク管理</div>
+        <p class="section-sub">カード変更 / 領収書ダウンロード / 解約手続き</p>
+      </div>
+      <div class="section-body">
+        <p style="font-size:13px;color:var(--ink-2);margin:0 0 14px;line-height:1.8;">
+          Stripe のサブスク管理画面 が開きます。 以下が セルフ で 行えます:<br>
+          ・ <strong>カード情報の変更</strong> (有効期限切れ ・ 紛失時)<br>
+          ・ <strong>過去の領収書 ・ 請求書 PDF ダウンロード</strong><br>
+          ・ <strong>解約手続き</strong> (当月末 まで 利用可能、 翌月 から 課金停止)<br>
+          <br>
+          解約前に「全データをJSONでダウンロード」 することを推奨します。
+        </p>
+        <div class="btn-row">
+          <button class="btn danger" id="cancel-btn">サブスク管理画面を開く</button>
+        </div>
+        <div id="cancel-msg" class="msg"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
+  import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut,
+    setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
+  import { getFirestore, doc, getDoc, updateDoc, collection, getDocs, query, where, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
+  import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-functions.js";
+
+  const __isStaging = /staging|skeleton-fp-compass-staging/.test(location.hostname);
+  const firebaseConfig = __isStaging ? {
+    apiKey: "AIzaSyAV9SEZZ5Tqu8pHUmmjMZ3RhrN_jFgMevs",
+    authDomain: "skeleton-fp-compass-staging.firebaseapp.com",
+    projectId: "skeleton-fp-compass-staging",
+    storageBucket: "skeleton-fp-compass-staging.firebasestorage.app",
+    messagingSenderId: "991197809601",
+    appId: "1:991197809601:web:6f59df4d7c505e16bc3d40",
+  } : {
+    apiKey: "AIzaSyAmVAEe9l9e1Yo_dzzJdbTVU35wWKd2sH4",
+    authDomain: "skeleton-fp-compass-632026.firebaseapp.com",
+    projectId: "skeleton-fp-compass-632026",
+    storageBucket: "skeleton-fp-compass-632026.firebasestorage.app",
+    messagingSenderId: "833972948597",
+    appId: "1:833972948597:web:b7310cc22ce41d9738f23c",
+  };
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+  const functions = getFunctions(app, "asia-northeast1");
+  setPersistence(auth, browserLocalPersistence).catch(console.error);
+
+  const $ = (id) => document.getElementById(id);
+  const loginEl = $("login"), appEl = $("app"), lmsg = $("lmsg");
+  function lm(kind, t) { lmsg.className = "lmsg " + kind; lmsg.textContent = t; }
+  function msg(id, kind, t) { const el = $(id); el.className = "msg " + kind; el.textContent = t; }
+
+  $("login-btn").addEventListener("click", async () => {
+    const e = $("email").value.trim(), p = $("pw").value;
+    if (!e || !p) { lm("err", "メアドとパスワードを入力"); return; }
+    try { await signInWithEmailAndPassword(auth, e, p); }
+    catch (err) { lm("err", err.code || err.message); }
+  });
+  $("pw").addEventListener("keydown", e => { if (e.key === "Enter") $("login-btn").click(); });
+  $("logout-btn").addEventListener("click", async () => { await signOut(auth); location.reload(); });
+
+  let currentTenantId = null;
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) { loginEl.style.display = "grid"; appEl.style.display = "none"; return; }
+    const uDoc = await getDoc(doc(db, "users", user.uid));
+    if (!uDoc.exists()) { lm("err", "未登録のアカウントです"); await signOut(auth); return; }
+    const uData = uDoc.data();
+    currentTenantId = uData.tenantId;
+    loginEl.style.display = "none"; appEl.style.display = "block";
+
+    const tDoc = await getDoc(doc(db, "tenants", uData.tenantId));
+    const t = tDoc.exists() ? tDoc.data() : {};
+    $("info-fpname").textContent = t.name || "—";
+    $("info-email").textContent = user.email;
+    $("info-tenant").textContent = uData.tenantId;
+    $("info-plan").textContent = t.plan || "—";
+    const since = t.contractStartedAt?.toDate?.()?.toISOString?.()?.slice(0,10) || "—";
+    $("info-since").textContent = since;
+    const billStatus = t.billing?.status || (t.status === "active" ? "active" : "—");
+    $("info-billing").innerHTML = `<span style="display:inline-block;padding:3px 10px;border-radius:5px;background:${billStatus==='active'?'#ECFDF5':'#FEF7E1'};color:${billStatus==='active'?'#065F46':'#92400E'};font-family:'JetBrains Mono',monospace;font-size:11.5px;font-weight:700;letter-spacing:0.06em;">${(billStatus||'').toUpperCase()}</span>`;
+
+    // 解約済 / past_due → 再加入バナー (ページ上部に prepend)
+    if (billStatus === "canceled" || billStatus === "past_due") {
+      const banner = document.createElement("div");
+      banner.style.cssText = "max-width:760px;margin:0 auto 18px;background:linear-gradient(135deg,#FEF3C7,#FDE68A);border:2px solid #F59E0B;border-radius:12px;padding:18px 22px;display:flex;align-items:center;gap:16px;justify-content:space-between;flex-wrap:wrap;font-family:inherit;";
+      banner.innerHTML = `
+        <div style="flex:1;min-width:220px;">
+          <div style="font-family:'Manrope',sans-serif;font-weight:800;font-size:10.5px;letter-spacing:0.22em;color:#92400E;text-transform:uppercase;margin-bottom:6px;">サブスク${billStatus === "canceled" ? "解約済" : "支払い未完了"}</div>
+          <div style="font-size:13.5px;color:#0E1116;line-height:1.7;">
+            ${billStatus === "canceled"
+              ? "現在 サブスクが 停止 中 です。 同じアカウントで <b>1 クリック で 再加入</b> できます (テナント・データは保持済)"
+              : "前回の引き落としが 失敗しています。 <b>カード再設定 で 再加入</b> してください (滞納から 7 日でデータアクセス遮断)"}
+          </div>
+        </div>
+        <button id="resume-btn" style="background:#0E1116;color:#fff;border:none;padding:11px 24px;border-radius:6px;font-family:'Manrope',sans-serif;font-weight:800;font-size:13px;letter-spacing:0.06em;cursor:pointer;white-space:nowrap;">サブスク再加入</button>
+      `;
+      const appWrap = document.querySelector(".app-wrap, .page-wrap, body");
+      if (appWrap) {
+        const firstChild = document.querySelector(".section, .page-h");
+        if (firstChild && firstChild.parentNode) firstChild.parentNode.insertBefore(banner, firstChild);
+        else document.body.insertBefore(banner, document.body.firstChild);
+      }
+      document.getElementById("resume-btn").addEventListener("click", async () => {
+        const btn = document.getElementById("resume-btn");
+        btn.disabled = true; btn.textContent = "Stripe 画面を準備中…";
+        try {
+          const resume = httpsCallable(functions, "resumeSubscription");
+          const result = await resume();
+          if (result.data?.url) location.href = result.data.url;
+          else throw new Error("URL 取得失敗");
+        } catch (e) {
+          btn.disabled = false; btn.textContent = "サブスク再加入";
+          alert("失敗: " + (e.message || e.code) + "\nsupport@skeleton-inc.jp までご連絡ください");
+        }
+      });
+    }
+
+    // ==== 紹介リンク + 割引集計 ====
+    try {
+      const refUrl = `https://app.skeleton-inc.jp/?ref=${encodeURIComponent(uData.tenantId)}`;
+      $("ref-url").textContent = refUrl;
+
+      const refQuery = query(
+        collection(db, "referral_ledger"),
+        where("type", "==", "fp_referral"),
+        where("referrerTenantId", "==", uData.tenantId),
+        where("status", "==", "active")
+      );
+      const refSnap = await getDocs(refQuery);
+      const n = refSnap.size;
+      const discount = Math.min(n * 3500, 19800);
+      const nextAmount = 19800 - discount;
+      $("ref-count").textContent = n;
+      $("ref-discount").textContent = discount > 0 ? `−¥${discount.toLocaleString()}` : "¥0";
+      $("ref-next").textContent = `¥${nextAmount.toLocaleString()}`;
+
+      const shareMsg = `FP事業者向け 顧客管理SaaS「FP Compass」を紹介します。月¥19,800で議事録自動化・LINE統合・AI推奨提案が使えます。下記から登録できます。\n${refUrl}`;
+      $("ref-line").href = `https://line.me/R/msg/text/?${encodeURIComponent(shareMsg)}`;
+      $("ref-mail").href = `mailto:?subject=${encodeURIComponent("FP Compass のご紹介")}&body=${encodeURIComponent(shareMsg)}`;
+
+      $("ref-copy").addEventListener("click", async () => {
+        try {
+          await navigator.clipboard.writeText(refUrl);
+          msg("ref-msg", "ok", "✓ URL をコピーしました");
+        } catch (_) {
+          msg("ref-msg", "err", "コピー失敗 (手動で選択してコピーしてください)");
+        }
+      });
+    } catch (e) {
+      console.warn("referral 集計 failed:", e);
+      $("ref-count").textContent = "0";
+      $("ref-discount").textContent = "¥0";
+      $("ref-next").textContent = "¥19,800";
+    }
+  });
+
+  // ==== データダウンロード ====
+  $("dl-btn").addEventListener("click", async () => {
+    if (!currentTenantId) return;
+    msg("dl-msg", "info", "データを取得中…");
+    try {
+      const result = { tenant: null, customers: [], total_size_kb: 0, exported_at: new Date().toISOString() };
+      const tDoc = await getDoc(doc(db, "tenants", currentTenantId));
+      if (tDoc.exists()) result.tenant = { id: tDoc.id, ...tDoc.data() };
+
+      const custSnap = await getDocs(collection(db, "tenants", currentTenantId, "customers"));
+      for (const cDoc of custSnap.docs) {
+        const c = { id: cDoc.id, ...cDoc.data() };
+        const [lineSnap, cxlSnap, meetSnap] = await Promise.all([
+          getDocs(collection(db, "tenants", currentTenantId, "customers", cDoc.id, "line_messages")).catch(()=>null),
+          getDocs(collection(db, "tenants", currentTenantId, "customers", cDoc.id, "cancellations")).catch(()=>null),
+          getDocs(collection(db, "tenants", currentTenantId, "customers", cDoc.id, "meetings")).catch(()=>null),
+        ]);
+        c.line_messages = lineSnap ? lineSnap.docs.map(x => ({id:x.id, ...x.data()})) : [];
+        c.cancellations = cxlSnap ? cxlSnap.docs.map(x => ({id:x.id, ...x.data()})) : [];
+        c.meetings = meetSnap ? meetSnap.docs.map(x => ({id:x.id, ...x.data()})) : [];
+        result.customers.push(c);
+      }
+      const json = JSON.stringify(result, null, 2);
+      result.total_size_kb = Math.round(json.length / 1024);
+      const blob = new Blob([JSON.stringify(result, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `fp-compass-${currentTenantId}-${new Date().toISOString().slice(0,10)}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      msg("dl-msg", "ok", `✓ ダウンロード完了 (${result.customers.length}人分のデータ、 約${result.total_size_kb}KB)`);
+    } catch (e) {
+      console.error(e);
+      msg("dl-msg", "err", "ダウンロード失敗: " + e.message);
+    }
+  });
+
+  // ==== 解約 / カード変更 / 領収書閲覧 (Stripe Billing Portal) ====
+  $("cancel-btn").addEventListener("click", async () => {
+    if (!currentTenantId) return;
+    msg("cancel-msg", "info", "サブスク管理画面を開いています…");
+    try {
+      const createPortalSession = httpsCallable(functions, "createPortalSession");
+      const result = await createPortalSession();
+      const url = result.data?.url;
+      if (!url) throw new Error("Portal URL が取得できませんでした");
+      window.location.href = url;
+    } catch (e) {
+      console.error(e);
+      msg("cancel-msg", "err", "Portal 起動失敗: " + (e.message || e.code) + " / support@skeleton-inc.jp までご連絡ください。");
+    }
+  });
+</script>
+</body>
+</html>

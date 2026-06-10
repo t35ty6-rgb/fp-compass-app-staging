@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>システム稼働状況 — FP Compass</title>
+<link rel="icon" type="image/svg+xml" href="./favicon.svg">
+<meta name="theme-color" content="#0E1116">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800;900&family=Noto+Sans+JP:wght@400;500;700;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0E1116; --ink-2:#353D4F; --ink-3:#6B7385;
+    --paper:#FAFAF7; --paper-2:#F0EFEA; --paper-warm:#FFFFFF;
+    --signal:#E63946; --signal-soft:#FFE5E8;
+    --ok:#10B981; --ok-soft:#D1FAE5;
+    --warn:#F59E0B; --warn-soft:#FEF3C7;
+    --line:rgba(14,17,22,0.10);
+  }
+  *,*::before,*::after{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:'Manrope','Noto Sans JP',sans-serif;
+    background:var(--paper);color:var(--ink);
+    line-height:1.75;font-feature-settings:"palt";
+  }
+  .container{max-width:760px;margin:0 auto;padding:48px 24px;}
+  .brand{
+    font-family:'Manrope',sans-serif;font-weight:800;
+    font-size:11px;letter-spacing:0.28em;color:var(--signal);
+    text-transform:uppercase;margin-bottom:12px;
+  }
+  h1{
+    font-family:'Noto Sans JP','Manrope',sans-serif;font-weight:900;
+    font-size:clamp(26px,4vw,38px);line-height:1.3;letter-spacing:-0.022em;
+    margin:0 0 8px;
+  }
+  .lead{font-size:13.5px;color:var(--ink-2);margin:0 0 32px;}
+
+  .overall{
+    background:var(--paper-warm);border:1px solid var(--line);
+    border-radius:12px;padding:24px 28px;margin-bottom:24px;
+    display:flex;align-items:center;gap:18px;
+  }
+  .overall.ok{border-left:4px solid var(--ok);}
+  .overall.warn{border-left:4px solid var(--warn);}
+  .overall.err{border-left:4px solid var(--signal);}
+  .overall-icon{
+    width:52px;height:52px;border-radius:50%;
+    display:grid;place-items:center;flex-shrink:0;
+    font-size:24px;font-weight:900;
+  }
+  .overall.ok .overall-icon{background:var(--ok-soft);color:var(--ok);}
+  .overall.warn .overall-icon{background:var(--warn-soft);color:var(--warn);}
+  .overall.err .overall-icon{background:var(--signal-soft);color:var(--signal);}
+  .overall-h{
+    font-family:'Noto Sans JP',sans-serif;font-weight:900;
+    font-size:18px;margin:0 0 4px;letter-spacing:-0.012em;
+  }
+  .overall-sub{
+    font-family:'JetBrains Mono',monospace;
+    font-size:11.5px;letter-spacing:0.08em;color:var(--ink-3);
+  }
+
+  .services{display:grid;gap:10px;}
+  .svc{
+    background:var(--paper-warm);border:1px solid var(--line);
+    border-radius:8px;padding:14px 18px;
+    display:flex;align-items:center;gap:14px;
+  }
+  .svc-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+  .svc-dot.ok{background:var(--ok);}
+  .svc-dot.warn{background:var(--warn);}
+  .svc-dot.err{background:var(--signal);}
+  .svc-name{flex:1;font-weight:700;font-size:14px;color:var(--ink);}
+  .svc-status{
+    font-family:'JetBrains Mono',monospace;font-weight:700;
+    font-size:10.5px;letter-spacing:0.16em;text-transform:uppercase;
+  }
+  .svc-status.ok{color:var(--ok);}
+  .svc-status.warn{color:var(--warn);}
+  .svc-status.err{color:var(--signal);}
+
+  .msg-banner{
+    background:var(--warn-soft);border:1px solid var(--warn);
+    border-radius:8px;padding:14px 18px;margin-bottom:18px;
+    font-size:13.5px;color:#92400E;line-height:1.7;
+  }
+  .msg-banner b{font-weight:800;}
+
+  .foot{
+    margin-top:48px;padding-top:24px;border-top:1px solid var(--line);
+    font-size:11.5px;color:var(--ink-3);
+    display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;
+  }
+  .foot a{color:var(--ink-2);text-decoration:underline;}
+  .updated{font-family:'JetBrains Mono',monospace;letter-spacing:0.04em;}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="brand">FP COMPASS · SYSTEM STATUS</div>
+  <h1>システム稼働状況</h1>
+  <p class="lead">FP Compass / 関連サービスのリアルタイム稼働状況</p>
+
+  <div id="banner" style="display:none;"></div>
+
+  <div id="overall" class="overall ok">
+    <div class="overall-icon">●</div>
+    <div>
+      <h2 class="overall-h" id="overall-text">読み込み中…</h2>
+      <div class="overall-sub" id="overall-updated">—</div>
+    </div>
+  </div>
+
+  <div class="services" id="services"></div>
+
+  <div class="foot">
+    <span>Skeleton Inc. · FP Compass</span>
+    <span class="updated" id="last-check">—</span>
+  </div>
+  <div style="margin-top:18px;font-size:12px;color:var(--ink-3);line-height:1.85;">
+    過去のインシデント / 計画メンテナンスは <a href="mailto:support@skeleton-inc.jp" style="color:var(--ink-2);">support@skeleton-inc.jp</a> までお問い合わせください。
+  </div>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
+  import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
+
+  const __isStaging = /staging|skeleton-fp-compass-staging/.test(location.hostname);
+  const firebaseConfig = __isStaging ? {
+    apiKey: "AIzaSyAV9SEZZ5Tqu8pHUmmjMZ3RhrN_jFgMevs",
+    authDomain: "skeleton-fp-compass-staging.firebaseapp.com",
+    projectId: "skeleton-fp-compass-staging",
+  } : {
+    apiKey: "AIzaSyAmVAEe9l9e1Yo_dzzJdbTVU35wWKd2sH4",
+    authDomain: "skeleton-fp-compass-632026.firebaseapp.com",
+    projectId: "skeleton-fp-compass-632026",
+  };
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  const labelMap = {
+    operational: { text:"全機能 正常稼働中", kind:"ok", sub:"All systems operational" },
+    degraded: { text:"一部 動作低下", kind:"warn", sub:"Partial degradation" },
+    outage: { text:"障害発生中", kind:"err", sub:"Major outage" },
+    maintenance: { text:"計画メンテナンス中", kind:"warn", sub:"Scheduled maintenance" },
+  };
+  const svcLabels = {
+    app: "管理画面 (app.skeleton-inc.jp)",
+    stripe: "決済 (Stripe)",
+    email: "メール送信 (Resend)",
+    line: "LINE 連携",
+  };
+
+  const ref = doc(db, "config/system_status");
+  onSnapshot(ref, (snap) => {
+    if (!snap.exists()) return;
+    const d = snap.data();
+    const overall = labelMap[d.overall] || labelMap.operational;
+    const el = document.getElementById("overall");
+    el.className = "overall " + overall.kind;
+    document.getElementById("overall-text").textContent = overall.text;
+    document.getElementById("overall-updated").textContent = overall.sub;
+
+    if (d.message && d.message.trim()) {
+      const banner = document.getElementById("banner");
+      banner.className = "msg-banner";
+      banner.innerHTML = "<b>📣 お知らせ:</b> " + escapeHtml(d.message);
+      banner.style.display = "";
+    }
+
+    const svc = document.getElementById("services");
+    svc.innerHTML = "";
+    for (const key of Object.keys(svcLabels)) {
+      const status = d[key] || "operational";
+      const s = labelMap[status] || labelMap.operational;
+      const row = document.createElement("div");
+      row.className = "svc";
+      row.innerHTML = `
+        <span class="svc-dot ${s.kind}"></span>
+        <span class="svc-name">${svcLabels[key]}</span>
+        <span class="svc-status ${s.kind}">${s.text}</span>
+      `;
+      svc.appendChild(row);
+    }
+    const updatedAt = d.updatedAt && d.updatedAt.toDate ? d.updatedAt.toDate() : new Date();
+    document.getElementById("last-check").textContent = "最終更新 " + updatedAt.toLocaleString("ja-JP");
+  }, (err) => {
+    document.getElementById("overall-text").textContent = "状態取得失敗";
+    console.error(err);
+  });
+
+  function escapeHtml(s){return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"})[c]);}
+</script>
+</body>
+</html>
