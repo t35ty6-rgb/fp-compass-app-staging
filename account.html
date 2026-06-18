@@ -640,30 +640,20 @@
   $("line-regen-btn").addEventListener("click", () => regenerateRichMenu(false));
   $("line-regen-stg-btn").addEventListener("click", () => regenerateRichMenu(true));
 
-  // ★ 全 localStorage クリア + リロード
+  // ★ 全 localStorage クリア + リロード (alert撤去 = 「タブ消える」 環境対応)
   $("clear-local-cache-btn").addEventListener("click", async () => {
-    try {
-      // localStorage 全消去
-      const keys = Object.keys(localStorage);
-      keys.forEach(k => localStorage.removeItem(k));
-      // sessionStorage も
-      sessionStorage.clear();
-      // IndexedDB 全削除 (Firebase Auth 含む — 再ログイン必要だが OK)
-      if (window.indexedDB && indexedDB.databases) {
-        const dbs = await indexedDB.databases();
-        for (const dbInfo of dbs) { if (dbInfo.name) await new Promise(r => { const req = indexedDB.deleteDatabase(dbInfo.name); req.onsuccess = req.onerror = r; }); }
-      }
-      // Service Worker 解除 (キャッシュ完全消し)
-      if (navigator.serviceWorker) {
-        const regs = await navigator.serviceWorker.getRegistrations();
-        for (const r of regs) await r.unregister();
-      }
-      alert('✓ ブラウザキャッシュ 全削除完了\n→ リロードします');
-      location.href = '/';
-    } catch (e) {
-      alert('一部失敗: ' + e.message + '\nそれでもリロード します');
-      location.href = '/';
-    }
+    const btn = document.getElementById('clear-local-cache-btn');
+    const result = document.getElementById('line-result');
+    btn.disabled = true; btn.textContent = '⏳ 削除中...';
+    if (result) result.innerHTML = '<div style="background:#FEF3C7;border:1px solid #F59E0B;padding:14px 18px;border-radius:10px;font-size:13px;color:#92400E;">⏳ ブラウザキャッシュ 削除中…</div>';
+    try { localStorage.clear(); } catch (_) {}
+    try { sessionStorage.clear(); } catch (_) {}
+    try { if (window.indexedDB?.databases) { const dbs = await indexedDB.databases(); for (const d of dbs) { if (d.name) try { indexedDB.deleteDatabase(d.name); } catch (_) {} } } } catch (_) {}
+    try { if (navigator.serviceWorker) { const regs = await navigator.serviceWorker.getRegistrations(); for (const r of regs) try { await r.unregister(); } catch (_) {} } } catch (_) {}
+    try { const cookies = document.cookie.split(';'); cookies.forEach(c => { const eq = c.indexOf('='); const name = eq > -1 ? c.substr(0, eq).trim() : c.trim(); document.cookie = name + '=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/'; }); } catch (_) {}
+    if (result) result.innerHTML = '<div style="background:#F0FDF4;border:2px solid #06C755;padding:16px 20px;border-radius:10px;font-size:13px;color:#065F46;font-weight:800;">✓ 削除完了 → 3秒後にリロードします</div>';
+    btn.textContent = '✓ 削除完了';
+    setTimeout(() => { window.location.replace('/'); }, 3000);
   });
 
   // ==== Zoom 連携 ====
