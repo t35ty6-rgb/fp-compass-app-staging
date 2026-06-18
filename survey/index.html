@@ -4,6 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>FP相談 事前ヒアリング | FP Compass</title>
+<!-- ★ LIFF SDK: お客様 の LINE userId を 自動取得 → customer doc に lineFriendId 自動セット -->
+<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Noto+Sans+JP:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -325,6 +327,32 @@
     </div>
 
     <script>
+    // ★ LIFF 初期化: アンケート 起動時 に LINE Login → userId 自動取得
+    (function initLiff(){
+      window._fpLiffUserId = '';
+      window._fpLiffDisplayName = '';
+      // LIFF ID は ?liffId= query で 上書き可。 デフォは memory:reference_fp_compass_liff.md の ID
+      const params = new URLSearchParams(location.search);
+      const liffId = params.get('liffId') || '2010266648-iX5kooZe';
+      if (typeof liff === 'undefined') { console.warn('[liff] SDK 読込失敗'); return; }
+      liff.init({ liffId })
+        .then(() => {
+          if (!liff.isLoggedIn()) { liff.login(); return; }
+          return liff.getProfile();
+        })
+        .then(profile => {
+          if (profile) {
+            window._fpLiffUserId = profile.userId || '';
+            window._fpLiffDisplayName = profile.displayName || '';
+            console.log('[liff] userId 取得:', profile.userId, '/ name:', profile.displayName);
+            // 名前 input に displayName を 初期値で 入れる (空なら)
+            const nameIn = document.querySelector('#nameInput, [name="name"]');
+            if (nameIn && !nameIn.value) nameIn.value = profile.displayName || '';
+          }
+        })
+        .catch(e => console.warn('[liff] init/profile 失敗:', e.message));
+    })();
+
     (function(){
       const form = document.getElementById('surveyForm');
       const bar = document.getElementById('bar');
@@ -462,7 +490,10 @@
               appId: '1:991197809601:web:9b9d49aa1c1c1f0d0d9c0d'
             });
             const fn = httpsCallable(getFunctions(app, 'asia-northeast1'), 'submitSurveyAnswer');
-            await fn({ tenantId, answers: fields, submittedAt: new Date().toISOString() });
+            // ★ LIFF から userId 取得 (取れなくても submit は続行)
+            const lineUserId = window._fpLiffUserId || '';
+            const lineDisplayName = window._fpLiffDisplayName || '';
+            await fn({ tenantId, answers: fields, submittedAt: new Date().toISOString(), lineUserId, lineDisplayName });
           } catch (e) { console.error('送信失敗:', e); }
         })();
         setTimeout(() => {
