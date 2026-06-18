@@ -4,6 +4,16 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>FP相談 事前ヒアリング | FP Compass</title>
+<!-- ★ ?stg=1 が付いてたら stg.app.skeleton-inc.jp/survey/index.html に redirect (本番LIFF endpoint固定問題の解決) -->
+<script>
+(function(){
+  const p = new URLSearchParams(location.search);
+  if (p.get('stg') === '1' && location.host !== 'stg.app.skeleton-inc.jp') {
+    p.delete('stg');
+    location.replace('https://stg.app.skeleton-inc.jp/survey/index.html?' + p.toString());
+  }
+})();
+</script>
 <!-- ★ LIFF SDK: お客様 の LINE userId を 自動取得 → customer doc に lineFriendId 自動セット -->
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
