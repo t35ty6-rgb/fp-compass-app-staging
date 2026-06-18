@@ -173,12 +173,43 @@
 
     <form method="post" id="surveyForm" class="card">
 
-    <!-- お名前 (常時表示 / wizard 外) -->
-    <div class="q" style="margin-bottom:24px;padding-bottom:20px;border-bottom:1px solid var(--line);">
+    <!-- お名前 (入力後 自動 collapse / Q1以降は 隠す) -->
+    <div class="q" id="name-section" style="margin-bottom:24px;padding-bottom:20px;border-bottom:1px solid var(--line);">
       <div class="q-label"><span class="q-no">名前</span>お名前 <span style="color:#DC2B2B;font-weight:700;">*</span></div>
       <div class="q-sub">面談時 にFP が お声がけ する 用 です。</div>
       <input type="text" name="name" id="customer-name" placeholder="例: 山田 太郎" autocomplete="name" required>
     </div>
+    <!-- 入力済 サマリ (collapse 後 表示) -->
+    <div id="name-collapsed" style="display:none;margin-bottom:16px;padding:8px 14px;background:#F0FDF4;border:1px solid #BBF7D0;border-radius:8px;font-size:12.5px;color:#065F46;cursor:pointer;display:none;">
+      ✓ <strong id="name-collapsed-text"></strong> さん で送信します <span style="color:#94a3b8;margin-left:6px;">(タップで 修正)</span>
+    </div>
+    <script>
+    (function(){
+      const sec = document.getElementById('name-section');
+      const input = document.getElementById('customer-name');
+      const collapsed = document.getElementById('name-collapsed');
+      const collapsedTxt = document.getElementById('name-collapsed-text');
+      function tryCollapse() {
+        const v = input.value.trim();
+        if (v) {
+          sec.style.display = 'none';
+          collapsed.style.display = 'block';
+          collapsedTxt.textContent = v;
+        }
+      }
+      input.addEventListener('blur', tryCollapse);
+      collapsed.addEventListener('click', () => {
+        sec.style.display = 'block';
+        collapsed.style.display = 'none';
+        input.focus();
+      });
+      // LIFF が 名前 自動入力 した時 も 自動 collapse
+      const checkLiff = setInterval(() => {
+        if (input.value.trim()) { tryCollapse(); clearInterval(checkLiff); }
+      }, 500);
+      setTimeout(() => clearInterval(checkLiff), 5000);
+    })();
+    </script>
 
     <div class="step" data-step="1" data-field="q1_年代" data-multi="" data-text="" data-slots="" style="display:block;">
       <div class="q-label"><span class="q-no">Q1</span>ご年齢</div>
