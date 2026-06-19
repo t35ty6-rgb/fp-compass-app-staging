@@ -364,6 +364,11 @@
         <div style="line-height:1.7;">FP がご回答と<strong>候補日3つ</strong>を確認し、確定日時と Zoom URL を LINE でお送りします (通常 1〜2 時間以内)。</div>
       </div>
       <div class="card" id="doneSummary"></div>
+      <div id="addFriendBox" style="display:none;background:#06C755;color:#fff;border-radius:14px;padding:18px 20px;margin-top:18px;text-align:center;">
+        <div style="font-size:15px;font-weight:700;margin-bottom:8px;">📲 まだ 友だち追加してない方は こちら</div>
+        <div style="font-size:12.5px;line-height:1.7;margin-bottom:14px;opacity:0.95;">公式LINE を 友だち追加 しないと、 確定日時 と Zoom URL が 届きません。 必ず 友だち追加 をお願いします。</div>
+        <a id="addFriendBtn" href="#" target="_blank" style="display:inline-block;background:#fff;color:#06C755;font-weight:700;padding:12px 28px;border-radius:24px;text-decoration:none;font-size:14px;">＋ 友だち追加する</a>
+      </div>
       <p class="lead" style="text-align:center;margin-top:18px;">LINE のトーク画面に戻ってお待ちください 🙏</p>
     </div>
 
@@ -547,6 +552,13 @@
           '<div class="meta-row"><span class="k">面談時間</span><span class="v">60 分 (Zoom)</span></div>' +
           '<div class="meta-row"><span class="k">確定連絡</span><span class="v">通常 1〜2 時間以内に LINE</span></div>';
           document.getElementById('doneOverlay').style.display = 'block';
+          // ★ LIFF で userId が 取れなかった or 友だち追加URL がある → CTA 表示
+          //   (Bot Link Aggressive OFF や Bot 拡張 未設定でも 必ず 友だち追加 経路 を 確保)
+          const friendBox = document.getElementById('addFriendBox');
+          if (friendBox && window._fpAddFriendUrl) {
+            const noLiff = !window._fpLiffUserId;
+            if (noLiff) friendBox.style.display = 'block';
+          }
           window.scrollTo({ top: 0, behavior: 'smooth' });
         }, 250);
       });
@@ -583,6 +595,13 @@
             const el = document.getElementById('fp-name-badge');
             el.textContent = '📩 ' + fpName + ' へ 送信されます';
             el.classList.add('show');
+          }
+          // 友だち追加 URL を 取得 → 完了画面の CTA リンクに 設定
+          const addFriendUrl = res?.data?.addFriendUrl;
+          if (addFriendUrl) {
+            window._fpAddFriendUrl = addFriendUrl;
+            const btn = document.getElementById('addFriendBtn');
+            if (btn) btn.href = addFriendUrl;
           }
         } catch (e) { console.warn('fp name lookup fail', e); }
       })();
