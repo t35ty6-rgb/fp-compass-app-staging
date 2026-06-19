@@ -247,6 +247,31 @@
       </div>
     </div>
 
+    <!-- アンケート カスタマイズ -->
+    <div class="section">
+      <div class="section-h">
+        <div class="section-title">アンケート カスタム質問</div>
+        <p class="section-sub">デフォルト 13問 の 後ろ に あなた専用 の 質問 を 最大 5問 追加 できます (任意)</p>
+      </div>
+      <div class="section-body">
+        <div id="sc-list" style="display:flex;flex-direction:column;gap:14px;margin-bottom:12px;"></div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button id="sc-add-btn" type="button" style="padding:11px 18px;background:#fff;color:#0F172A;border:1.5px solid #0F172A;border-radius:8px;font-weight:700;cursor:pointer;font-size:13px;">＋ 質問を追加</button>
+          <button id="sc-save-btn" type="button" style="padding:11px 22px;background:#0F172A;color:#fff;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-size:13px;">保存</button>
+          <span id="sc-msg" style="align-self:center;font-size:12px;color:var(--ink-3);"></span>
+        </div>
+        <details style="margin-top:16px;background:#F8FAFC;padding:12px 16px;border-radius:8px;font-size:12px;color:var(--ink-2);">
+          <summary style="cursor:pointer;font-weight:700;color:var(--ink);">💡 使い方</summary>
+          <ul style="margin-top:8px;line-height:1.8;padding-left:18px;">
+            <li><b>選択肢式 (radio)</b>: 1つだけ 選んでもらう 質問。 例: 「投資経験 → あり / なし」</li>
+            <li><b>複数選択 (checkbox)</b>: 複数 OK。 例: 「気になる商品 → 株 / 投信 / 保険」</li>
+            <li><b>自由記入 (textarea)</b>: 文章で 答えてもらう。 例: 「特に詳しく聞きたいこと」</li>
+            <li>選択肢 は 改行 区切り で 入力</li>
+          </ul>
+        </details>
+      </div>
+    </div>
+
     <!-- Zoom 連携 -->
     <div class="section">
       <div class="section-h">
@@ -724,6 +749,83 @@
       msg("cancel-msg", "err", "Portal 起動失敗: " + (e.message || e.code) + " / support@skeleton-inc.jp までご連絡ください。");
     }
   });
+
+  // ============================================================
+  // アンケート カスタム質問 編集
+  // ============================================================
+  let scQuestions = [];
+  function scRender() {
+    const list = document.getElementById('sc-list');
+    if (!list) return;
+    list.innerHTML = '';
+    if (!scQuestions.length) {
+      list.innerHTML = '<div style="padding:18px;background:#F8FAFC;border:1px dashed var(--line);border-radius:8px;text-align:center;font-size:12.5px;color:var(--ink-3);">追加された質問は ありません。 「＋ 質問を追加」 で 1問目 を 作成</div>';
+      return;
+    }
+    scQuestions.forEach((q, idx) => {
+      const card = document.createElement('div');
+      card.style.cssText = 'background:#fff;border:1px solid var(--line);border-radius:10px;padding:14px 16px;';
+      card.innerHTML = `
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+          <div style="font-family:'Manrope',sans-serif;font-weight:800;font-size:11px;color:var(--ink-3);letter-spacing:0.12em;">Q${idx + 1}</div>
+          <button type="button" data-sc-del="${idx}" style="padding:4px 10px;background:#FEE2E2;color:#991B1B;border:none;border-radius:5px;font-size:11px;font-weight:700;cursor:pointer;">削除</button>
+        </div>
+        <input type="text" data-sc-label="${idx}" value="${(q.label || '').replace(/"/g, '&quot;')}" placeholder="質問文 (例: 投資経験はありますか?)" style="width:100%;border:1px solid var(--line);border-radius:6px;padding:9px 12px;font-size:13px;margin-bottom:8px;">
+        <select data-sc-type="${idx}" style="width:100%;border:1px solid var(--line);border-radius:6px;padding:9px 12px;font-size:13px;margin-bottom:8px;background:#fff;">
+          <option value="radio" ${q.type === 'radio' ? 'selected' : ''}>選択肢式 (1つ選ぶ)</option>
+          <option value="checkbox" ${q.type === 'checkbox' ? 'selected' : ''}>複数選択 (複数OK)</option>
+          <option value="textarea" ${q.type === 'textarea' ? 'selected' : ''}>自由記入 (文章)</option>
+        </select>
+        <textarea data-sc-options="${idx}" rows="3" placeholder="選択肢 を 改行区切り で 入力 (radio/checkbox の時のみ)" style="width:100%;border:1px solid var(--line);border-radius:6px;padding:9px 12px;font-size:13px;font-family:inherit;display:${q.type === 'textarea' ? 'none' : 'block'};">${(q.options || []).join('\n')}</textarea>
+      `;
+      list.appendChild(card);
+    });
+    list.querySelectorAll('[data-sc-del]').forEach(btn => {
+      btn.addEventListener('click', () => { scQuestions.splice(parseInt(btn.dataset.scDel), 1); scRender(); });
+    });
+    list.querySelectorAll('[data-sc-label]').forEach(inp => {
+      inp.addEventListener('input', () => { scQuestions[parseInt(inp.dataset.scLabel)].label = inp.value; });
+    });
+    list.querySelectorAll('[data-sc-type]').forEach(sel => {
+      sel.addEventListener('change', () => {
+        const i = parseInt(sel.dataset.scType);
+        scQuestions[i].type = sel.value;
+        scRender();
+      });
+    });
+    list.querySelectorAll('[data-sc-options]').forEach(ta => {
+      ta.addEventListener('input', () => {
+        const i = parseInt(ta.dataset.scOptions);
+        scQuestions[i].options = ta.value.split('\n').map(s => s.trim()).filter(Boolean);
+      });
+    });
+  }
+  document.getElementById('sc-add-btn')?.addEventListener('click', () => {
+    if (scQuestions.length >= 5) { document.getElementById('sc-msg').textContent = '最大 5問 まで'; return; }
+    scQuestions.push({ label: '', type: 'radio', options: [], required: true });
+    scRender();
+  });
+  document.getElementById('sc-save-btn')?.addEventListener('click', async () => {
+    const m = document.getElementById('sc-msg');
+    try {
+      m.textContent = '保存中…';
+      const valid = scQuestions.filter(q => q.label && q.label.trim().length > 0);
+      const fn = httpsCallable(getFunctions(app, 'asia-northeast1'), 'setSurveyConfig');
+      await fn({ customQuestions: valid });
+      m.textContent = '✓ 保存しました'; m.style.color = '#06C755';
+      setTimeout(() => { m.textContent = ''; m.style.color = ''; }, 2500);
+    } catch (e) { m.textContent = '保存失敗: ' + (e.message || e.code); m.style.color = '#DC2B2B'; }
+  });
+  async function scLoad() {
+    if (!currentTenantId) return;
+    try {
+      const fn = httpsCallable(getFunctions(app, 'asia-northeast1'), 'getReferrerName');
+      const res = await fn({ code: currentTenantId });
+      scQuestions = Array.isArray(res.data?.customQuestions) ? res.data.customQuestions : [];
+      scRender();
+    } catch (e) { console.warn('scLoad:', e); scRender(); }
+  }
+  setTimeout(scLoad, 1500);
 </script>
 </body>
 </html>

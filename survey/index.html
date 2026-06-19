@@ -406,8 +406,46 @@
       const curNo = document.getElementById('curNo');
       const prevBtn = document.getElementById('prevBtn');
       const nextBtn = document.getElementById('nextBtn');
-      const total = 13;
+      let total = 13;
       let cur = 1;
+
+      // ★ カスタム質問 注入: tenant.surveyConfig.customQuestions を 候補日 (step 13) の前 に 挿入
+      window._injectCustomQuestions = function(customQs) {
+        if (!Array.isArray(customQs) || !customQs.length) return;
+        const candStep = form.querySelector('.step[data-step="13"]');
+        if (!candStep) return;
+        const newStepBase = 13;
+        customQs.forEach((q, i) => {
+          const stepNum = newStepBase + i;
+          const fieldName = 'custom_' + (i + 1);
+          const step = document.createElement('div');
+          step.className = 'step';
+          step.dataset.step = String(stepNum);
+          step.dataset.field = fieldName;
+          step.dataset.multi = (q.type === 'checkbox') ? '1' : '';
+          step.dataset.text = (q.type === 'textarea' || q.type === 'text') ? '1' : '';
+          step.dataset.slots = '';
+          step.style.display = 'none';
+          const head = '<h2 class="q">' + (q.label || '質問') + (q.required === false ? '' : '<span style="color:#DC2B2B">*</span>') + '</h2>';
+          let body = '';
+          if (q.type === 'textarea') {
+            body = '<textarea name="' + fieldName + '" rows="4" style="width:100%;border:1px solid #d4d4d4;border-radius:8px;padding:10px;font-size:14px;font-family:inherit;" placeholder="' + (q.placeholder || '自由にご記入ください') + '"></textarea>';
+          } else if (q.type === 'text') {
+            body = '<input type="text" name="' + fieldName + '" style="width:100%;border:1px solid #d4d4d4;border-radius:8px;padding:10px;font-size:14px;" placeholder="' + (q.placeholder || '') + '">';
+          } else {
+            const inputType = (q.type === 'checkbox') ? 'checkbox' : 'radio';
+            body = (q.options || []).map(opt =>
+              '<label class="opt"><input type="' + inputType + '" name="' + fieldName + '" value="' + opt + '"><span>' + opt + '</span></label>'
+            ).join('');
+          }
+          step.innerHTML = head + body;
+          candStep.parentNode.insertBefore(step, candStep);
+        });
+        // 候補日 step を 末尾 に renumber
+        candStep.dataset.step = String(newStepBase + customQs.length);
+        total = 13 + customQs.length;
+        console.log('[survey] custom questions injected:', customQs.length, ' total:', total);
+      };
 
       // Slots step: highlight selects + clear error
       form.querySelectorAll('.bf-select').forEach(sel => sel.addEventListener('change', () => {
@@ -604,6 +642,13 @@
             window._fpAddFriendUrl = addFriendUrl;
             const btn = document.getElementById('addFriendBtn');
             if (btn) btn.href = addFriendUrl;
+          }
+          // ★ カスタム質問 注入 (tenant.surveyConfig.customQuestions)
+          const customQs = res?.data?.customQuestions || [];
+          if (customQs.length && typeof window._injectCustomQuestions === 'function') {
+            window._injectCustomQuestions(customQs);
+            // showStep を 呼び直して total/progress 反映
+            try { showStep(1); } catch(_) {}
           }
         } catch (e) { console.warn('fp name lookup fail', e); }
       })();
