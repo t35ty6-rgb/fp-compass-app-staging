@@ -226,8 +226,8 @@
 
         <div id="line-result" style="margin-top:16px;"></div>
 
-        <!-- ★ 試験中 全 localStorage クリーンアップ (オーナーfb: 「ブラウザ残骸 を 一括削除したい」) -->
-        <div style="margin-top:20px;padding:14px 18px;background:#FEF2F2;border:1px dashed #FCA5A5;border-radius:10px;">
+        <!-- ★ 試験中 全 localStorage クリーンアップ (stg のみ表示 / 本番では非表示) -->
+        <div id="clear-cache-section" style="display:none;margin-top:20px;padding:14px 18px;background:#FEF2F2;border:1px dashed #FCA5A5;border-radius:10px;">
           <div style="font-weight:800;color:#991B1B;margin-bottom:6px;font-size:13px;">🧹 試験データ 全クリーンアップ (ブラウザ側)</div>
           <div style="font-size:11.5px;color:#7F1D1D;margin-bottom:10px;line-height:1.6;">
             ブラウザの localStorage / IndexedDB / Cookie を 全削除して 真の 0 状態に戻します。<br>
@@ -641,6 +641,11 @@
   $("line-regen-btn").addEventListener("click", () => regenerateRichMenu(false));
   $("line-regen-stg-btn").addEventListener("click", () => regenerateRichMenu(true));
 
+  // ★ stg のみ 削除ボタンセクション 表示 (本番では非表示 = FP事業者の誤クリック防止)
+  if (location.hostname === 'stg.app.skeleton-inc.jp' || location.hostname === 'localhost' || location.hostname.startsWith('127.0.0.1')) {
+    const sec = document.getElementById('clear-cache-section');
+    if (sec) sec.style.display = 'block';
+  }
   // ★ 全 localStorage クリア + 即リロード (ボタン直下に inline feedback)
   $("clear-local-cache-btn").addEventListener("click", async () => {
     const btn = document.getElementById('clear-local-cache-btn');
