@@ -374,11 +374,19 @@
 
     <script>
     // ★ LIFF 初期化: アンケート 起動時 に LINE Login → userId 自動取得
+    //   ?uid= が 既に 来てる場合 (= webhook follow event で 取得済) は LIFF skip
+    //   ?nolifff=1 で 強制 skip も可 (テスト用)
     (function initLiff(){
       window._fpLiffUserId = '';
       window._fpLiffDisplayName = '';
-      // LIFF ID は ?liffId= query で 上書き可。 デフォは memory:reference_fp_compass_liff.md の ID
       const params = new URLSearchParams(location.search);
+      const hasUidQuery = !!params.get('uid');
+      const forceSkip = params.get('nolifff') === '1' || params.get('nolitt') === '1';
+      if (hasUidQuery || forceSkip) {
+        console.log('[liff] skipped (uid query present or forced)');
+        return;
+      }
+      // LIFF ID は ?liffId= query で 上書き可。 デフォは memory:reference_fp_compass_liff.md の ID
       const liffId = params.get('liffId') || '2010438953-T33xTMVb';
       if (typeof liff === 'undefined') { console.warn('[liff] SDK 読込失敗'); return; }
       liff.init({ liffId })
