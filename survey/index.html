@@ -528,12 +528,11 @@
         console.log('[survey] custom questions injected:', customQs.length, ' total:', total);
       };
 
-      // Slots step: highlight selects + clear error
+      // Slots step: highlight selects + 動的にヒント更新
       form.querySelectorAll('.bf-select').forEach(sel => sel.addEventListener('change', () => {
         sel.classList.toggle('has-value', !!sel.value);
-        const err = document.getElementById('slotsErr');
-        if (err) err.style.display = 'none';
         nextBtn.disabled = !isStepValid(cur);
+        if (cur === total) updateSlotsHint();
       }));
 
       function getStep(n) { return form.querySelector('.step[data-step="' + n + '"]'); }
@@ -552,10 +551,41 @@
         const combos = ps.map(p => p.d + '|' + p.t);
         return new Set(combos).size === 3;
       }
+      function nameValid() {
+        const n = document.getElementById('customer-name');
+        return !!(n && n.value.trim().length > 0);
+      }
+      function updateSlotsHint() {
+        // slots step での 残り 不足要件 を 画面上に inline 表示
+        const err = document.getElementById('slotsErr');
+        if (!err) return;
+        const ps = getSlotPairs();
+        const nm = nameValid();
+        const slotsOk = slotsValid();
+        const missing = [];
+        if (!nm) missing.push('お名前 (画面 上部) を 入力');
+        if (ps.some(p => !p.d || !p.t)) missing.push('第1〜第3希望 すべて 日付 と 時間 を 選ぶ');
+        else if (!slotsOk) missing.push('3つ とも 別の 日時 を 選ぶ (同じ日時が含まれています)');
+        if (missing.length) {
+          err.innerHTML = '✋ 送信するには:<br>' + missing.map(m => '・ ' + m).join('<br>');
+          err.style.display = 'block';
+          err.style.background = '#FEF3C7';
+          err.style.borderRadius = '8px';
+          err.style.padding = '12px 14px';
+          err.style.color = '#92400E';
+          err.style.border = '1px solid #F59E0B';
+        } else {
+          err.style.display = 'none';
+        }
+      }
+      // お名前 input の change で 再評価
+      document.getElementById('customer-name')?.addEventListener('input', () => {
+        if (cur === total) { nextBtn.disabled = !(slotsValid() && nameValid()); updateSlotsHint(); }
+      });
       function isStepValid(n) {
         const s = getStep(n);
         if (!s) return false;
-        if (s.dataset.slots === '1') return slotsValid();
+        if (s.dataset.slots === '1') return slotsValid() && nameValid();
         const field = s.dataset.field;
         const isMulti = s.dataset.multi === '1';
         const isText = s.dataset.text === '1';
@@ -575,6 +605,8 @@
         }
         cur = n;
         curNo.textContent = n;
+        // 最終ステップ (候補日) では hint を 動的表示
+        if (n === total) setTimeout(updateSlotsHint, 50);
         const p = Math.round(n / total * 100);
         bar.style.width = p + '%';
         pct.textContent = p + '%';
