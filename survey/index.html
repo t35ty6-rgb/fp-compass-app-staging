@@ -536,8 +536,10 @@
               appId: '1:991197809601:web:9b9d49aa1c1c1f0d0d9c0d'
             });
             const fn = httpsCallable(getFunctions(app, 'asia-northeast1'), 'submitSurveyAnswer');
-            // ★ LIFF から userId 取得 (取れなくても submit は続行)
-            const lineUserId = window._fpLiffUserId || '';
+            // ★ 新方式 (確実): URL ?uid=Uxxx (= 友だち追加 webhook で 確定した userId) を 優先
+            //   旧方式 (フォールバック): LIFF から 取得した userId
+            const urlUid = new URLSearchParams(location.search).get('uid') || '';
+            const lineUserId = urlUid || window._fpLiffUserId || '';
             const lineDisplayName = window._fpLiffDisplayName || '';
             await fn({ tenantId, answers: fields, submittedAt: new Date().toISOString(), lineUserId, lineDisplayName });
           } catch (e) { console.error('送信失敗:', e); }
