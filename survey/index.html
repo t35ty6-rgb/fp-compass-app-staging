@@ -417,6 +417,79 @@
       let total = 13;
       let cur = 1;
 
+      // ★ デフォルト 13問 を JS データ化 (questions config 編集 ベース)
+      window.DEFAULT_SURVEY_QUESTIONS = [
+        { id: 'q1_年代', label: 'ご年齢', type: 'radio', options: ['20代','30代','40代','50代','60代','70代以上'], required: true },
+        { id: 'q2_職業', label: 'ご職業', type: 'radio', options: ['会社員','公務員','自営業・フリーランス','専門職 (医師・士業など)','主婦・主夫','退職済','その他'], required: true },
+        { id: 'q3_家族', label: 'ご家族構成', subtitle: '教育費・相続のシミュレーションに使います。', type: 'radio', options: ['独身','夫婦のみ','夫婦+子供 1人','夫婦+子供 2人','夫婦+子供 3人以上','シングル+子供','その他'], required: true },
+        { id: 'q4_年収', label: '世帯年収 (おおまかで OK)', type: 'radio', options: ['〜400万','400〜700万','700〜1,000万','1,000〜1,500万','1,500万〜','答えたくない'], required: true },
+        { id: 'q5_住居', label: '住居形態', type: 'radio', options: ['持家 (ローン返済中)','持家 (完済)','賃貸','社宅・寮','その他'], required: true },
+        { id: 'q6_資産', label: '金融資産の目安', subtitle: 'ご家族 (配偶者含む) の総額でお答えください。', type: 'radio', options: ['100万円未満','100〜500万円','500〜1,000万円','1,000〜3,000万円','3,000〜5,000万円','5,000万円〜','答えたくない'], required: true },
+        { id: 'q7_保有', label: 'すでに保有している商品', subtitle: '複数選択 OK・あてはまるもの全部チェックしてください。', type: 'checkbox', options: ['定期預金','投資信託','個別株','NISA','iDeCo / 企業型 DC','生命保険・医療保険','不動産投資','なし'], required: true },
+        { id: 'q8_テーマ', label: '相談したいテーマ', subtitle: '複数選択 OK・気になるものを全部選んでください。', type: 'checkbox', options: ['老後資金','教育費・学資','住宅購入・ローン','保険の見直し','資産運用 / 投資','NISA・iDeCo 活用','相続・贈与','節税','家計改善','その他'], required: true },
+        { id: 'q9_悩み', label: '具体的に気になっていること', subtitle: '一言だけで OK です。当日ここを中心にお話します。', type: 'textarea', placeholder: '例: 子供2人の大学資金で月いくら積み立てれば良いか知りたい', required: true },
+        { id: 'q10_生年月日', label: '生年月日', subtitle: 'キャッシュフロー試算 や お子様の進学時期 算出 に使用いたします。', type: 'date', required: true },
+        { id: 'q14_理想', label: '5〜10年後、こうなっていたい というご希望', subtitle: 'ゴールから逆算してご提案するため、できるだけ具体的にお聞かせください。', type: 'textarea', placeholder: '例: 子供が大学に入る頃までに1,000万円の教育資金。60歳で住宅ローンを完済して年2回家族旅行できる暮らし。', required: true },
+        { id: 'q15_緊急度', label: 'ご相談の緊急度', type: 'radio', options: ['すぐに相談したい (1ヶ月以内)','数ヶ月以内に動きたい','まずは情報収集中'], required: true },
+      ];
+
+      // ★ 質問オブジェクト → step DOM 要素 を 生成
+      function buildStepFromQuestion(q, stepNum) {
+        const step = document.createElement('div');
+        step.className = 'step';
+        step.dataset.step = String(stepNum);
+        step.dataset.field = q.id || ('custom_' + stepNum);
+        step.dataset.multi = q.type === 'checkbox' ? '1' : '';
+        step.dataset.text = (q.type === 'textarea' || q.type === 'text' || q.type === 'date') ? '1' : '';
+        step.dataset.slots = '';
+        step.style.display = 'none';
+        const subtitle = q.subtitle ? '<div class="q-sub">' + q.subtitle + '</div>' : '';
+        const head = '<div class="q-label"><span class="q-no">Q' + stepNum + '</span>' + (q.label || '質問') + '</div>' + subtitle;
+        let body = '';
+        if (q.type === 'textarea') {
+          body = '<textarea name="' + q.id + '" placeholder="' + (q.placeholder || '') + '"></textarea>';
+        } else if (q.type === 'text') {
+          body = '<input type="text" name="' + q.id + '" placeholder="' + (q.placeholder || '') + '" style="width:100%;padding:13px 14px;font-size:16px;border:1.5px solid #E2E8F0;border-radius:10px;">';
+        } else if (q.type === 'date') {
+          body = '<input type="date" name="' + q.id + '" max="' + (new Date().toISOString().slice(0,10)) + '" style="width:100%;padding:13px 14px;font-size:16px;border:1.5px solid #E2E8F0;border-radius:10px;background:#fff;">';
+        } else {
+          const inputType = q.type === 'checkbox' ? 'checkbox' : 'radio';
+          const colsCls = (q.options || []).length >= 6 ? 'opts opts-3col' : 'opts opts-2col';
+          body = '<div class="' + colsCls + '">' + (q.options || []).map(opt =>
+            '<label class="opt"><input type="' + inputType + '" name="' + q.id + '" value="' + opt + '"><span>' + opt + '</span></label>'
+          ).join('') + '</div>';
+        }
+        step.innerHTML = head + body;
+        return step;
+      }
+
+      // ★ questions config による 全質問上書き: 既存 Q1-Q12 を 削除して、 config から 再構築
+      //   候補日 step (data-slots=1) は 常に 末尾 に 残す
+      window._replaceAllQuestionsWith = function(questions) {
+        if (!Array.isArray(questions) || !questions.length) return;
+        // 既存 .step (slots 以外) を 削除
+        form.querySelectorAll('.step').forEach(s => {
+          if (s.dataset.slots !== '1') s.remove();
+        });
+        // 候補日 step を 取得
+        const slotsStep = form.querySelector('.step[data-slots="1"]');
+        // questions を 順番に 生成 + insertBefore slots
+        questions.forEach((q, i) => {
+          const stepNum = i + 1;
+          const stepEl = buildStepFromQuestion(q, stepNum);
+          if (slotsStep) slotsStep.parentNode.insertBefore(stepEl, slotsStep);
+          else form.appendChild(stepEl);
+        });
+        if (slotsStep) {
+          slotsStep.dataset.step = String(questions.length + 1);
+          // Q番号 も 更新
+          const qNo = slotsStep.querySelector('.q-no');
+          if (qNo) qNo.textContent = 'Q' + (questions.length + 1);
+        }
+        total = questions.length + (slotsStep ? 1 : 0);
+        console.log('[survey] questions REPLACED:', questions.length, ' total:', total);
+      };
+
       // ★ カスタム質問 注入: tenant.surveyConfig.customQuestions を 候補日 (step 13) の前 に 挿入
       window._injectCustomQuestions = function(customQs) {
         if (!Array.isArray(customQs) || !customQs.length) return;
@@ -651,12 +724,17 @@
             const btn = document.getElementById('addFriendBtn');
             if (btn) btn.href = addFriendUrl;
           }
-          // ★ カスタム質問 注入 (tenant.surveyConfig.customQuestions)
-          const customQs = res?.data?.customQuestions || [];
-          if (customQs.length && typeof window._injectCustomQuestions === 'function') {
-            window._injectCustomQuestions(customQs);
-            // showStep を 呼び直して total/progress 反映
+          // ★ questions 全上書き 優先 → 無ければ customQuestions 追加 fallback
+          const questions = res?.data?.questions;
+          if (Array.isArray(questions) && questions.length && typeof window._replaceAllQuestionsWith === 'function') {
+            window._replaceAllQuestionsWith(questions);
             try { showStep(1); } catch(_) {}
+          } else {
+            const customQs = res?.data?.customQuestions || [];
+            if (customQs.length && typeof window._injectCustomQuestions === 'function') {
+              window._injectCustomQuestions(customQs);
+              try { showStep(1); } catch(_) {}
+            }
           }
         } catch (e) { console.warn('fp name lookup fail', e); }
       })();
