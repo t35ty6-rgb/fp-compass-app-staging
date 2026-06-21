@@ -187,7 +187,7 @@
   //   - ブラウザ back / forward → popstate → URL読取 → activateTab(name, {fromPopstate:true})
   //   - リロード / 直アクセス → 初期 URL 読取 → activateTab で 復元
   //   メリット: F5でも 同じ画面戻る / Playwright E2E URL直アクセス / Bug再現が URL共有 だけで済む
-  const VALID_VIEWS = ['dashboard','clients','timeline','leadHub','distributionHub','birthdayTab','calendarTab','settingsHub','dormantFollowup','tagsHub','kpi'];
+  const VALID_VIEWS = ['dashboard','clients','timeline','meetingHistory','leadHub','distributionHub','birthdayTab','calendarTab','settingsHub','dormantFollowup','tagsHub','kpi'];
   function activateTab(name, options) {
     options = options || {};
     state.activeTab = name;
@@ -201,6 +201,12 @@
     if (name === 'dashboard') renderDashboard();
     if (name === 'clients') renderClients();
     if (name === 'timeline') renderGlobalTimeline();
+    if (name === 'meetingHistory') {
+      if (window.LineApp && window.LineApp.renderMeetingHistory) {
+        if (!window._lineInited) { window.LineApp.init(); window._lineInited = true; }
+        window.LineApp.renderMeetingHistory();
+      }
+    }
     if (['leadHub', 'distributionHub', 'birthdayTab', 'calendarTab', 'settingsHub', 'dormantFollowup', 'tagsHub'].indexOf(name) >= 0) {
       if (window.LineApp) {
         if (!window._lineInited) {

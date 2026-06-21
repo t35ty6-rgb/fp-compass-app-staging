@@ -714,6 +714,11 @@
           <i data-lucide="git-commit-horizontal"></i>
           <span>ライフイベント</span>
         </div>
+        <div class="tab" data-tab="meetingHistory">
+          <i data-lucide="video"></i>
+          <span>面談履歴</span>
+          <span class="nav-count" id="nav-count-history"></span>
+        </div>
       </nav>
     </div>
 
@@ -1052,6 +1057,11 @@
           </div>
         </section>
 
+        <!-- ===== 面談履歴 (Past Meetings) ===== -->
+        <section class="view" data-view="meetingHistory">
+          <div id="mh-root"></div>
+        </section>
+
         <!-- ===== KPI / タスク管理 ===== -->
         <section class="view" data-view="kpi">
           <div class="page-head">
@@ -1181,7 +1191,7 @@ window.fpReadyAfterAuth = function() {
     });
   })();
 
-  const ver = "20260622C-true-cause";
+  const ver = "20260622D-history-tab";
   const scripts = [
     "life-events.js?v=" + ver,
     "recommender.js?v=" + ver,
@@ -1500,7 +1510,7 @@ window.fpReadyAfterAuth = function() {
 <script>
 (function(){
   // 最新の ver を 1 箇所に集約 (fpReadyAfterAuth 側と一致させる必要あり)
-  const FP_VERSION = "20260622C-true-cause";
+  const FP_VERSION = "20260622D-history-tab";
   const loadTime = new Date();
   const hhmm = String(loadTime.getHours()).padStart(2,'0') + ':' + String(loadTime.getMinutes()).padStart(2,'0');
   const dateLabel = (FP_VERSION.match(/^(\d{4})(\d{2})(\d{2})/) || []).slice(1).join('/').replace(/^(\d{4})\//,'$1/').replace(/\/(\d{2})\/(\d{2})$/,'/$1/$2') || FP_VERSION;
