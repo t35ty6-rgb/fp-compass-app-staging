@@ -708,12 +708,18 @@
             <textarea id="fp-dormant-msg" rows="8" style="width:100%;padding:14px 16px;border:1.5px solid #E2E8F0;border-radius:8px;font-size:13.5px;font-family:'Noto Sans JP',sans-serif;line-height:1.75;resize:vertical;box-sizing:border-box;">${escapeHtml(defaultMsg)}</textarea>
           </div>
 
-          <div style="position:sticky;bottom:18px;background:linear-gradient(135deg,#0F172A,#1E293B);border-radius:12px;padding:18px;box-shadow:0 12px 36px rgba(15,23,42,0.32);display:flex;align-items:center;gap:14px;">
-            <div style="flex:1;color:#fff;">
-              <div style="font-size:11.5px;font-weight:700;letter-spacing:0.06em;color:#94A3B8;">✓ 選択中 <span id="fp-dormant-selected-count" style="color:#10B981;font-weight:900;">${enriched.length}</span>名 に送信</div>
+          <div style="position:sticky;bottom:18px;background:linear-gradient(135deg,#0F172A,#1E293B);border-radius:12px;padding:18px 22px;box-shadow:0 12px 36px rgba(15,23,42,0.32);display:flex;align-items:center;gap:18px;flex-wrap:wrap;">
+            <div style="flex:1;color:#fff;min-width:180px;">
+              <div style="font-size:11.5px;font-weight:700;letter-spacing:0.06em;color:#94A3B8;">✓ 選択中 <span id="fp-dormant-selected-count" style="color:#FCD34D;font-weight:900;">${enriched.length}</span>名 に送信</div>
               <div style="font-size:10px;color:#CBD5E1;margin-top:2px;">⚠ 送信後は取消不可。送信前に文面を確認してください</div>
             </div>
-            <button id="fp-dormant-send" style="background:#fff;color:#0F172A;border:none;padding:14px 28px;border-radius:8px;font-size:14px;font-weight:900;letter-spacing:0.08em;cursor:pointer;font-family:'Inter','Noto Sans JP',sans-serif;box-shadow:0 4px 14px rgba(255,255,255,0.18);">✨ 選択した方に一斉送信</button>
+            <div class="btn-cta-primary-wrap">
+              <span class="btn-cta-primary-chip">\\ 全員に 1クリック /</span>
+              <button id="fp-dormant-send" class="btn-cta-primary">
+                <span>選んだ方に 一斉送信</span>
+                <span class="cta-arrow">→</span>
+              </button>
+            </div>
           </div>
           <div id="fp-dormant-result" style="margin-top:14px;"></div>
         `}
@@ -780,21 +786,36 @@
       btn.disabled = true; btn.textContent = '送信中...';
       // ★ 全画面オーバーレイで操作ブロック (誤クリック / 中断 防止)
       showSendingOverlay(`ご無沙汰フォロー 一斉送信中 (${selected.length}名)`, selected.length);
+      // ★ multi-tenant sendLineMessage 経由 (旧 /api/send-line = demo GAS token で別チャンネル失敗するのを修正)
+      const { initializeApp: _ia, getApps: _ga } = await import('https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js');
+      const { getFunctions: _gf, httpsCallable: _hc } = await import('https://www.gstatic.com/firebasejs/10.13.2/firebase-functions.js');
+      const _app = _ga()[0] || _ia({ apiKey: 'AIzaSyAmVAEe9l9e1Yo_dzzJdbTVU35wWKd2sH4', authDomain: 'skeleton-fp-compass-632026.firebaseapp.com', projectId: 'skeleton-fp-compass-632026' });
+      const _fn = _hc(_gf(_app, 'asia-northeast1'), 'sendLineMessage');
       let ok = 0, fail = 0;
-      const failDetails = []; // ★ 失敗ごとに hint/code/error を捕捉
+      const failDetails = [];
       for (let i = 0; i < selected.length; i++) {
         const s = selected[i];
         updateSendingProgress(i, selected.length, s.name);
         const text = tpl.replace(/\{name\}/g, s.name);
         try {
-          const r = await fetch(CLOUD_RUN_BASE + '/api/send-line', {
-            method: 'POST', headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ userId: s.uid, text }),
-          });
-          const d = await r.json();
-          if (d.ok) { ok++; }
-          else { fail++; failDetails.push({ name: s.name, code: d.code, hint: d.hint, error: d.error }); }
-        } catch (e) { fail++; failDetails.push({ name: s.name, error: e.message || String(e) }); }
+          // customer id 紐付け: DUMMY_CLIENTS から逆引き
+          const cClient = (window.DUMMY_CLIENTS || []).find(c => c.lineFriendId === s.uid);
+          if (cClient) {
+            await _fn({ customerId: cClient.id, text });
+          } else {
+            await _fn({ lineFriendId: s.uid, text });
+          }
+          ok++;
+        } catch (e) {
+          fail++;
+          const m = e?.message || String(e);
+          const reason = /LINE 未連携|failed-precondition/.test(m)
+            ? 'あなたの LINE 公式アカウント が 未連携 (アカウント設定で 接続してください)'
+            : /Failed to send|友だち追加/.test(m)
+              ? `お客様 が この LINE 公式アカウント を 友だち未追加`
+              : m.slice(0, 200);
+          failDetails.push({ name: s.name, hint: reason });
+        }
         // レート制限対策 200ms 待つ
         await new Promise(res => setTimeout(res, 200));
       }
@@ -2268,7 +2289,52 @@
         audio: { echoCancellation: true, noiseSuppression: true, sampleRate: 44100 },
       });
     } catch (e) {
-      alert('カメラ・マイクのアクセスを許可してください\n\n詳細: ' + (e?.message || e));
+      // ★ オーナーfb 2026-06-22: 単純な alert は不親切 → 解決手順つきモーダルに置換
+      const errName = e?.name || '';
+      const isPermission = /NotAllowed|Permission/i.test(errName);
+      const isNoDevice = /NotFound|DevicesNotFound/i.test(errName);
+      const isInUse = /NotReadable|InUse|TrackStart/i.test(errName);
+      const ov = document.createElement('div');
+      ov.style.cssText = 'position:fixed;inset:0;background:rgba(15,23,42,0.78);z-index:2147483647;display:flex;align-items:center;justify-content:center;font-family:"Hiragino Sans",sans-serif;';
+      const heading = isPermission ? 'カメラ / マイク のアクセス が ブロックされています'
+        : isNoDevice ? 'カメラ / マイク が 見つかりません'
+        : isInUse ? 'カメラ / マイク が 他のアプリ で 使用中 です'
+        : 'カメラ起動 に 失敗しました';
+      const steps = isPermission ? [
+        '画面 上部 (アドレスバー の 左) の <strong>🎥 / 🎤 アイコン</strong> をクリック',
+        '「常に許可」 を 選択',
+        'ページを <strong>リロード</strong> して もう一度 「急遽 対面録画」 を押す',
+      ] : isNoDevice ? [
+        'PC に カメラ・マイク が 内蔵 されているか 確認',
+        '外付け の 場合は USB が 刺さっているか 確認',
+        'Mac の 場合: <strong>システム設定 → プライバシーとセキュリティ → カメラ/マイク</strong> で ブラウザ が ON か 確認',
+      ] : isInUse ? [
+        'Zoom / Google Meet / Teams など 他の ビデオ会議アプリ を <strong>完全終了</strong>',
+        '別タブで カメラ を使う 別アプリ も 閉じる',
+        'もう一度 「急遽 対面録画」 を押す',
+      ] : [
+        'ブラウザ を リロード',
+        'それでも 直らない 場合 は サポート (support@skeleton-inc.jp) まで',
+      ];
+      ov.innerHTML = `
+        <div style="background:#fff;border-radius:14px;max-width:460px;width:92%;padding:28px 32px;box-shadow:0 28px 80px rgba(0,0,0,0.4);">
+          <div style="display:inline-flex;align-items:center;gap:8px;background:#FEE2E2;color:#B91C1C;font-size:11px;font-weight:800;padding:5px 12px;border-radius:99px;letter-spacing:0.1em;margin-bottom:14px;">⚠ RECORDING ERROR</div>
+          <h2 style="font-family:'Noto Serif JP',serif;font-size:19px;font-weight:700;color:#111827;margin:0 0 8px;line-height:1.45;">${heading}</h2>
+          <p style="font-size:12.5px;color:#6b7280;line-height:1.7;margin:0 0 16px;">対面録画には <strong style="color:#111827;">カメラ + マイク</strong> へのアクセス許可 が 必要です。 下の手順で 解決してください。</p>
+          <ol style="margin:0 0 18px;padding-left:22px;font-size:13px;color:#1f2a3f;line-height:1.85;">
+            ${steps.map(s => `<li style="margin-bottom:6px;">${s}</li>`).join('')}
+          </ol>
+          <div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:8px;padding:10px 14px;margin-bottom:18px;font-size:11px;color:#64748B;font-family:'JetBrains Mono',monospace;line-height:1.6;">技術詳細: ${escapeHtml(String(errName || e?.message || e).slice(0, 200))}</div>
+          <div style="display:flex;gap:10px;">
+            <button class="btn-cta-primary" onclick="location.reload()" style="flex:1;">
+              <span>ページをリロード</span>
+              <span class="cta-arrow">↻</span>
+            </button>
+            <button class="btn-cta-ghost" id="fp-rec-err-close">閉じる</button>
+          </div>
+        </div>`;
+      document.body.appendChild(ov);
+      document.getElementById('fp-rec-err-close').addEventListener('click', () => ov.remove());
       return;
     }
     // 録画プレビュー (小さく右下に表示)
@@ -6607,26 +6673,35 @@ ${family} ${era}層は「教育費ピーク (子18歳) と退職金準備が重�
       if (!client.lineFriendId || client.lineFriendId.startsWith('U-lead-') || client.lineFriendId.startsWith('demo-')) {
         alert(`${msg.clientName}様はLINE未連携です。\n\n顧客台帳でLINE友だちIDを確認してください。`); return false;
       }
+      // ★ 真因対応 (2026-06-22): multi-tenant sendLineMessage callable に切替
+      //    旧 /api/send-line は demo (福田) GAS token で 別チャンネル送信失敗していた
       try {
-        const r = await fetch(CLOUD_RUN_BASE + '/api/send-line', {
-          method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ userId: client.lineFriendId, text: msg.body }),
+        const { initializeApp, getApps } = await import('https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js');
+        const { getFunctions, httpsCallable } = await import('https://www.gstatic.com/firebasejs/10.13.2/firebase-functions.js');
+        const app = getApps()[0] || initializeApp({
+          apiKey: 'AIzaSyAmVAEe9l9e1Yo_dzzJdbTVU35wWKd2sH4',
+          authDomain: 'skeleton-fp-compass-632026.firebaseapp.com',
+          projectId: 'skeleton-fp-compass-632026',
         });
-        let d;
-        try { d = await r.json(); } catch (_) { d = { ok: false, error: 'サーバーエラー (レスポンス形式異常)' }; }
-        if (d.ok) { markSent(msg.id, msg.clientId); return true; }
-        // ★ GAS が返す詳細 (hint / code / error) を そのまま表示
+        const fn = httpsCallable(getFunctions(app, 'asia-northeast1'), 'sendLineMessage');
+        await fn({ customerId: client.id, text: msg.body });
+        markSent(msg.id, msg.clientId);
+        return true;
+      } catch (e) {
+        // Firebase callable は friendlyMsg を message に入れて throw 投げてくれる
+        const errMsg = e?.message || String(e);
+        const isNoToken = /LINE 未連携|failed-precondition/.test(errMsg);
         const lines = [`${msg.clientName}様への送信に失敗しました`, ''];
-        // ★ code 400 + 一般エラーは hint がないので「友だち未追加 or ブロック中」と読み替え
-        const inferred = d.hint || (d.code === 400 ? 'LINE 配信エラー — 次のいずれか: ①友だち未追加/ブロック ②無効なuserId ③LINE OA のチャンネル違い ④月間配信上限到達' : '');
-        if (inferred) lines.push(`原因: ${inferred}`);
-        if (d.code) lines.push(`LINE API code: ${d.code}`);
-        if (d.error) lines.push(`詳細: ${String(d.error).slice(0, 200)}`);
-        if (!inferred && !d.error) lines.push(`原因: ${r.status === 429 ? 'LINE 送信数上限 (月間制限)' : r.status >= 500 ? 'サーバーエラー' : 'HTTP ' + r.status}`);
+        if (isNoToken) {
+          lines.push('原因: あなたの LINE 公式アカウントが未連携です');
+          lines.push('');
+          lines.push('→ アカウント設定 で LINE 公式アカウント の Channel Access Token を 入力してください');
+          lines.push('  (画面右上「アカウント」 から ⚙ 設定)');
+        } else {
+          lines.push(errMsg.slice(0, 400));
+        }
         alert(lines.join('\n'));
         return false;
-      } catch (e) {
-        alert(`通信エラー: ${e.message}\n\nネットワーク接続を確認してください`); return false;
       }
     }
 

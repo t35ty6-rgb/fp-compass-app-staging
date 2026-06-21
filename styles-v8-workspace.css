@@ -6304,3 +6304,203 @@ body[data-prod="1"] #form-delete-btn { display: none !important; }
 body[data-prod="1"] .demo-only,
 body[data-prod="1"] [data-demo-only],
 body[data-prod="1"] .brand-badge { display: none !important; }
+
+/* ============================================================
+   CTA Button System (2026-06-22 roundD)
+   参考: 目を引くCTAデザイン6選 のうち pattern 1/2/5 を採用
+   階層: PRIMARY (確定アクション) / SECONDARY (個別) / GHOST (キャンセル)
+   既存サンセット (#c19a3a / #9a5a18) + navy を使い、 派手すぎない業務UI
+   ============================================================ */
+
+:root {
+  --cta-gold: #C19A3A;
+  --cta-gold-deep: #9A5A18;
+  --cta-gold-cream: #FBF5E3;
+  --cta-gold-shadow: rgba(193,154,58,0.32);
+  --cta-ink: #1F2A3F;
+  --cta-red: #B91C3C;
+  --cta-red-shadow: rgba(185,28,60,0.28);
+  --cta-line: #E8E2D4;
+}
+
+/* ───── PRIMARY ───── 一斉送信 / 予約確定 / 録画開始 等 確定アクション */
+.btn-cta-primary {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  background: linear-gradient(135deg, var(--cta-gold) 0%, var(--cta-gold-deep) 100%);
+  color: #fff;
+  border: none;
+  border-radius: 99px;
+  padding: 16px 26px 16px 32px;
+  font-family: 'Hiragino Sans', 'Noto Sans JP', sans-serif;
+  font-weight: 800;
+  font-size: 15px;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  box-shadow:
+    0 6px 16px var(--cta-gold-shadow),
+    inset 0 1px 0 rgba(255,255,255,0.22);
+  transition: transform .15s, box-shadow .18s, filter .15s;
+  white-space: nowrap;
+}
+.btn-cta-primary:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 10px 26px var(--cta-gold-shadow),
+    inset 0 1px 0 rgba(255,255,255,0.3);
+  filter: brightness(1.05);
+}
+.btn-cta-primary:active {
+  transform: translateY(0);
+  box-shadow: 0 3px 10px var(--cta-gold-shadow);
+}
+.btn-cta-primary:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+}
+.btn-cta-primary .cta-arrow {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background: #fff;
+  color: var(--cta-gold-deep);
+  border-radius: 50%;
+  font-size: 14px;
+  font-weight: 900;
+  transition: transform .2s;
+}
+.btn-cta-primary:hover .cta-arrow { transform: translateX(3px); }
+
+/* 上に乗る 吹き出し風 サブラベル (参考 #2) */
+.btn-cta-primary-wrap {
+  position: relative;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+  isolation: isolate;
+}
+.btn-cta-primary-chip {
+  position: relative;
+  z-index: 2;
+  background: var(--cta-ink);
+  color: var(--cta-gold-cream);
+  font-family: 'Hiragino Sans', sans-serif;
+  font-weight: 800;
+  font-size: 11.5px;
+  letter-spacing: 0.06em;
+  padding: 6px 18px;
+  border-radius: 99px;
+  margin-bottom: -14px;
+  box-shadow: 0 4px 10px rgba(31,42,63,0.25);
+  white-space: nowrap;
+}
+.btn-cta-primary-chip::before,
+.btn-cta-primary-chip::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  width: 1px;
+  height: 16px;
+  background: var(--cta-gold);
+  transform: translateY(-50%) rotate(15deg);
+}
+.btn-cta-primary-chip::before { left: -12px; transform: translateY(-50%) rotate(-20deg); }
+.btn-cta-primary-chip::after  { right: -12px; transform: translateY(-50%) rotate(20deg); }
+.btn-cta-primary-wrap .btn-cta-primary { z-index: 1; padding-top: 20px; }
+.btn-cta-primary-wrap:hover .btn-cta-primary-chip {
+  transform: translateY(-2px);
+  transition: transform .2s;
+}
+
+/* DANGER バリアント (赤系) — 削除 / キャンセル 等の取消できないアクション */
+.btn-cta-primary.is-danger {
+  background: linear-gradient(135deg, #DC2626 0%, var(--cta-red) 100%);
+  box-shadow: 0 6px 16px var(--cta-red-shadow), inset 0 1px 0 rgba(255,255,255,0.22);
+}
+.btn-cta-primary.is-danger .cta-arrow { color: var(--cta-red); }
+.btn-cta-primary.is-danger:hover {
+  box-shadow: 0 10px 26px var(--cta-red-shadow), inset 0 1px 0 rgba(255,255,255,0.3);
+}
+
+/* ───── SECONDARY ───── 個別送信 / 編集 等 (参考 #5: 円バッジ+矢印) */
+.btn-cta-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: #fff;
+  color: var(--cta-ink);
+  border: 1.5px solid var(--cta-gold);
+  border-radius: 99px;
+  padding: 9px 18px 9px 9px;
+  font-family: 'Hiragino Sans', sans-serif;
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(193,154,58,0.12);
+  transition: background .12s, border-color .12s, box-shadow .12s, transform .12s;
+}
+.btn-cta-secondary:hover {
+  background: var(--cta-gold-cream);
+  border-color: var(--cta-gold-deep);
+  box-shadow: 0 4px 12px rgba(193,154,58,0.2);
+  transform: translateY(-1px);
+}
+.btn-cta-secondary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+.btn-cta-secondary .cta-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  background: var(--cta-gold);
+  color: #fff;
+  border-radius: 50%;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  flex-shrink: 0;
+}
+.btn-cta-secondary .cta-tail {
+  font-size: 13px;
+  color: var(--cta-gold-deep);
+  font-weight: 800;
+  margin-left: 4px;
+  transition: transform .15s;
+}
+.btn-cta-secondary:hover .cta-tail { transform: translateX(3px); }
+
+/* ───── GHOST ───── キャンセル / 戻る (参考 #6 派生: 下線下) */
+.btn-cta-ghost {
+  background: transparent;
+  color: #6B7280;
+  border: none;
+  padding: 10px 14px;
+  font-family: 'Hiragino Sans', sans-serif;
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+  border-bottom: 1.5px solid transparent;
+  border-radius: 0;
+  transition: color .12s, border-color .12s;
+}
+.btn-cta-ghost:hover {
+  color: var(--cta-ink);
+  border-bottom-color: var(--cta-gold);
+}
+
+/* Reduced motion: 動きを止める */
+@media (prefers-reduced-motion: reduce) {
+  .btn-cta-primary, .btn-cta-secondary, .cta-arrow, .cta-tail, .btn-cta-primary-chip { transition: none !important; }
+  .btn-cta-primary:hover, .btn-cta-secondary:hover { transform: none !important; }
+}
