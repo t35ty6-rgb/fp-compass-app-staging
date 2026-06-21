@@ -674,6 +674,18 @@
           <h1 class="page-title"><i data-lucide="alarm-clock" style="vertical-align:middle;margin-right:8px;"></i>ご無沙汰フォロー</h1>
           <p class="page-sub">21日以上 LINE で連絡してない方を期間ごとに表示。テンプレ編集 → 全員に1クリック送信。${activeTagFilter ? `<span style="color:#5B5BF0;font-weight:700;"> · タグ「${escapeHtml((tagsMaster.find(t => t.id === activeTagFilter) || {}).label || '')}」 で絞り込み中</span>` : ''}</p>
         </header>
+
+        <!-- ★ 役割明示バナー: 配信タブとの混同防止 -->
+        <div style="background:linear-gradient(135deg,#FEF3C7,#FFEDD5);border:1px solid #FCD34D;border-radius:12px;padding:18px 22px;margin-bottom:18px;">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+            <span style="background:#7C2D12;color:#fff;font-size:10px;font-weight:800;letter-spacing:0.12em;padding:3px 9px;border-radius:4px;">ご無沙汰フォロー — RE-ENGAGE</span>
+            <span style="font-size:12px;color:#64748B;">= <strong style="color:#7C2D12;">最終接触から日数が経った客</strong>を1人ずつ追客 (関係維持・再接続)</span>
+          </div>
+          <div style="font-size:12px;color:#64748B;line-height:1.7;">
+            キャンペーンやお知らせを全員に一斉送信したい時は → <a href="#" onclick="document.querySelector('.tab[data-tab=&quot;distributionHub&quot;]')?.click();return false;" style="color:#1D4ED8;font-weight:700;text-decoration:underline;">配信タブ</a> （テンプレ駆動でまとめて送信）
+          </div>
+        </div>
+
         ${tagFilterHtml}
 
         ${enriched.length === 0 ? `
@@ -905,10 +917,20 @@
     const heroColor = hero ? accents[hero.kind] : accents.ok;
 
     v.innerHTML = `
-      <div style="margin:0 0 28px;padding:0 0 16px;border-bottom:1px solid #e8e2d4;">
-        <div style="font-size:10.5px;font-weight:700;color:#8b7d5d;letter-spacing:0.18em;text-transform:uppercase;margin-bottom:6px;">New Consultation</div>
-        <h1 style="font-family:'Noto Serif JP',serif;font-size:28px;font-weight:700;letter-spacing:0.02em;margin:0 0 6px;color:#1f2a3f;">新規相談</h1>
-        <p style="color:#6b7280;font-size:13px;margin:0;line-height:1.6;">LINE — アンケート — 候補日 — Zoom面談 — 完了 までの進行状況</p>
+      <div style="margin:0 0 18px;padding:0 0 16px;border-bottom:1px solid #e8e2d4;display:flex;justify-content:space-between;align-items:flex-end;gap:20px;flex-wrap:wrap;">
+        <div>
+          <div style="font-size:10.5px;font-weight:700;color:#8b7d5d;letter-spacing:0.18em;text-transform:uppercase;margin-bottom:6px;">New Consultation</div>
+          <h1 style="font-family:'Noto Serif JP',serif;font-size:28px;font-weight:700;letter-spacing:0.02em;margin:0 0 6px;color:#1f2a3f;">新規相談</h1>
+          <p style="color:#6b7280;font-size:13px;margin:0;line-height:1.6;">LINE — アンケート — 候補日 — Zoom面談 — 完了 までの進行状況</p>
+        </div>
+        <!-- ★ 急遽対面録画 (予約不要・お客様が突然来た時用) -->
+        <button id="fp-quick-inperson"
+          style="background:linear-gradient(135deg,#7C3AED,#5B21B6);color:#fff;border:none;padding:14px 22px;border-radius:10px;font-size:13.5px;font-weight:800;cursor:pointer;font-family:'Hiragino Sans',sans-serif;letter-spacing:0.04em;box-shadow:0 6px 20px rgba(124,58,237,0.35);display:flex;align-items:center;gap:10px;white-space:nowrap;"
+          title="急に対面相談が入った時 → ボタン1つで録画開始 (議事録は自動で作られます)">
+          <span style="font-size:18px;line-height:1;">●</span>
+          <span>急遽 対面録画開始</span>
+          <span style="background:rgba(255,255,255,0.18);font-size:10px;padding:2px 7px;border-radius:10px;font-weight:700;letter-spacing:0.06em;">予約不要</span>
+        </button>
       </div>
 
       ${isDemo ? '<div style="background:#fdfbf4;border:1px solid #e8d9a8;border-radius:6px;padding:11px 16px;margin-bottom:24px;font-size:12px;color:#5e4d1a;font-family:\'Noto Sans JP\',sans-serif;letter-spacing:0.02em;"><strong style="font-weight:700;">Note —</strong> 表示中の候補日待ち4件はサンプルです。本番では実際のLINEアンケート回答が並びます</div>' : ''}
@@ -1003,22 +1025,85 @@
         <div id="bookings-list"></div>
       </section>
 
+      <!-- ★ NEW: 完了ミーティング履歴 (Zoom + 対面 + 議事録リンク) -->
+      ${(() => {
+        const aiRes = (liveData && liveData.ai_results) || [];
+        // 完了した予約: recordingStatus==='saved' OR 過去日付の confirmed
+        const today0 = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        const completed = bookings.filter(b => {
+          if (b.recordingStatus === 'saved') return true;
+          if (!b.date) return false;
+          if (b.status === 'cancelled') return false;
+          const meetDate = new Date(b.date + 'T00:00:00');
+          if (isNaN(meetDate.getTime())) return false;
+          return meetDate < today0;  // 過去日付
+        });
+        // ts ベースで重複除外 + 新しい順
+        const seen = new Set();
+        const uniqCompleted = completed.filter(b => {
+          const k = b.ts || (b.date + '_' + b.userId);
+          if (seen.has(k)) return false; seen.add(k); return true;
+        }).sort((a, b) => String(b.date + (b.time||'')).localeCompare(String(a.date + (a.time||''))));
+        // ローカル保存の急遽録画も合流
+        const quickMeta = (() => { try { return JSON.parse(localStorage.getItem('fp-quick-inperson-meta') || '[]'); } catch (_) { return []; } })();
+        const quickRows = quickMeta.slice().reverse().map(q => ({
+          ts: q.ts, date: (q.startedAt || '').slice(0, 10), time: (q.startedAt || '').slice(11, 16),
+          name: q.clientName + ' 様', userId: q.clientId, isInperson: true,
+        }));
+        const allMeetings = quickRows.concat(uniqCompleted);
+        return `
+        <section class="board-section" id="section-history" style="margin-top:36px;">
+          <div style="margin:0 0 14px;padding-bottom:10px;border-bottom:1px solid #e8e2d4;display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;">
+            <div>
+              <div style="font-size:10.5px;font-weight:700;color:#8b7d5d;letter-spacing:0.18em;text-transform:uppercase;margin-bottom:3px;">Past Meetings</div>
+              <h2 style="font-family:'Noto Serif JP',serif;font-size:18px;margin:0;font-weight:600;color:#1f2a3f;">完了ミーティング履歴 ${allMeetings.length > 0 ? `<span style="font-size:11px;background:#065F46;color:#fff;padding:2px 8px;border-radius:10px;margin-left:8px;font-family:'Inter',sans-serif;font-weight:700;letter-spacing:0.04em;">${allMeetings.length} 件</span>` : ''}</h2>
+            </div>
+            <div style="font-size:11px;color:#9ca3af;letter-spacing:0.02em;">Zoom + 対面 / 議事録自動保管</div>
+          </div>
+          ${allMeetings.length === 0 ? `<div style="background:#fff;border:1px dashed #e8e2d4;border-radius:8px;padding:28px 30px;color:#6b7280;font-size:12.5px;line-height:1.75;letter-spacing:0.02em;">
+            <strong style="color:#1f2a3f;font-weight:700;font-size:13.5px;display:block;margin-bottom:8px;">完了した面談はまだありません</strong>
+            ここには <strong style="color:#1f2a3f;">録画完了した Zoom 面談 / 急遽対面録画</strong> がどんどん貯まっていきます。<br>
+            ・録画ONで開始 → 停止 → AI 議事録自動生成 → このリストに反映<br>
+            ・各行から 議事録を開く / 顧客カードに移動 ができます
+          </div>` :
+            allMeetings.map(b => {
+              const ai = aiRes.find(r => (r.bookingTs && r.bookingTs === b.ts) || (r.userId && r.userId === b.userId) || (r.customerName && r.customerName === (b.name || '').replace(/様$/,'').trim()));
+              const dateLabel = b.date ? String(b.date).slice(5).replace('-', '/') : '--/--';
+              const timeLabel = b.time ? String(b.time).slice(0, 5) : '';
+              const kindIc = b.isInperson ? '🏠 対面' : '🎥 Zoom';
+              const kindBg = b.isInperson ? '#FAF5FF' : '#EFF6FF';
+              const kindFg = b.isInperson ? '#6D28D9' : '#1D4ED8';
+              return `
+                <div style="background:#fff;border:1px solid #e8e2d4;border-left:4px solid #065F46;border-radius:8px;padding:14px 18px;margin-bottom:8px;display:grid;grid-template-columns:80px 1fr auto;gap:16px;align-items:center;">
+                  <div style="text-align:left;">
+                    <div style="font-size:18px;font-weight:800;color:#1f2a3f;line-height:1;font-family:'Inter',sans-serif;">${dateLabel}</div>
+                    ${timeLabel ? `<div style="font-size:11px;color:#9ca3af;margin-top:3px;font-weight:600;">${timeLabel}</div>` : ''}
+                    <div style="margin-top:5px;display:inline-block;background:${kindBg};color:${kindFg};font-size:10px;font-weight:800;padding:2px 7px;border-radius:4px;letter-spacing:0.04em;">${kindIc}</div>
+                  </div>
+                  <div style="min-width:0;">
+                    <strong style="font-size:14px;color:#1f2a3f;">${escapeHtml(b.name || '匿名')}</strong>
+                    <div style="margin-top:4px;font-size:11.5px;color:#6b7280;line-height:1.55;">
+                      ${ai ? `📝 <span style="color:#065F46;font-weight:700;">議事録あり</span> · ${escapeHtml(String(ai.summary || '').split('\n')[0].slice(0, 60))}` : '<span style="color:#9ca3af;">議事録未生成</span>'}
+                    </div>
+                  </div>
+                  <div style="display:flex;gap:6px;align-items:center;">
+                    ${ai ? `<button data-view-meeting-minutes="${escapeHtml(b.ts || '')}" data-ai-summary="${escapeHtml(String(ai.summary || ''))}" data-ai-transcript="${escapeHtml(String(ai.transcript || ai.summary || ''))}" data-client-name="${escapeHtml((b.name||'').replace(/様$/,'').trim())}" class="btn-mini" style="background:#fff8e1;border:1px solid #f0d36b;color:#8a6f1e;font-weight:700;font-size:11.5px;padding:6px 12px;border-radius:6px;cursor:pointer;">📝 議事録</button>` : ''}
+                    ${b.userId ? `<button data-open-client-from-history="${escapeHtml(b.userId)}" data-client-name="${escapeHtml((b.name||'').replace(/様$/,'').trim())}" class="btn-mini" style="background:#f0f9ff;border:1px solid #bae6fd;color:#0c4a6e;font-weight:700;font-size:11.5px;padding:6px 12px;border-radius:6px;cursor:pointer;">→ 顧客カード</button>` : ''}
+                  </div>
+                </div>`;
+            }).join('')}
+        </section>`;
+      })()}
+
       <section class="board-section" id="section-aftercare" style="margin-top:36px;">
         <div style="margin:0 0 14px;padding-bottom:10px;border-bottom:1px solid #e8e2d4;">
-          <div style="font-size:10.5px;font-weight:700;color:#8b7d5d;letter-spacing:0.18em;text-transform:uppercase;margin-bottom:3px;">Follow-up</div>
-          <h2 style="font-family:'Noto Serif JP',serif;font-size:18px;margin:0;font-weight:600;color:#1f2a3f;">フォローアップ対象 ${aftercare.length > 0 ? `<span style="font-size:11px;background:#9a5a18;color:#fff;padding:2px 8px;border-radius:10px;margin-left:8px;font-family:'Inter',sans-serif;font-weight:700;letter-spacing:0.04em;">${aftercare.length} 名</span>` : ''}</h2>
+          <div style="font-size:10.5px;font-weight:700;color:#8b7d5d;letter-spacing:0.18em;text-transform:uppercase;margin-bottom:3px;">Stuck / Re-engage</div>
+          <h2 style="font-family:'Noto Serif JP',serif;font-size:18px;margin:0;font-weight:600;color:#1f2a3f;">対応漏れ ${aftercare.length > 0 ? `<span style="font-size:11px;background:#9a5a18;color:#fff;padding:2px 8px;border-radius:10px;margin-left:8px;font-family:'Inter',sans-serif;font-weight:700;letter-spacing:0.04em;">${aftercare.length} 名</span>` : ''}</h2>
         </div>
-        <p style="color:#6b7280;font-size:12.5px;margin:0 0 18px;line-height:1.65;letter-spacing:0.02em;">アンケート途中・候補日提示後・面談キャンセル等で止まっている方 / LINEで追加メッセージを送りましょう</p>
+        <p style="color:#6b7280;font-size:12.5px;margin:0 0 18px;line-height:1.65;letter-spacing:0.02em;">アンケート途中・候補日提示後・面談キャンセル等で<strong>途中で止まっている方</strong> / LINEで追撃メッセージを送りましょう</p>
         <div id="aftercare-list">
-          ${aftercare.length === 0 ? `<div style="background:#fff;border:1px dashed #e8e2d4;border-radius:8px;padding:28px 30px;color:#6b7280;font-size:12.5px;line-height:1.75;letter-spacing:0.02em;">
-            <strong style="color:#1f2a3f;font-weight:700;font-size:13.5px;display:block;margin-bottom:8px;">フォロー必要な方はいません</strong>
-            ここには <strong style="color:#1f2a3f;">途中で止まってる人</strong> が自動で並びます:<br>
-            ・友だち追加したがアンケート未回答 (3日以上)<br>
-            ・アンケート回答済みだが候補日を提示してない (5日以上)<br>
-            ・候補日提示済みだが FP が確定操作してない (3日以上)<br>
-            ・面談日が過ぎたが完了マークがついてない<br>
-            <br>
-            <span style="font-size:11px;color:#94a3b8;">該当者が出てきたら 「LINE 追撃」 ボタンでテンプレ自動入力 → ワンクリック送信できます</span>
+          ${aftercare.length === 0 ? `<div style="background:#fff;border:1px dashed #e8e2d4;border-radius:8px;padding:20px 26px;color:#6b7280;font-size:12.5px;line-height:1.7;letter-spacing:0.02em;">
+            <strong style="color:#1f2a3f;">途中で止まってる方はいません</strong> · 該当者が出てきたら自動でここに並びます
           </div>` :
             aftercare.map(a => `
               <div style="background:var(--surface);border:1px solid var(--line);border-left:4px solid ${a.stage==='completion-pending'?'#06c755':(a.days>=14?'#b91c3c':(a.days>=7?'#f59e0b':'#0ea5e9'))};border-radius:10px;padding:14px 18px;margin-bottom:8px;display:grid;grid-template-columns:36px 1fr auto;gap:14px;align-items:center;">
@@ -1040,6 +1125,31 @@
     `;
     fillConfirmList();
     fillBookingsList();
+    // ★ 完了ミーティング履歴: 議事録表示
+    document.querySelectorAll('[data-view-meeting-minutes]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const ts = btn.dataset.viewMeetingMinutes;
+        const live = (liveData && liveData.bookings) || [];
+        const b = live.find(x => String(x.ts).slice(0,19) === String(ts).slice(0,19));
+        const transcript = (b && b.transcript) || btn.dataset.aiTranscript || btn.dataset.aiSummary || '';
+        if (!transcript) { alert('議事録が見つかりません'); return; }
+        showTranscriptModal(transcript, '📝 議事録 — ' + (btn.dataset.clientName || ''));
+      });
+    });
+    // ★ 完了ミーティング履歴: 顧客カードに飛ぶ
+    document.querySelectorAll('[data-open-client-from-history]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const uid = btn.dataset.openClientFromHistory;
+        const cname = btn.dataset.clientName;
+        // userId/name → DUMMY_CLIENTS の id を探して openClientModal
+        const c = (window.DUMMY_CLIENTS || []).find(x => x.lineFriendId === uid || (cname && x.name === cname));
+        if (c && window.FpApp && window.FpApp.openClientModal) {
+          window.FpApp.openClientModal(c.id);
+        } else {
+          alert('該当する顧客カードが見つかりません');
+        }
+      });
+    });
     // フォローアップ追撃ボタン
     document.querySelectorAll('[data-aftercare-uid]').forEach(btn => {
       btn.addEventListener('click', async () => {
@@ -1080,10 +1190,95 @@
     // カレンダー比較トグル
     const calBtn = document.getElementById('fp-toggle-cal');
     if (calBtn) calBtn.addEventListener('click', toggleCalendarSidePanel);
+    // ★ 急遽対面録画ボタン (予約不要)
+    const quickBtn = document.getElementById('fp-quick-inperson');
+    if (quickBtn && !quickBtn._bound) {
+      quickBtn._bound = true;
+      quickBtn.addEventListener('click', openQuickInpersonModal);
+    }
     // 起動時にも復元
     if (localStorage.getItem('fp-cal-side-open') === '1') ensureCalendarSidePanel();
     fillFunnelArea();
     fillSurveysList();
+  }
+
+  // ★ 急遽対面録画モーダル: 顧客選択 → カメラ録画開始 → 議事録自動生成
+  function openQuickInpersonModal() {
+    const clients = (window.DUMMY_CLIENTS || []);
+    const ov = document.createElement('div');
+    ov.id = 'fp-quick-inperson-modal';
+    ov.style.cssText = 'position:fixed;inset:0;background:rgba(15,23,42,0.72);z-index:99999;display:flex;align-items:center;justify-content:center;font-family:"Hiragino Sans",sans-serif;';
+    ov.innerHTML = `
+      <div style="background:#fff;border-radius:16px;max-width:480px;width:92%;padding:28px;box-shadow:0 32px 80px rgba(0,0,0,0.4);">
+        <div style="font-size:11px;font-weight:800;color:#7C3AED;letter-spacing:0.14em;margin-bottom:6px;">QUICK START</div>
+        <h2 style="font-size:20px;font-weight:800;color:#111827;margin:0 0 6px;font-family:'Noto Serif JP',serif;">急遽 対面録画開始</h2>
+        <p style="font-size:13px;color:#6b7280;line-height:1.65;margin:0 0 18px;">予約なしで対面相談が始まった時はこちら。録画停止後、自動で AI 議事録が作られて 顧客カードに保存されます。</p>
+
+        <label style="display:block;font-size:11.5px;font-weight:700;color:#374151;letter-spacing:0.04em;margin-bottom:6px;">お客様を選択</label>
+        <select id="fp-qi-client" style="width:100%;padding:11px 12px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:14px;font-family:inherit;margin-bottom:14px;background:#fff;">
+          <option value="">— 顧客を選んでください —</option>
+          <option value="__new__">＋ 新規お客様として記録 (後で顧客登録)</option>
+          <optgroup label="既存顧客 (${clients.length}名)">
+            ${clients.map(c => `<option value="${escapeHtml(c.id)}">${escapeHtml(c.name || '?')} 様</option>`).join('')}
+          </optgroup>
+        </select>
+
+        <div id="fp-qi-newname-row" style="display:none;margin-bottom:14px;">
+          <label style="display:block;font-size:11.5px;font-weight:700;color:#374151;letter-spacing:0.04em;margin-bottom:6px;">新規お客様のお名前 (議事録ラベル用)</label>
+          <input id="fp-qi-newname" type="text" placeholder="例: 山田 太郎" style="width:100%;padding:11px 12px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:14px;font-family:inherit;">
+        </div>
+
+        <div style="background:#FAF5FF;border:1px solid #E9D5FF;border-radius:8px;padding:12px 14px;margin-bottom:18px;font-size:11.5px;color:#5B21B6;line-height:1.7;">
+          <strong>準備するもの:</strong> PC のカメラ/マイク許可 (初回のみ)<br>
+          <strong>停止方法:</strong> 録画中インジケータの「■ 録画停止」ボタン
+        </div>
+
+        <div style="display:flex;gap:10px;">
+          <button id="fp-qi-start" style="flex:2;padding:14px;background:linear-gradient(135deg,#7C3AED,#5B21B6);color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit;letter-spacing:0.04em;" disabled>● 録画開始</button>
+          <button id="fp-qi-cancel" style="flex:1;padding:14px;background:#f3f4f6;color:#374151;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">キャンセル</button>
+        </div>
+      </div>`;
+    document.body.appendChild(ov);
+
+    const sel = ov.querySelector('#fp-qi-client');
+    const newRow = ov.querySelector('#fp-qi-newname-row');
+    const newInput = ov.querySelector('#fp-qi-newname');
+    const startBtn = ov.querySelector('#fp-qi-start');
+    sel.addEventListener('change', () => {
+      const v = sel.value;
+      newRow.style.display = v === '__new__' ? '' : 'none';
+      const valid = v && (v !== '__new__' || (newInput.value || '').trim().length > 0);
+      startBtn.disabled = !valid;
+    });
+    newInput.addEventListener('input', () => {
+      startBtn.disabled = !(sel.value === '__new__' && newInput.value.trim().length > 0);
+    });
+
+    ov.querySelector('#fp-qi-cancel').addEventListener('click', () => ov.remove());
+
+    startBtn.addEventListener('click', async () => {
+      const v = sel.value;
+      let clientName, clientId;
+      if (v === '__new__') {
+        clientName = (newInput.value || '').trim();
+        clientId = 'quick-' + Date.now();
+      } else {
+        const c = clients.find(x => x.id === v);
+        if (!c) return;
+        clientName = c.name || 'お客様';
+        clientId = c.id;
+      }
+      const inpersonTs = 'inperson-' + Date.now();
+      // bookings 風メタを書き込んで モーダル / カード から見えるように
+      try {
+        const existing = JSON.parse(localStorage.getItem('fp-quick-inperson-meta') || '[]');
+        existing.push({ ts: inpersonTs, clientId, clientName, startedAt: new Date().toISOString(), mode: 'inperson-quick' });
+        localStorage.setItem('fp-quick-inperson-meta', JSON.stringify(existing.slice(-50)));
+      } catch (_) {}
+      ov.remove();
+      // 録画開始 (既存パイプライン流用)
+      await startWebcamRecording(inpersonTs);
+    });
   }
 
   // Sheets が自動で日付型に変換してしまった ISO 文字列を JST の "YYYY-MM-DD / 帯+時間" に戻す
@@ -4192,6 +4387,16 @@ ${family} ${era}層は「教育費ピーク (子18歳) と退職金準備が重�
         <span style="font-size:18px;">${ic}</span>${label}
       </button>`;
     v.innerHTML = `
+      <!-- ★ 役割明示バナー: 「配信」 と 「ご無沙汰フォロー」 の混同防止 -->
+      <div style="background:linear-gradient(135deg,#EFF6FF,#F5F3FF);border:1px solid #BFDBFE;border-radius:12px;padding:18px 22px;margin-bottom:20px;">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+          <span style="background:#1D4ED8;color:#fff;font-size:10px;font-weight:800;letter-spacing:0.12em;padding:3px 9px;border-radius:4px;">配信タブ — BROADCAST</span>
+          <span style="font-size:12px;color:#64748B;">= テンプレで <strong style="color:#1D4ED8;">複数人に一斉送信</strong> (キャンペーン/お知らせ/季節企画)</span>
+        </div>
+        <div style="font-size:12px;color:#64748B;line-height:1.7;">
+          1対1で個別追客したい時は → <a href="#" onclick="document.querySelector('.tab[data-tab=&quot;dormantFollowup&quot;]')?.click();return false;" style="color:#7C2D12;font-weight:700;text-decoration:underline;">ご無沙汰フォロー</a> （最終接触から日数が経った客を順番に1人ずつ）
+        </div>
+      </div>
       <!-- サブタブ: 今日 / スケジュール / テンプレ / ログ — 一発目は「今日」 -->
       <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px;">
         ${tab('today', '📤', '今日 送る')}
@@ -6479,8 +6684,14 @@ ${family} ${era}層は「教育費ピーク (子18歳) と退職金準備が重�
         let d;
         try { d = await r.json(); } catch (_) { d = { ok: false, error: 'サーバーエラー (レスポンス形式異常)' }; }
         if (d.ok) { markSent(msg.id, msg.clientId); return true; }
-        const errMsg = d.error || (r.status === 429 ? 'LINE 送信数上限 (月間制限)' : r.status >= 500 ? 'サーバーエラー' : '送信失敗');
-        alert(`${msg.clientName}様への送信に失敗しました\n\n原因: ${errMsg}`); return false;
+        // ★ GAS が返す詳細 (hint / code / error) を そのまま表示
+        const lines = [`${msg.clientName}様への送信に失敗しました`, ''];
+        if (d.hint) lines.push(`原因: ${d.hint}`);
+        if (d.code) lines.push(`LINE API code: ${d.code}`);
+        if (d.error) lines.push(`詳細: ${String(d.error).slice(0, 200)}`);
+        if (!d.hint && !d.error) lines.push(`原因: ${r.status === 429 ? 'LINE 送信数上限 (月間制限)' : r.status >= 500 ? 'サーバーエラー' : 'HTTP ' + r.status}`);
+        alert(lines.join('\n'));
+        return false;
       } catch (e) {
         alert(`通信エラー: ${e.message}\n\nネットワーク接続を確認してください`); return false;
       }
