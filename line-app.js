@@ -1176,16 +1176,47 @@
           <input id="fp-qi-newname" type="text" placeholder="例: 山田 太郎" style="width:100%;padding:11px 12px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:14px;font-family:inherit;">
         </div>
 
-        <div style="background:#FAF5FF;border:1px solid #E9D5FF;border-radius:8px;padding:12px 14px;margin-bottom:18px;font-size:11.5px;color:#5B21B6;line-height:1.7;">
-          <strong>準備するもの:</strong> PC のカメラ/マイク許可 (初回のみ)<br>
-          <strong>停止方法:</strong> 録画中インジケータの「■ 録画停止」ボタン
+        <!-- ★ 録画モード選択 (カメラ/マイク 不要を選べる) -->
+        <label style="display:block;font-size:11.5px;font-weight:700;color:#374151;letter-spacing:0.04em;margin-bottom:8px;">録画モード</label>
+        <div id="fp-qi-mode-grid" style="display:grid;grid-template-columns:1fr;gap:8px;margin-bottom:16px;">
+          <label class="fp-qi-mode" data-mode="audio" style="display:flex;gap:12px;padding:14px 16px;border:1.5px solid #C19A3A;border-radius:10px;cursor:pointer;background:#FBF5E3;transition:border-color .12s,background .12s;">
+            <input type="radio" name="fp-qi-mode" value="audio" checked style="margin-top:3px;flex-shrink:0;">
+            <div style="flex:1;">
+              <div style="font-size:11px;font-weight:800;color:#9A5A18;letter-spacing:0.12em;margin-bottom:3px;">RECOMMENDED</div>
+              <div style="font-size:14px;font-weight:800;color:#1F2A3F;line-height:1.4;">🎤 マイクだけで録音</div>
+              <div style="font-size:11.5px;color:#6b7280;margin-top:3px;line-height:1.55;">カメラ不要。音声→AI議事録までフル自動。</div>
+            </div>
+          </label>
+          <label class="fp-qi-mode" data-mode="webcam" style="display:flex;gap:12px;padding:14px 16px;border:1.5px solid #E5E7EB;border-radius:10px;cursor:pointer;background:#fff;transition:border-color .12s,background .12s;">
+            <input type="radio" name="fp-qi-mode" value="webcam" style="margin-top:3px;flex-shrink:0;">
+            <div style="flex:1;">
+              <div style="font-size:11px;font-weight:800;color:#6B7280;letter-spacing:0.12em;margin-bottom:3px;">VIDEO</div>
+              <div style="font-size:14px;font-weight:800;color:#1F2A3F;line-height:1.4;">🎥 カメラ + マイクで録画</div>
+              <div style="font-size:11.5px;color:#6b7280;margin-top:3px;line-height:1.55;">表情も残す。 初回はブラウザの許可が必要。</div>
+            </div>
+          </label>
+          <label class="fp-qi-mode" data-mode="memo" style="display:flex;gap:12px;padding:14px 16px;border:1.5px solid #E5E7EB;border-radius:10px;cursor:pointer;background:#fff;transition:border-color .12s,background .12s;">
+            <input type="radio" name="fp-qi-mode" value="memo" style="margin-top:3px;flex-shrink:0;">
+            <div style="flex:1;">
+              <div style="font-size:11px;font-weight:800;color:#6B7280;letter-spacing:0.12em;margin-bottom:3px;">TEXT ONLY</div>
+              <div style="font-size:14px;font-weight:800;color:#1F2A3F;line-height:1.4;">📝 録音せず メモだけ書く</div>
+              <div style="font-size:11.5px;color:#6b7280;margin-top:3px;line-height:1.55;">手入力で議事録を残す。 自動生成はなし。</div>
+            </div>
+          </label>
         </div>
 
         <div style="display:flex;gap:10px;">
-          <button id="fp-qi-start" style="flex:2;padding:14px;background:linear-gradient(135deg,#7C3AED,#5B21B6);color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit;letter-spacing:0.04em;" disabled>● 録画開始</button>
-          <button id="fp-qi-cancel" style="flex:1;padding:14px;background:#f3f4f6;color:#374151;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">キャンセル</button>
+          <button id="fp-qi-start" class="btn-cta-primary" style="flex:2;justify-content:center;" disabled>
+            <span>選んだモードで開始</span>
+            <span class="cta-arrow">→</span>
+          </button>
+          <button id="fp-qi-cancel" class="btn-cta-ghost">キャンセル</button>
         </div>
-      </div>`;
+      </div>
+      <style>
+        .fp-qi-mode:has(input:checked) { border-color: #C19A3A !important; background: #FBF5E3 !important; }
+        .fp-qi-mode:hover { border-color: #C19A3A; }
+      </style>`;
     document.body.appendChild(ov);
 
     const sel = ov.querySelector('#fp-qi-client');
@@ -1216,16 +1247,18 @@
         clientName = c.name || 'お客様';
         clientId = c.id;
       }
+      const mode = ov.querySelector('input[name="fp-qi-mode"]:checked')?.value || 'audio';
       const inpersonTs = 'inperson-' + Date.now();
-      // bookings 風メタを書き込んで モーダル / カード から見えるように
       try {
         const existing = JSON.parse(localStorage.getItem('fp-quick-inperson-meta') || '[]');
-        existing.push({ ts: inpersonTs, clientId, clientName, startedAt: new Date().toISOString(), mode: 'inperson-quick' });
+        existing.push({ ts: inpersonTs, clientId, clientName, startedAt: new Date().toISOString(), mode: 'inperson-' + mode });
         localStorage.setItem('fp-quick-inperson-meta', JSON.stringify(existing.slice(-50)));
       } catch (_) {}
       ov.remove();
-      // 録画開始 (既存パイプライン流用)
-      await startWebcamRecording(inpersonTs);
+      // モード分岐
+      if (mode === 'audio')       await startAudioOnlyRecording(inpersonTs);
+      else if (mode === 'webcam') await startWebcamRecording(inpersonTs);
+      else                        await openMemoOnlyForQuick(inpersonTs, clientId, clientName);
     });
   }
 
@@ -2289,52 +2322,103 @@
         audio: { echoCancellation: true, noiseSuppression: true, sampleRate: 44100 },
       });
     } catch (e) {
-      // ★ オーナーfb 2026-06-22: 単純な alert は不親切 → 解決手順つきモーダルに置換
+      // ★ オーナーfb 2026-06-22 (roundG): カメラ/マイク 失敗時に 進める fallback を 3 つ提示
+      //   1) マイクのみ録音 (音声 → AI議事録 まで同じパイプライン)
+      //   2) メモのみ (録画なしで メモモーダル 開く)
+      //   3) 設定見直してリロード
       const errName = e?.name || '';
       const isPermission = /NotAllowed|Permission/i.test(errName);
       const isNoDevice = /NotFound|DevicesNotFound/i.test(errName);
       const isInUse = /NotReadable|InUse|TrackStart/i.test(errName);
       const ov = document.createElement('div');
-      ov.style.cssText = 'position:fixed;inset:0;background:rgba(15,23,42,0.78);z-index:2147483647;display:flex;align-items:center;justify-content:center;font-family:"Hiragino Sans",sans-serif;';
+      ov.style.cssText = 'position:fixed;inset:0;background:rgba(15,23,42,0.78);z-index:2147483647;display:flex;align-items:center;justify-content:center;font-family:"Hiragino Sans",sans-serif;overflow-y:auto;padding:24px 0;';
       const heading = isPermission ? 'カメラ / マイク のアクセス が ブロックされています'
         : isNoDevice ? 'カメラ / マイク が 見つかりません'
         : isInUse ? 'カメラ / マイク が 他のアプリ で 使用中 です'
         : 'カメラ起動 に 失敗しました';
-      const steps = isPermission ? [
-        '画面 上部 (アドレスバー の 左) の <strong>🎥 / 🎤 アイコン</strong> をクリック',
-        '「常に許可」 を 選択',
-        'ページを <strong>リロード</strong> して もう一度 「急遽 対面録画」 を押す',
-      ] : isNoDevice ? [
-        'PC に カメラ・マイク が 内蔵 されているか 確認',
-        '外付け の 場合は USB が 刺さっているか 確認',
-        'Mac の 場合: <strong>システム設定 → プライバシーとセキュリティ → カメラ/マイク</strong> で ブラウザ が ON か 確認',
-      ] : isInUse ? [
-        'Zoom / Google Meet / Teams など 他の ビデオ会議アプリ を <strong>完全終了</strong>',
-        '別タブで カメラ を使う 別アプリ も 閉じる',
-        'もう一度 「急遽 対面録画」 を押す',
-      ] : [
-        'ブラウザ を リロード',
-        'それでも 直らない 場合 は サポート (support@skeleton-inc.jp) まで',
-      ];
       ov.innerHTML = `
-        <div style="background:#fff;border-radius:14px;max-width:460px;width:92%;padding:28px 32px;box-shadow:0 28px 80px rgba(0,0,0,0.4);">
-          <div style="display:inline-flex;align-items:center;gap:8px;background:#FEE2E2;color:#B91C1C;font-size:11px;font-weight:800;padding:5px 12px;border-radius:99px;letter-spacing:0.1em;margin-bottom:14px;">⚠ RECORDING ERROR</div>
+        <div style="background:#fff;border-radius:14px;max-width:520px;width:92%;padding:28px 32px;box-shadow:0 28px 80px rgba(0,0,0,0.4);">
+          <div style="display:inline-flex;align-items:center;gap:8px;background:#FEF3C7;color:#92400E;font-size:11px;font-weight:800;padding:5px 12px;border-radius:99px;letter-spacing:0.1em;margin-bottom:14px;">⚠ 録画準備 に 問題</div>
           <h2 style="font-family:'Noto Serif JP',serif;font-size:19px;font-weight:700;color:#111827;margin:0 0 8px;line-height:1.45;">${heading}</h2>
-          <p style="font-size:12.5px;color:#6b7280;line-height:1.7;margin:0 0 16px;">対面録画には <strong style="color:#111827;">カメラ + マイク</strong> へのアクセス許可 が 必要です。 下の手順で 解決してください。</p>
-          <ol style="margin:0 0 18px;padding-left:22px;font-size:13px;color:#1f2a3f;line-height:1.85;">
-            ${steps.map(s => `<li style="margin-bottom:6px;">${s}</li>`).join('')}
-          </ol>
-          <div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:8px;padding:10px 14px;margin-bottom:18px;font-size:11px;color:#64748B;font-family:'JetBrains Mono',monospace;line-height:1.6;">技術詳細: ${escapeHtml(String(errName || e?.message || e).slice(0, 200))}</div>
-          <div style="display:flex;gap:10px;">
-            <button class="btn-cta-primary" onclick="location.reload()" style="flex:1;">
-              <span>ページをリロード</span>
-              <span class="cta-arrow">↻</span>
-            </button>
-            <button class="btn-cta-ghost" id="fp-rec-err-close">閉じる</button>
+          <p style="font-size:13px;color:#6b7280;line-height:1.75;margin:0 0 18px;">大丈夫です。 <strong style="color:#111827;">下のどれかを選んで そのまま 面談に進めます</strong>。 設定の修正は あとで OK。</p>
+
+          <!-- Option 1: マイクだけで録音 (大本命) -->
+          <button id="fp-rec-fallback-audio" style="display:block;width:100%;text-align:left;background:linear-gradient(135deg,#C19A3A,#9A5A18);color:#fff;border:none;border-radius:11px;padding:18px 22px;margin-bottom:10px;cursor:pointer;font-family:inherit;transition:transform .15s,box-shadow .15s;box-shadow:0 6px 18px rgba(193,154,58,0.3);">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:14px;">
+              <div>
+                <div style="font-size:11px;font-weight:800;letter-spacing:0.14em;opacity:0.85;margin-bottom:4px;">RECOMMENDED</div>
+                <div style="font-size:15.5px;font-weight:800;letter-spacing:0.03em;line-height:1.4;">🎤 マイクだけで 録音する</div>
+                <div style="font-size:11.5px;opacity:0.9;margin-top:4px;line-height:1.55;">カメラ無しで OK。 音声から AI議事録 まで 同じ流れで 作れます。</div>
+              </div>
+              <span style="font-size:22px;flex-shrink:0;">→</span>
+            </div>
+          </button>
+
+          <!-- Option 2: メモのみ -->
+          <button id="fp-rec-fallback-memo" style="display:block;width:100%;text-align:left;background:#fff;color:#1F2A3F;border:1.5px solid #E8E2D4;border-radius:11px;padding:16px 22px;margin-bottom:10px;cursor:pointer;font-family:inherit;transition:background .12s,border-color .12s;">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:14px;">
+              <div>
+                <div style="font-size:11px;font-weight:800;color:#9A5A18;letter-spacing:0.14em;margin-bottom:4px;">手書きメモ</div>
+                <div style="font-size:14px;font-weight:700;letter-spacing:0.03em;line-height:1.4;">📝 録音せず メモだけ 書く</div>
+                <div style="font-size:11.5px;color:#6b7280;margin-top:4px;line-height:1.55;">手入力で 議事録を 残す。 録音 / 議事録自動生成 は なし。</div>
+              </div>
+              <span style="font-size:18px;color:#9A5A18;flex-shrink:0;">→</span>
+            </div>
+          </button>
+
+          <!-- Option 3: 設定見直す (技術系) -->
+          <details style="margin-top:14px;background:#F8FAFC;border:1px solid #E2E8F0;border-radius:8px;padding:0;">
+            <summary style="cursor:pointer;padding:12px 16px;font-size:12.5px;font-weight:700;color:#475569;list-style:none;display:flex;align-items:center;justify-content:space-between;">
+              <span>⚙ カメラ/マイク を 設定して 録画 する (技術詳細)</span>
+              <span style="font-size:14px;">▾</span>
+            </summary>
+            <div style="padding:0 16px 14px;font-size:12.5px;color:#475569;line-height:1.85;">
+              <ol style="margin:0;padding-left:22px;">
+                ${(isPermission ? [
+                  '画面上部 アドレスバー左の <strong>🎥/🎤 アイコン</strong> をクリック',
+                  '「常に許可」を選択 → ページをリロード',
+                ] : isNoDevice ? [
+                  'PC に カメラ・マイク が 内蔵 / USB 接続されているか 確認',
+                  'Mac: <strong>システム設定 → プライバシーとセキュリティ → カメラ/マイク</strong> で ブラウザ ON',
+                ] : isInUse ? [
+                  'Zoom / Meet / Teams 等 他のビデオ会議アプリ を 完全終了',
+                  '別タブで カメラ を使う アプリ も 閉じる',
+                ] : [
+                  'ブラウザをリロード → 再試行',
+                ]).map(s => `<li style="margin-bottom:4px;">${s}</li>`).join('')}
+              </ol>
+              <button onclick="location.reload()" class="btn-mini-action" style="margin-top:12px;">↻ ページをリロード</button>
+              <div style="margin-top:12px;font-size:10.5px;color:#94A3B8;font-family:'JetBrains Mono',monospace;line-height:1.5;">技術: ${escapeHtml(String(errName || e?.message || e).slice(0, 160))}</div>
+            </div>
+          </details>
+
+          <div style="display:flex;justify-content:flex-end;margin-top:14px;">
+            <button class="btn-cta-ghost" id="fp-rec-err-close">あとにする</button>
           </div>
         </div>`;
       document.body.appendChild(ov);
-      document.getElementById('fp-rec-err-close').addEventListener('click', () => ov.remove());
+
+      const closeOv = () => ov.remove();
+      document.getElementById('fp-rec-err-close').addEventListener('click', closeOv);
+
+      // Option 1: マイクのみで録音
+      document.getElementById('fp-rec-fallback-audio').addEventListener('click', async () => {
+        closeOv();
+        await startAudioOnlyRecording(bookingTs);
+      });
+
+      // Option 2: メモのみ → 既存 memo モーダル を開く
+      document.getElementById('fp-rec-fallback-memo').addEventListener('click', () => {
+        closeOv();
+        if (typeof openMemoModal === 'function') {
+          openMemoModal(bookingTs);
+        } else {
+          // 既存 data-open-memo ボタン を 探して click
+          const memoBtn = document.querySelector(`[data-open-memo="${bookingTs}"]`);
+          if (memoBtn) memoBtn.click();
+          else alert('メモ機能を 起動できませんでした。 顧客カード → 議事録 から 手入力できます。');
+        }
+      });
       return;
     }
     // 録画プレビュー (小さく右下に表示)
@@ -2391,6 +2475,138 @@
     // GAS に録画開始を通知
     try { await fetch(CLOUD_RUN_BASE + '/api/recording/start?ts=' + encodeURIComponent(bookingTs), { method: 'POST' }); } catch (_) {}
     // ★ 同じく stopScreenRecording ボタン = 停止
+    await fetchLiveData();
+    renderLeadHubInner();
+  }
+
+  // ★ 2026-06-22 roundG: 録音せずメモだけ書く (急遽録画モーダルの 3rd option)
+  function openMemoOnlyForQuick(inpersonTs, clientId, clientName) {
+    const ov = document.createElement('div');
+    ov.style.cssText = 'position:fixed;inset:0;background:rgba(15,23,42,0.78);z-index:2147483647;display:flex;align-items:center;justify-content:center;font-family:"Hiragino Sans",sans-serif;padding:24px;';
+    ov.innerHTML = `
+      <div style="background:#fff;border-radius:14px;max-width:560px;width:100%;padding:28px 32px;box-shadow:0 28px 80px rgba(0,0,0,0.4);">
+        <div style="display:inline-flex;align-items:center;gap:8px;background:#FBF5E3;color:#9A5A18;font-size:11px;font-weight:800;padding:5px 12px;border-radius:99px;letter-spacing:0.12em;margin-bottom:14px;">📝 メモ ONLY</div>
+        <h2 style="font-family:'Noto Serif JP',serif;font-size:19px;font-weight:700;color:#111827;margin:0 0 6px;">${escapeHtml(clientName)} 様 / 面談メモ</h2>
+        <p style="font-size:12.5px;color:#6b7280;line-height:1.7;margin:0 0 14px;">面談中・面談後に メモを 書いてください。 保存すると 顧客カードに 残ります。</p>
+        <textarea id="fp-memo-only-text" rows="12" placeholder="例:\n相談テーマ: 老後資金 / NISA\n論点: 月3万 積立 / 配偶者 控除\n次のアクション: 来月 候補日3つ 送る" style="width:100%;padding:14px 16px;font-size:13.5px;font-family:'Hiragino Sans',sans-serif;line-height:1.75;border:1.5px solid #E5E7EB;border-radius:8px;resize:vertical;box-sizing:border-box;"></textarea>
+        <div style="display:flex;gap:10px;margin-top:18px;">
+          <button class="btn-cta-primary" id="fp-memo-only-save" style="flex:2;justify-content:center;"><span>メモを 保存</span><span class="cta-arrow">✓</span></button>
+          <button class="btn-cta-ghost" id="fp-memo-only-cancel">キャンセル</button>
+        </div>
+      </div>`;
+    document.body.appendChild(ov);
+
+    document.getElementById('fp-memo-only-cancel').addEventListener('click', () => ov.remove());
+    document.getElementById('fp-memo-only-save').addEventListener('click', () => {
+      const text = document.getElementById('fp-memo-only-text').value.trim();
+      if (!text) { alert('メモが空です。 内容を 書いてから 保存してください。'); return; }
+      // localStorage に メモとして保存 (既存のキー命名規則に揃える)
+      const tasksKey = 'fp-tasks-' + inpersonTs;
+      try {
+        const existing = JSON.parse(localStorage.getItem(tasksKey) || '[]');
+        existing.push({ ts: new Date().toISOString(), text: text, kind: 'memo-only', clientId, clientName });
+        localStorage.setItem(tasksKey, JSON.stringify(existing));
+      } catch (_) {}
+      // 面談履歴 にも 反映されるよう meta 更新
+      try {
+        const meta = JSON.parse(localStorage.getItem('fp-quick-inperson-meta') || '[]');
+        const idx = meta.findIndex(m => m.ts === inpersonTs);
+        if (idx >= 0) { meta[idx].memo = text.slice(0, 200); localStorage.setItem('fp-quick-inperson-meta', JSON.stringify(meta)); }
+      } catch (_) {}
+      ov.remove();
+      const toast = document.createElement('div');
+      toast.style.cssText = 'position:fixed;top:24px;left:50%;transform:translateX(-50%);background:#065F46;color:#fff;padding:14px 28px;border-radius:99px;font-weight:800;font-size:13px;z-index:2147483647;box-shadow:0 12px 30px rgba(0,0,0,0.3);';
+      toast.textContent = '✓ メモを 保存しました';
+      document.body.appendChild(toast);
+      setTimeout(() => toast.remove(), 2800);
+      if (typeof renderMeetingHistory === 'function') renderMeetingHistory();
+    });
+  }
+
+  // ★ 2026-06-22 roundG: マイクのみ録音 fallback (カメラ NotFound / 不要 時)
+  //   音声 → 同じパイプライン (upload → AI議事録)
+  async function startAudioOnlyRecording(bookingTs) {
+    const R = window._fpRecorder;
+    let stream;
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({
+        audio: { echoCancellation: true, noiseSuppression: true, sampleRate: 44100 },
+      });
+    } catch (e) {
+      alert('マイク も アクセス不可 です。\n\nMac の場合: システム設定 → プライバシーとセキュリティ → マイク で ブラウザ を ON にしてください。\n\n技術: ' + (e?.name || e?.message || e));
+      return;
+    }
+
+    // 録音中インジケータ (右下、 audio-only 用)
+    let indicator = document.getElementById('fp-audio-rec-indicator');
+    if (!indicator) {
+      indicator = document.createElement('div');
+      indicator.id = 'fp-audio-rec-indicator';
+      indicator.style.cssText = 'position:fixed;bottom:80px;right:20px;background:#fff;border:3px solid #DC2626;border-radius:99px;padding:14px 22px;z-index:9990;box-shadow:0 8px 24px rgba(0,0,0,0.25);font-family:"Hiragino Sans",sans-serif;display:flex;align-items:center;gap:12px;cursor:pointer;';
+      indicator.innerHTML = `
+        <span style="width:12px;height:12px;background:#DC2626;border-radius:50%;animation:fp-audio-pulse 1.2s ease-in-out infinite;"></span>
+        <span style="font-weight:800;color:#1F2A3F;font-size:13px;">🎤 マイク 録音中…</span>
+        <span id="fp-audio-rec-timer" style="font-family:'Inter',monospace;font-weight:700;color:#9A5A18;font-size:12px;">00:00</span>
+        <span style="font-size:10.5px;color:#6B7280;border-left:1px solid #E5E7EB;padding-left:10px;margin-left:2px;">クリックで 停止</span>
+        <style>@keyframes fp-audio-pulse { 0%,100%{opacity:1;transform:scale(1);} 50%{opacity:.5;transform:scale(1.15);} }</style>`;
+      document.body.appendChild(indicator);
+    }
+
+    const startedAt = Date.now();
+    const timerEl = document.getElementById('fp-audio-rec-timer');
+    const timerInterval = setInterval(() => {
+      if (!timerEl) return;
+      const s = Math.floor((Date.now() - startedAt) / 1000);
+      const mm = String(Math.floor(s / 60)).padStart(2, '0');
+      const ss = String(s % 60).padStart(2, '0');
+      timerEl.textContent = `${mm}:${ss}`;
+    }, 1000);
+
+    const chunks = [];
+    const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus') ? 'audio/webm;codecs=opus'
+      : MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm' : 'audio/mp4';
+    const mr = new MediaRecorder(stream, { mimeType });
+    mr.ondataavailable = e => { if (e.data && e.data.size > 0) chunks.push(e.data); };
+    mr.onstop = async () => {
+      stream.getTracks().forEach(t => t.stop());
+      clearInterval(timerInterval);
+      if (indicator) indicator.remove();
+      const blob = new Blob(chunks, { type: mimeType });
+      R.blob = blob;
+      R.bookingTs = bookingTs;
+      R.mediaRecorder = null;
+      try { await fetch(CLOUD_RUN_BASE + '/api/recording/stop?ts=' + encodeURIComponent(bookingTs), { method: 'POST' }); } catch (_) {}
+      try {
+        const ext = mimeType.includes('mp4') ? 'm4a' : 'webm';
+        const fname = 'audio-only-' + Date.now() + '.' + ext;
+        const arrayBuf = await blob.arrayBuffer();
+        const bytes = new Uint8Array(arrayBuf);
+        let b64 = '';
+        const chunkSize = 8192;
+        for (let i = 0; i < bytes.length; i += chunkSize) {
+          b64 += btoa(String.fromCharCode(...bytes.subarray(i, i + chunkSize)));
+        }
+        const upRes = await fetch(CLOUD_RUN_BASE + '/api/upload-recording', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ts: bookingTs, filename: fname, mimeType, base64: b64 }),
+        });
+        console.log('[audio-only] upload result:', await upRes.json());
+      } catch (upErr) { console.warn('[audio-only] upload fail:', upErr); }
+      await fetchLiveData();
+      renderLeadHubInner();
+    };
+    indicator.addEventListener('click', () => {
+      if (mr.state !== 'inactive') {
+        if (confirm('録音を 停止しますか?\n\n停止後、 音声から 自動で AI議事録 が生成されます。')) mr.stop();
+      }
+    });
+    mr.start(3000);
+    R.mediaRecorder = mr;
+    R.bookingTs = bookingTs;
+    R.blob = null;
+    R.mode = 'audio-only';
+    try { await fetch(CLOUD_RUN_BASE + '/api/recording/start?ts=' + encodeURIComponent(bookingTs), { method: 'POST' }); } catch (_) {}
     await fetchLiveData();
     renderLeadHubInner();
   }
