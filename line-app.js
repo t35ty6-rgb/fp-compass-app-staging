@@ -7616,9 +7616,13 @@ ${family} ${era}層は「教育費ピーク (子18歳) と退職金準備が重�
     const root = document.getElementById('mh-root');
     if (!root) return;
 
-    // データ取得 — bookings 完了分 + 急遽対面 (localStorage)
-    fetchLiveData().then(() => {
-      const live = window.LineAppLiveData || liveData || {};
+    // ★ 同期 render: liveData が無くても empty/quick だけで描く。 取得は背後で並行
+    const live = window.LineAppLiveData || liveData || {};
+    if (!live.bookings) {
+      // 背後で fetch → 完了後に再 render
+      try { fetchLiveData().then(() => renderMeetingHistory()).catch(() => {}); } catch (_) {}
+    }
+    (function () {
       const bookings = live.bookings || [];
       const aiResults = live.ai_results || [];
       const now = new Date();
@@ -7836,7 +7840,7 @@ ${family} ${era}層は「教育費ピーク (子18歳) と退職金準備が重�
           }
         });
       });
-    });
+    })();
   }
 
   // ============================
