@@ -1007,6 +1007,12 @@
               </button>
             </div>
           </div>
+          <!-- ★ 2026-06-22 roundI: タグセグメントfilter (オーナーが作ったタグで絞り込み) -->
+          <div id="client-tag-segment-bar" style="display:none;align-items:center;gap:8px;flex-wrap:wrap;padding:12px 14px;background:#FBF5E3;border:1px solid #E8D9A8;border-radius:10px;margin-bottom:12px;">
+            <span style="font-size:11px;font-weight:800;color:#9A5A18;letter-spacing:0.12em;margin-right:4px;">🏷 タグで絞込</span>
+            <div id="client-tag-chips" style="display:flex;gap:6px;flex-wrap:wrap;flex:1;"></div>
+            <button id="client-tag-clear" class="btn-mini-action" style="display:none;font-size:10.5px;">クリア</button>
+          </div>
           <div class="client-toolbar">
             <input type="search" id="client-search" placeholder="名前 / 職業 / かな で検索">
             <select id="status-filter">
@@ -1199,7 +1205,7 @@ window.fpReadyAfterAuth = function() {
     });
   })();
 
-  const ver = "20260622K-quick-zoom";
+  const ver = "20260622L-modal-cta-tagseg";
   const scripts = [
     "life-events.js?v=" + ver,
     "recommender.js?v=" + ver,
@@ -1538,7 +1544,7 @@ window.fpReadyAfterAuth = function() {
 <script>
 (function(){
   // 最新の ver を 1 箇所に集約 (fpReadyAfterAuth 側と一致させる必要あり)
-  const FP_VERSION = "20260622K-quick-zoom";
+  const FP_VERSION = "20260622L-modal-cta-tagseg";
   const loadTime = new Date();
   const hhmm = String(loadTime.getHours()).padStart(2,'0') + ':' + String(loadTime.getMinutes()).padStart(2,'0');
   const dateLabel = (FP_VERSION.match(/^(\d{4})(\d{2})(\d{2})/) || []).slice(1).join('/').replace(/^(\d{4})\//,'$1/').replace(/\/(\d{2})\/(\d{2})$/,'/$1/$2') || FP_VERSION;

@@ -1093,10 +1093,20 @@
     mergeLineActivity();
     // ★ 全 client に 議事録 自動タグ を 一括 反映 (顧客一覧でも 出るように)
     try { autoTagAllClients(); } catch (e) { console.warn('autoTagAllClients:', e); }
+    // ★ 2026-06-22 roundI: タグ filter UI を 動的描画
+    try { renderClientTagSegmentBar(); } catch (e) { console.warn('tagSegmentBar:', e); }
     const q = state.search.trim().toLowerCase();
     let list = clients.slice();
     if (state.statusFilter !== 'all') {
       list = list.filter(c => c.status === state.statusFilter);
+    }
+    // ★ タグ filter (state.tagFilter は タグID配列、 OR マッチ = どれか1つでもタグついてる)
+    state.tagFilter = state.tagFilter || [];
+    if (state.tagFilter.length > 0) {
+      list = list.filter(c => {
+        const myTags = (typeof getClientTags === 'function') ? getClientTags(c.id) : [];
+        return state.tagFilter.some(t => myTags.includes(t));
+      });
     }
     if (q) {
       list = list.filter(c =>
@@ -3019,7 +3029,7 @@
                 <textarea id="cd-line-input" placeholder="メッセージを入力... (Cmd+Enter で送信)"></textarea>
                 <div class="cd-line-composer-foot">
                   <span class="cd-line-composer-meta">${c.lineFriendId ? '✓ LINE連携済' : '⚠ LINE friend ID 未登録'}</span>
-                  <button class="cd-line-ai-quick" id="cd-line-ai-quick" data-cid="${escapeHtml(c.id)}" title="AI が直近の履歴から返信案を生成 → textarea に挿入 → 編集して送信" style="background:linear-gradient(135deg,#6366F1,#4338CA);color:#fff;border:none;padding:8px 14px;border-radius:6px;font-weight:800;cursor:pointer;font-size:12.5px;font-family:inherit;letter-spacing:0.04em;margin-right:8px;">✨ AI で返信案</button>
+                  <button class="cd-line-ai-quick btn-mini-action" id="cd-line-ai-quick" data-cid="${escapeHtml(c.id)}" title="AI が直近の履歴から返信案を生成 → textarea に挿入 → 編集して送信" style="margin-right:8px;"><span class="icon">✨</span>AI で返信案</button>
                   <button class="cd-line-send-btn" id="cd-line-send"${c.lineFriendId ? '' : ' disabled'}>
                     <i data-lucide="send"></i><span>送信</span>
                   </button>
@@ -8119,6 +8129,46 @@ ${client.name}さん、ありがとうございます。
       console.log('[autoTagAll] updated', changed, 'clients');
     }
   }
+  // ★ 2026-06-22 roundI: 顧客台帳タグセグメント filter UI
+  function renderClientTagSegmentBar() {
+    const bar = document.getElementById('client-tag-segment-bar');
+    const chipsEl = document.getElementById('client-tag-chips');
+    const clearBtn = document.getElementById('client-tag-clear');
+    if (!bar || !chipsEl) return;
+    const master = (typeof getTagsMaster === 'function') ? getTagsMaster() : [];
+    if (!master.length) { bar.style.display = 'none'; return; }
+    // 各タグの該当顧客数を計算
+    const tagCount = {};
+    master.forEach(t => { tagCount[t.id] = 0; });
+    (clients || []).forEach(c => {
+      const ids = (typeof getClientTags === 'function') ? getClientTags(c.id) : [];
+      ids.forEach(id => { if (tagCount.hasOwnProperty(id)) tagCount[id]++; });
+    });
+    // 0件タグは隠す
+    const visible = master.filter(t => tagCount[t.id] > 0);
+    if (!visible.length) { bar.style.display = 'none'; return; }
+    bar.style.display = 'flex';
+    state.tagFilter = state.tagFilter || [];
+    chipsEl.innerHTML = visible.map(t => {
+      const on = state.tagFilter.includes(t.id);
+      const bg = on ? (t.color || '#9A5A18') : '#fff';
+      const fg = on ? '#fff' : (t.color || '#1F2A3F');
+      const border = t.color || '#9A5A18';
+      return `<button data-client-tag-filter="${escapeHtml(t.id)}" style="background:${bg};color:${fg};border:1.5px solid ${border};padding:5px 12px;border-radius:99px;font-size:11.5px;font-weight:800;cursor:pointer;font-family:'Hiragino Sans',sans-serif;letter-spacing:0.02em;display:inline-flex;align-items:center;gap:5px;transition:all .12s;">${escapeHtml(t.label || t.id)}<span style="opacity:.75;font-weight:700;font-size:10.5px;">${tagCount[t.id]}</span></button>`;
+    }).join('');
+    clearBtn.style.display = state.tagFilter.length > 0 ? '' : 'none';
+    chipsEl.querySelectorAll('[data-client-tag-filter]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const tid = btn.dataset.clientTagFilter;
+        const idx = state.tagFilter.indexOf(tid);
+        if (idx >= 0) state.tagFilter.splice(idx, 1);
+        else state.tagFilter.push(tid);
+        renderClients();
+      });
+    });
+    clearBtn.onclick = () => { state.tagFilter = []; renderClients(); };
+  }
+
   function getTagsMaster() {
     try { return JSON.parse(localStorage.getItem('fp-tags-master') || '[]'); } catch (_) { return []; }
   }
