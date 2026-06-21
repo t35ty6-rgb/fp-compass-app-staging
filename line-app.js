@@ -800,8 +800,9 @@
         // hint 別にまとめる
         const groups = {};
         failDetails.forEach(d => {
-          // ★ code 400 + 一般エラーは「友だち未追加 or ブロック中」と読み替え
-          let key = d.hint || (d.code === 400 ? 'お客様が公式LINEを友だち未追加 or ブロック中' : (d.error || '理由不明'));
+          // ★ code 400 は LINE が「送信できない」一般エラー — 4つの可能性を併記
+          let key = d.hint
+            || (d.code === 400 ? 'LINE 配信エラー — 次のいずれか: ①友だち未追加/ブロック ②無効なuserId ③LINE OA のチャンネル違い ④月間配信上限到達 (LINE Official Account Manager で確認推奨)' : (d.error || '理由不明'));
           (groups[key] = groups[key] || []).push(d.name);
         });
         detailHtml = '<div style="background:#fff;border:1px solid #FCA5A5;border-radius:8px;padding:14px 18px;margin-top:8px;font-size:12.5px;color:#7F1D1D;line-height:1.65;">'
@@ -6706,7 +6707,7 @@ ${family} ${era}層は「教育費ピーク (子18歳) と退職金準備が重�
         // ★ GAS が返す詳細 (hint / code / error) を そのまま表示
         const lines = [`${msg.clientName}様への送信に失敗しました`, ''];
         // ★ code 400 + 一般エラーは hint がないので「友だち未追加 or ブロック中」と読み替え
-        const inferred = d.hint || (d.code === 400 ? 'お客様が公式LINEを友だち未追加 or ブロック中の可能性' : '');
+        const inferred = d.hint || (d.code === 400 ? 'LINE 配信エラー — 次のいずれか: ①友だち未追加/ブロック ②無効なuserId ③LINE OA のチャンネル違い ④月間配信上限到達' : '');
         if (inferred) lines.push(`原因: ${inferred}`);
         if (d.code) lines.push(`LINE API code: ${d.code}`);
         if (d.error) lines.push(`詳細: ${String(d.error).slice(0, 200)}`);
