@@ -779,6 +779,7 @@
       const result = document.getElementById('fp-dormant-result');
       btn.disabled = true; btn.textContent = '送信中...';
       let ok = 0, fail = 0;
+      const failDetails = []; // ★ 失敗ごとに hint/code/error を捕捉
       for (const s of selected) {
         const text = tpl.replace(/\{name\}/g, s.name);
         try {
@@ -787,12 +788,30 @@
             body: JSON.stringify({ userId: s.uid, text }),
           });
           const d = await r.json();
-          if (d.ok) ok++; else fail++;
-        } catch (_) { fail++; }
+          if (d.ok) { ok++; }
+          else { fail++; failDetails.push({ name: s.name, code: d.code, hint: d.hint, error: d.error }); }
+        } catch (e) { fail++; failDetails.push({ name: s.name, error: e.message || String(e) }); }
         // レート制限対策 200ms 待つ
         await new Promise(res => setTimeout(res, 200));
       }
-      result.innerHTML = `<div style="background:${fail===0?'#F0FDF4':'#FEF3C7'};border:1px solid ${fail===0?'#10B981':'#F59E0B'};color:${fail===0?'#065F46':'#92400E'};padding:14px 18px;border-radius:8px;font-size:13px;font-weight:700;">✓ 送信完了: 成功 ${ok}名 / 失敗 ${fail}名</div>`;
+      // ★ 結果バナー: 失敗時は理由ごとにグループ化して表示
+      let detailHtml = '';
+      if (failDetails.length > 0) {
+        // hint 別にまとめる
+        const groups = {};
+        failDetails.forEach(d => {
+          // ★ code 400 + 一般エラーは「友だち未追加 or ブロック中」と読み替え
+          let key = d.hint || (d.code === 400 ? 'お客様が公式LINEを友だち未追加 or ブロック中' : (d.error || '理由不明'));
+          (groups[key] = groups[key] || []).push(d.name);
+        });
+        detailHtml = '<div style="background:#fff;border:1px solid #FCA5A5;border-radius:8px;padding:14px 18px;margin-top:8px;font-size:12.5px;color:#7F1D1D;line-height:1.65;">'
+          + '<div style="font-weight:800;margin-bottom:6px;font-size:13px;">失敗の内訳:</div>'
+          + Object.keys(groups).map(reason => `<div style="margin-bottom:4px;"><strong>・${escapeHtml(reason)}</strong>: ${groups[reason].join(', ')}</div>`).join('')
+          + '</div>';
+      }
+      result.innerHTML = `<div style="background:${fail===0?'#F0FDF4':'#FEF3C7'};border:1px solid ${fail===0?'#10B981':'#F59E0B'};color:${fail===0?'#065F46':'#92400E'};padding:14px 18px;border-radius:8px;font-size:13px;font-weight:700;">${fail===0?'✓':'⚠'} 送信完了: 成功 ${ok}名 / 失敗 ${fail}名</div>${detailHtml}`;
+      // ★ オーナーfb: 結果を見えるところまでスクロール (画面外で気付かないバグ防止)
+      try { result.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch (_) {}
       btn.disabled = false; btn.textContent = '✨ 選択した方に一斉送信';
     });
   }
@@ -6686,10 +6705,12 @@ ${family} ${era}層は「教育費ピーク (子18歳) と退職金準備が重�
         if (d.ok) { markSent(msg.id, msg.clientId); return true; }
         // ★ GAS が返す詳細 (hint / code / error) を そのまま表示
         const lines = [`${msg.clientName}様への送信に失敗しました`, ''];
-        if (d.hint) lines.push(`原因: ${d.hint}`);
+        // ★ code 400 + 一般エラーは hint がないので「友だち未追加 or ブロック中」と読み替え
+        const inferred = d.hint || (d.code === 400 ? 'お客様が公式LINEを友だち未追加 or ブロック中の可能性' : '');
+        if (inferred) lines.push(`原因: ${inferred}`);
         if (d.code) lines.push(`LINE API code: ${d.code}`);
         if (d.error) lines.push(`詳細: ${String(d.error).slice(0, 200)}`);
-        if (!d.hint && !d.error) lines.push(`原因: ${r.status === 429 ? 'LINE 送信数上限 (月間制限)' : r.status >= 500 ? 'サーバーエラー' : 'HTTP ' + r.status}`);
+        if (!inferred && !d.error) lines.push(`原因: ${r.status === 429 ? 'LINE 送信数上限 (月間制限)' : r.status >= 500 ? 'サーバーエラー' : 'HTTP ' + r.status}`);
         alert(lines.join('\n'));
         return false;
       } catch (e) {
