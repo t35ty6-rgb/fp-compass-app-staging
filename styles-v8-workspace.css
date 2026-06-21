@@ -183,8 +183,60 @@ body, table, .kpi-value, .num, .funnel-value, .task-count,
   border: 1px solid var(--hairline);
   border-radius: 8px;
   padding: 8px 10px;
-  margin: 0 0 18px;
+  margin: 0 0 12px;
   transition: border-color .12s, box-shadow .12s;
+}
+
+/* -------- Sidebar Quick Recording Button -------- */
+/* どこからでも 1クリックで対面録画開始できる action ボタン (nav tab ではない) */
+.sidebar-quick-rec {
+  display: flex; align-items: center; gap: 10px;
+  width: 100%;
+  background: linear-gradient(135deg, #7C3AED 0%, #5B21B6 100%);
+  color: #fff;
+  border: none;
+  border-radius: 9px;
+  padding: 11px 14px;
+  margin: 0 0 18px;
+  font-family: 'Hiragino Sans', 'Noto Sans JP', sans-serif;
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(124, 58, 237, 0.28);
+  transition: transform .12s, box-shadow .15s;
+}
+.sidebar-quick-rec:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 22px rgba(124, 58, 237, 0.42);
+}
+.sidebar-quick-rec:active {
+  transform: translateY(0);
+}
+.sidebar-quick-rec-dot {
+  width: 9px; height: 9px;
+  background: #FCA5A5;
+  border-radius: 50%;
+  flex-shrink: 0;
+  box-shadow: 0 0 0 2px rgba(252, 165, 165, 0.3);
+  animation: sidebar-quick-rec-pulse 2.5s ease-in-out infinite;
+}
+@keyframes sidebar-quick-rec-pulse {
+  0%, 100% { opacity: 1; box-shadow: 0 0 0 2px rgba(252, 165, 165, 0.3); }
+  50% { opacity: 0.7; box-shadow: 0 0 0 4px rgba(252, 165, 165, 0.5); }
+}
+.sidebar-quick-rec-label {
+  flex: 1;
+  text-align: left;
+}
+.sidebar-quick-rec-pill {
+  background: rgba(255, 255, 255, 0.18);
+  font-size: 9.5px;
+  font-weight: 800;
+  padding: 2px 7px;
+  border-radius: 4px;
+  letter-spacing: 0.06em;
+  flex-shrink: 0;
 }
 .sidebar-search:focus-within {
   border-color: var(--accent);

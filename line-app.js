@@ -778,9 +778,13 @@
       const btn = document.getElementById('fp-dormant-send');
       const result = document.getElementById('fp-dormant-result');
       btn.disabled = true; btn.textContent = '送信中...';
+      // ★ 全画面オーバーレイで操作ブロック (誤クリック / 中断 防止)
+      showSendingOverlay(`ご無沙汰フォロー 一斉送信中 (${selected.length}名)`, selected.length);
       let ok = 0, fail = 0;
       const failDetails = []; // ★ 失敗ごとに hint/code/error を捕捉
-      for (const s of selected) {
+      for (let i = 0; i < selected.length; i++) {
+        const s = selected[i];
+        updateSendingProgress(i, selected.length, s.name);
         const text = tpl.replace(/\{name\}/g, s.name);
         try {
           const r = await fetch(CLOUD_RUN_BASE + '/api/send-line', {
@@ -794,6 +798,8 @@
         // レート制限対策 200ms 待つ
         await new Promise(res => setTimeout(res, 200));
       }
+      updateSendingProgress(selected.length, selected.length, '');
+      closeSendingOverlay();
       // ★ 結果バナー: 失敗時は理由ごとにグループ化して表示
       let detailHtml = '';
       if (failDetails.length > 0) {
@@ -985,12 +991,10 @@
           <h2 style="font-family:'Noto Serif JP',serif;font-size:18px;margin:0;font-weight:600;color:#1f2a3f;">FP 作業フロー</h2>
         </div>
       </div>
-      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:14px;">
+      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-bottom:14px;">
         ${[
           { label: '候補日確定', desc: 'お客様の3候補から確定', value: pendingConfirm, unit: '名', target: '#section-confirm', accent: accents.urgent, active: pendingConfirm > 0, step: '01' },
           { label: 'Zoom 打ち合わせ予定', desc: '確定済 / 面談日待ち', value: upcomingZoomCount, unit: '件', target: '#section-recording', accent: accents.upcoming, active: upcomingZoomCount > 0, step: '02' },
-          { label: '面談中 (録画ON)', desc: '今まさに録画してる面談', value: recordingNow, unit: '件', target: '#section-recording', accent: accents.active, active: recordingNow > 0, step: '03' },
-          { label: 'フォロー対象', desc: '途中で止まったお客様', value: aftercare.length, unit: '名', target: '#section-aftercare', accent: accents.followup, active: aftercare.length > 0, step: '04' },
         ].map(c => `
           <a href="${c.target}" style="text-decoration:none;color:inherit;background:#fff;border:1px solid ${c.active ? c.accent.border + '55' : '#e8e2d4'};${c.active ? `border-top:2px solid ${c.accent.border};` : ''}border-radius:8px;padding:18px 18px 16px;display:flex;flex-direction:column;gap:4px;transition:all 0.15s;${c.active ? `box-shadow:0 1px 3px rgba(15,23,42,0.04),0 6px 20px ${c.accent.border}1f;` : 'box-shadow:0 1px 2px rgba(15,23,42,0.03);'}">
             <div style="display:flex;align-items:center;justify-content:space-between;">
@@ -1007,9 +1011,7 @@
       <div style="background:#fdfbf4;border:1px solid #e8d9a8;border-radius:8px;padding:14px 20px;margin-bottom:36px;font-size:11.5px;color:#5e4d1a;line-height:1.7;">
         <div style="font-size:10px;font-weight:700;color:#8b7d5d;letter-spacing:0.18em;text-transform:uppercase;margin-bottom:6px;">How it works</div>
         <strong style="color:#1f2a3f;font-weight:700;">01</strong> アンケート回答+候補日3つが届いたら確定 →
-        <strong style="color:#1f2a3f;font-weight:700;">02</strong> Zoom URLが発行され面談日待ち →
-        <strong style="color:#1f2a3f;font-weight:700;">03</strong> 面談当日「録画ONでZoom開始」で録画中に →
-        <strong style="color:#1f2a3f;font-weight:700;">04</strong> 途中で止まったお客様は別途リスト化
+        <strong style="color:#1f2a3f;font-weight:700;">02</strong> Zoom URLが発行され面談日待ち → 面談当日「録画ONでZoom開始」で録画開始 → 終了後 面談履歴タブに自動アーカイブ
       </div>
 
       <section class="board-section" id="section-confirm">
@@ -5758,49 +5760,34 @@ ${family} ${era}層は「教育費ピーク (子18歳) と退職金準備が重�
         </div>
       </details>
 
-      <!-- いま登録されてる予定 (折り畳み) -->
+      <!-- いま登録されてる予定 (デフォルト 折りたたみ — 開いた時に各予定もコンパクト表示) -->
       ${enabledSchedules > 0 ? `
-      <details class="fp-dist-fold" open>
+      <details class="fp-dist-fold">
         <summary>
           <span class="fp-dist-fold-icon">📋</span>
           <div>
             <strong>いま登録されてる予定 (${enabledSchedules}件)</strong>
-            <span>毎朝、 ここに登録された予定に従って 承認リストが作られます。</span>
+            <span>クリックで一覧表示 / 各行クリックで本文編集</span>
           </div>
           <span class="fp-dist-fold-chev">▾</span>
         </summary>
         <div class="fp-dist-fold-body">
-        <div class="fp-dist-running-grid">
+        <div class="fp-dist-sched-list">
           ${window.LINE_SCHEDULES.filter(s => s.enabled).map(s => {
             const seg = window.SEGMENTS.find(x => x.id === s.segment);
             const recipients = seg ? window.LineCRM.evaluateSegment(seg.id).length : (s.segment === 'auto-birthday' ? todayBirthdays.length : 0);
-            // ★ オーナーfb (v AN): 何が送られるか分かるよう 本文プレビューを 表示
             const tpl = (window.LINE_TEMPLATES || []).find(t => t.id === s.templateId);
             const bodyText = (s.body || (tpl && tpl.body) || '').replace(/\{\{name\}\}/g, 'お客様').replace(/\{name\}/g, 'お客様').replace(/\{\{fp_name\}\}/g, 'FP').replace(/\{fpName\}/g, 'FP').replace(/\{\{[^}]+\}\}/g, '…');
-            const previewText = bodyText.slice(0, 80).replace(/\n/g, ' / ');
+            const cadenceText = s.schedule || '';
             return `
-              <div class="fp-dist-run-card" data-schid-jump="${escapeHtml(s.id)}">
-                <div class="fp-dist-run-top">
-                  ${cadenceVisual(s.schedule)}
-                  <div class="fp-dist-run-main">
-                    <div class="fp-dist-run-name">${escapeHtml(s.name)}</div>
-                    <div class="fp-dist-run-meta">${seg ? seg.icon + ' ' + escapeHtml(seg.name) : '🎂 誕生日対象者'} <span class="fp-dist-run-recipients">${recipients}名</span></div>
-                    <div class="fp-dist-run-next">次回: <strong>${escapeHtml(s.nextSend || '—')}</strong></div>
-                  </div>
-                  <div class="fp-dist-run-toggle">●</div>
-                </div>
-                ${bodyText ? `
-                  <div class="fp-dist-run-preview">
-                    <div class="fp-dist-run-preview-label">📝 本文</div>
-                    <div class="fp-dist-run-preview-text">${escapeHtml(previewText)}${bodyText.length > 80 ? '…' : ''}</div>
-                    <button class="fp-dist-run-preview-btn" data-preview-schid="${escapeHtml(s.id)}">全文を見る・編集する →</button>
-                  </div>
-                ` : `
-                  <div class="fp-dist-run-preview fp-dist-run-preview-empty">
-                    ⚠ 本文が未設定です。 編集して本文を入れてください。
-                  </div>
-                `}
-              </div>
+              <button class="fp-dist-sched-row" data-preview-schid="${escapeHtml(s.id)}" title="クリックで本文編集">
+                <span class="fp-dist-sched-row-cadence">${escapeHtml(cadenceText.slice(0, 18) || '—')}</span>
+                <span class="fp-dist-sched-row-name">${escapeHtml(s.name)}</span>
+                <span class="fp-dist-sched-row-seg">${seg ? seg.icon : '🎂'}</span>
+                <span class="fp-dist-sched-row-count">${recipients}名</span>
+                <span class="fp-dist-sched-row-next">${escapeHtml((s.nextSend || '').slice(5))}</span>
+                <span class="fp-dist-sched-row-arrow">›</span>
+              </button>
             `;
           }).join('')}
         </div>
@@ -6043,6 +6030,25 @@ ${family} ${era}層は「教育費ピーク (子18歳) と退職金準備が重�
       .fp-dist-preset-edit:hover { border-color: #C19A3A; color: #C19A3A; }
 
       .fp-dist-running-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+      /* ★ コンパクト1行リスト: 折りたたみ展開時の予定一覧 */
+      .fp-dist-sched-list { display: flex; flex-direction: column; gap: 0; border: 1px solid #E8E2D4; border-radius: 8px; overflow: hidden; background: #fff; }
+      .fp-dist-sched-row {
+        display: grid;
+        grid-template-columns: 100px 1fr 24px 60px 60px 16px;
+        gap: 12px; align-items: center;
+        background: transparent; border: none; border-bottom: 1px solid #F0EBDF;
+        padding: 12px 16px; cursor: pointer;
+        font-family: 'Hiragino Sans', sans-serif;
+        text-align: left; transition: background .12s;
+      }
+      .fp-dist-sched-row:last-child { border-bottom: none; }
+      .fp-dist-sched-row:hover { background: #FDFBF4; }
+      .fp-dist-sched-row-cadence { font-size: 11px; color: #9A5A18; font-weight: 700; letter-spacing: 0.04em; font-family: 'Inter', sans-serif; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      .fp-dist-sched-row-name { font-size: 13px; color: #1F2A3F; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      .fp-dist-sched-row-seg { font-size: 14px; text-align: center; }
+      .fp-dist-sched-row-count { font-size: 11.5px; color: #6B7280; font-weight: 600; text-align: right; font-family: 'Inter', sans-serif; }
+      .fp-dist-sched-row-next { font-size: 10.5px; color: #94A3B8; font-weight: 600; text-align: right; font-family: 'Inter', sans-serif; white-space: nowrap; }
+      .fp-dist-sched-row-arrow { font-size: 16px; color: #C19A3A; text-align: center; }
       .fp-dist-run-card {
         background: #fff; border: 1px solid #E8E2D4;
         border-radius: 10px; padding: 14px 16px;
@@ -6665,11 +6671,17 @@ ${family} ${era}層は「教育費ピーク (子18歳) と退職金準備が重�
     if (bulkBtn) bulkBtn.addEventListener('click', async () => {
       if (!confirm(`${todayMessages.length}件 すべて 送信します。 よろしいですか?`)) return;
       bulkBtn.disabled = true; bulkBtn.textContent = '送信中...';
+      // ★ 全画面ブロック (誤クリック / 中断 防止)
+      showSendingOverlay(`今日 送る 一斉送信中 (${todayMessages.length}件)`, todayMessages.length);
       let ok = 0, ng = 0;
-      for (const m of todayMessages) {
+      for (let i = 0; i < todayMessages.length; i++) {
+        const m = todayMessages[i];
+        updateSendingProgress(i, todayMessages.length, m.clientName);
         const sent = await sendMsg(m); if (sent) ok++; else ng++;
         await new Promise(r => setTimeout(r, 200));
       }
+      updateSendingProgress(todayMessages.length, todayMessages.length, '');
+      closeSendingOverlay();
       toast(`✓ 一斉送信 完了: ${ok}件 / 失敗 ${ng}件`, 'sent');
       setTimeout(() => renderLineDashboard(), 1200);
     });
@@ -7609,6 +7621,39 @@ ${family} ${era}層は「教育費ピーク (子18歳) と退職金準備が重�
   }
 
   // ============================
+  // 送信中オーバーレイ (全クリック ブロック + 進捗表示)
+  // ★ オーナーfb 2026-06-22: 送信中 に 他ボタン 押せて 中断 / 取消 起きる バグ対策
+  // ============================
+  function showSendingOverlay(label, total) {
+    closeSendingOverlay(); // 念のため 既存 を 消す
+    const ov = document.createElement('div');
+    ov.id = 'fp-sending-overlay';
+    ov.style.cssText = 'position:fixed;inset:0;background:rgba(15,23,42,0.78);z-index:2147483646;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(3px);font-family:"Hiragino Sans","Noto Sans JP",sans-serif;';
+    ov.innerHTML = `
+      <div style="background:#fff;border-radius:14px;padding:32px 40px;max-width:440px;width:90%;box-shadow:0 32px 80px rgba(0,0,0,0.5);text-align:center;">
+        <div style="width:60px;height:60px;border:4px solid #E2E8F0;border-top-color:#7C3AED;border-radius:50%;margin:0 auto 20px;animation:fp-spin 0.9s linear infinite;"></div>
+        <div style="font-size:11px;font-weight:800;color:#7C3AED;letter-spacing:0.16em;margin-bottom:6px;">SENDING</div>
+        <div id="fp-sending-label" style="font-size:18px;font-weight:800;color:#111827;font-family:'Noto Serif JP',serif;margin-bottom:8px;">${label || '送信中…'}</div>
+        <div id="fp-sending-progress" style="font-size:12.5px;color:#6b7280;line-height:1.7;">${total ? '0 / ' + total + ' 名 完了' : '通信中…'}</div>
+        <div style="margin-top:18px;background:#FEF3C7;border:1px solid #F59E0B;border-radius:6px;padding:10px 14px;font-size:11px;color:#92400E;font-weight:600;line-height:1.6;">
+          ⚠ 完了するまで このまま お待ちください<br>他の操作 / ブラウザ閉じ は 行わないでください
+        </div>
+      </div>
+      <style>@keyframes fp-spin { to { transform: rotate(360deg); } }</style>`;
+    document.body.appendChild(ov);
+    return ov;
+  }
+  function updateSendingProgress(done, total, currentName) {
+    const p = document.getElementById('fp-sending-progress');
+    if (!p) return;
+    p.innerHTML = `<strong style="color:#111827;font-family:'Inter',sans-serif;">${done}</strong> / ${total} 名 完了` + (currentName ? `<br><span style="color:#7C3AED;font-weight:700;">今: ${currentName} 様 へ 送信中…</span>` : '');
+  }
+  function closeSendingOverlay() {
+    const ov = document.getElementById('fp-sending-overlay');
+    if (ov) ov.remove();
+  }
+
+  // ============================
   // 面談履歴 (ワークスペース top タブ)
   // Zoom + 対面 + 議事録リンクの蓄積場所 — editorial layout
   // ============================
@@ -7849,6 +7894,7 @@ ${family} ${era}層は「教育費ピーク (子18歳) と退職金準備が重�
   window.LineApp = {
     activateSubview: activateSubview,
     renderMeetingHistory: renderMeetingHistory,
+    openQuickInpersonModal: openQuickInpersonModal,
     init: function () {
       document.querySelectorAll('.line-subtab').forEach(t => {
         t.addEventListener('click', () => activateSubview(t.dataset.lineSub));
