@@ -2445,28 +2445,46 @@
       R.blob = blob;
       R.bookingTs = bookingTs;
       R.mediaRecorder = null;
-      // GAS に録画状態を保存
       try { await fetch(CLOUD_RUN_BASE + '/api/recording/stop?ts=' + encodeURIComponent(bookingTs), { method: 'POST' }); } catch (_) {}
-      // 既存の AI 議事録パイプライン (stopScreenRecording の後段と同じ)
-      try {
-        const ext = mimeType.includes('mp4') ? 'mp4' : 'webm';
-        const fname = 'webcam-recording-' + Date.now() + '.' + ext;
-        const arrayBuf = await blob.arrayBuffer();
-        const bytes = new Uint8Array(arrayBuf);
-        let b64 = '';
-        const chunkSize = 8192;
-        for (let i = 0; i < bytes.length; i += chunkSize) {
-          b64 += btoa(String.fromCharCode(...bytes.subarray(i, i + chunkSize)));
-        }
-        const upRes = await fetch(CLOUD_RUN_BASE + '/api/upload-recording', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ ts: bookingTs, filename: fname, mimeType, base64: b64 }),
-        });
-        console.log('[webcam] upload result:', await upRes.json());
-      } catch (upErr) { console.warn('[webcam] upload fail:', upErr); }
+      // ★ 2026-06-22 roundJ: フル AI パイプライン (Drive + Whisper + Claude + 顧客保存 + 進捗UI)
+      const customerName = (function () {
+        try { return JSON.parse(localStorage.getItem('fp-quick-inperson-meta') || '[]').find(m => m.ts === bookingTs)?.clientName || 'お客様'; } catch (_) { return 'お客様'; }
+      })();
+      const customerId = (function () {
+        try { return JSON.parse(localStorage.getItem('fp-quick-inperson-meta') || '[]').find(m => m.ts === bookingTs)?.clientId || ''; } catch (_) { return ''; }
+      })();
+      const fallbackBooking = { ts: bookingTs, name: customerName, userId: customerId, isInperson: true };
+
+      try { showUnifiedProgressPanel(customerName, blob); } catch (_) {}
+      try { updateProgressStep('save', 'done'); updateProgressStep('drive', 'active'); updateProgressStep('ai', 'active'); } catch (_) {}
+      try { showCenterToast('議事録 を 生成中…', `${customerName} 様 の 対面録画 → AI で 文字起こし + 議事録 作成 中。 30-60秒 ほど お待ちください`, { tone: 'progress', duration: 0 }); } catch (_) {}
+
+      const drivePromise = autoUploadRecording(blob, bookingTs, customerName, fallbackBooking)
+        .then(() => { try { updateProgressStep('drive', 'done'); } catch(_){} })
+        .catch(() => { try { updateProgressStep('drive', 'error'); } catch(_){} });
+
+      let aiResult = null;
+      try { aiResult = await aiProcessRecording(blob, bookingTs, customerName, fallbackBooking); } catch (e) { console.error('aiProcessRecording fail:', e); }
+      if (aiResult && aiResult.ok) {
+        try { updateProgressStep('ai', 'done'); } catch(_){}
+        window._fpAIResult = { result: aiResult, customerName: customerName, booking: fallbackBooking };
+        try { autoSaveAIResult(aiResult, customerName, fallbackBooking); } catch(_){}
+        try { showProgressDoneAction(); } catch(_){}
+      } else {
+        try { updateProgressStep('ai', 'error', aiResult?.error); } catch(_){}
+        try {
+          autoSaveAIResult({
+            ok: true, bookingTs, userId: customerId, customerName,
+            summary: '⚠ AI処理 失敗\n\nエラー: ' + (aiResult?.error || '不明') + '\n\n録画ファイル自体は Drive に保存されています。',
+            transcript: '', key_concerns: ['AI処理エラー'], tasks: [], error: true,
+          }, customerName, fallbackBooking);
+        } catch(_){}
+      }
+      await drivePromise;
+      try { await onRecordingComplete(bookingTs, blob, URL.createObjectURL(blob)); } catch(_){}
       await fetchLiveData();
-      renderLeadHubInner();
+      try { renderLeadHubInner(); } catch(_){}
+      try { if (typeof renderMeetingHistory === 'function') renderMeetingHistory(); } catch(_){}
     };
     mr.start(3000);
     R.mediaRecorder = mr;
@@ -2522,42 +2540,67 @@
 
     wait.remove();
 
-    // 成功 → 結果モーダル (host URL クリックで FP が Zoom 参加 / お客様にも LINE 送信済)
+    // 成功 → 結果モーダル — LINE 送信成否で 出し分け
     const ov = document.createElement('div');
     ov.id = 'fp-quick-zoom-result';
-    ov.style.cssText = 'position:fixed;inset:0;background:rgba(15,23,42,0.78);z-index:2147483647;display:flex;align-items:center;justify-content:center;font-family:"Hiragino Sans",sans-serif;padding:24px;';
-    const pushedBadge = result.linePushed
-      ? `<div style="display:inline-flex;align-items:center;gap:6px;background:#D1FAE5;color:#065F46;font-size:11px;font-weight:800;padding:5px 12px;border-radius:99px;letter-spacing:0.08em;">✓ LINE 送信済</div>`
-      : `<div style="display:inline-flex;align-items:center;gap:6px;background:#FEF3C7;color:#92400E;font-size:11px;font-weight:800;padding:5px 12px;border-radius:99px;letter-spacing:0.08em;">⚠ LINE 未送信 (URLを 手動でお伝えください)</div>`;
+    ov.style.cssText = 'position:fixed;inset:0;background:rgba(15,23,42,0.78);z-index:2147483647;display:flex;align-items:center;justify-content:center;font-family:"Hiragino Sans",sans-serif;padding:24px;overflow-y:auto;';
+
+    // QR コード (新規お客様 = LINE未送信 時に 一発でスマホに伝えられるよう)
+    const qrSrc = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(result.zoomUrl)}`;
+    const mailSubject = encodeURIComponent(`【${clientName} 様】Zoom 面談のご案内`);
+    const mailBody = encodeURIComponent(`${clientName} 様\n\nご相談 ありがとうございます。 下記 URL から Zoom に お入りください。\n\n${result.zoomUrl}\n\n何かあれば お気軽に ご連絡ください。`);
+    const mailtoUrl = `mailto:?subject=${mailSubject}&body=${mailBody}`;
+    const smsBody = encodeURIComponent(`${clientName}様 Zoom面談URLです → ${result.zoomUrl}`);
+    const smsUrl = `sms:?body=${smsBody}`;
+
     ov.innerHTML = `
-      <div style="background:#fff;border-radius:14px;max-width:520px;width:100%;padding:28px 32px;box-shadow:0 32px 80px rgba(0,0,0,0.5);">
+      <div style="background:#fff;border-radius:14px;max-width:540px;width:100%;padding:28px 32px;box-shadow:0 32px 80px rgba(0,0,0,0.5);">
         <div style="display:inline-flex;align-items:center;gap:8px;background:#FBF5E3;color:#9A5A18;font-size:11px;font-weight:800;padding:5px 12px;border-radius:99px;letter-spacing:0.12em;margin-bottom:14px;">⚡ Zoom 発行完了</div>
         <h2 style="font-family:'Noto Serif JP',serif;font-size:20px;font-weight:700;color:#111827;margin:0 0 6px;">${escapeHtml(clientName)} 様 と Zoom 開始</h2>
-        <p style="font-size:12.5px;color:#6b7280;line-height:1.7;margin:0 0 16px;">下の「FPとして 参加」 を 押すと 新タブで Zoom が起動します。 お客様には すでに LINE で URL を 送信済 です。</p>
 
-        ${pushedBadge}
+        ${result.linePushed
+          ? `<p style="font-size:12.5px;color:#6b7280;line-height:1.7;margin:0 0 16px;">下の <strong>「FPとして 参加」</strong> を 押すと 新タブで Zoom が起動。 お客様 にも すでに LINE で URL を 送信済 です。</p>
+             <div style="display:inline-flex;align-items:center;gap:6px;background:#D1FAE5;color:#065F46;font-size:11px;font-weight:800;padding:5px 12px;border-radius:99px;letter-spacing:0.08em;margin-bottom:14px;">✓ LINE 送信済</div>`
+          : `<p style="font-size:13.5px;color:#1F2A3F;line-height:1.7;margin:0 0 16px;"><strong style="color:#9A5A18;">LINE 未連携のお客様</strong>のため、 下の方法で URL を お伝えください。 まず <strong>「FPとして 参加」</strong> で Zoom 開いて お客様の入室を 待ちましょう。</p>`}
 
-        <!-- FP 用 host URL -->
-        <div style="background:#FBF5E3;border:1.5px solid #C19A3A;border-radius:10px;padding:14px 16px;margin-top:14px;">
-          <div style="font-size:10.5px;font-weight:800;color:#9A5A18;letter-spacing:0.14em;margin-bottom:6px;">FP HOST URL</div>
-          <code style="display:block;font-size:11px;font-family:'JetBrains Mono',monospace;color:#1F2A3F;word-break:break-all;line-height:1.5;margin-bottom:10px;background:#fff;padding:8px 10px;border-radius:6px;">${escapeHtml(result.hostZoomUrl).slice(0, 200)}…</code>
+        <!-- FP 用 host URL — メインCTA -->
+        <div style="background:#FBF5E3;border:1.5px solid #C19A3A;border-radius:10px;padding:14px 16px;margin-bottom:14px;">
+          <div style="font-size:10.5px;font-weight:800;color:#9A5A18;letter-spacing:0.14em;margin-bottom:8px;">FP HOST URL (あなた用)</div>
           <a href="${escapeHtml(result.hostZoomUrl)}" target="_blank" rel="noopener noreferrer" class="btn-cta-primary" style="text-decoration:none;justify-content:center;width:100%;">
             <span>FPとして Zoom に参加 (host)</span>
             <span class="cta-arrow">→</span>
           </a>
         </div>
 
-        <!-- お客様用 join URL (コピー用) -->
-        <details style="margin-top:14px;background:#F8FAFC;border:1px solid #E2E8F0;border-radius:8px;padding:0;">
-          <summary style="cursor:pointer;padding:12px 16px;font-size:12.5px;font-weight:700;color:#475569;list-style:none;display:flex;align-items:center;justify-content:space-between;">
-            <span>📋 お客様用 URL (コピー / 手動共有)</span>
-            <span style="font-size:14px;">▾</span>
-          </summary>
-          <div style="padding:0 16px 14px;">
-            <code style="display:block;font-size:11px;font-family:'JetBrains Mono',monospace;color:#1F2A3F;word-break:break-all;line-height:1.5;background:#fff;padding:8px 10px;border-radius:6px;border:1px solid #E2E8F0;">${escapeHtml(result.zoomUrl)}</code>
-            <button id="fp-qz-copy" class="btn-mini-action" style="margin-top:10px;"><span class="icon">📋</span>URLを コピー</button>
+        <!-- お客様用 URL 共有エリア -->
+        ${result.linePushed ? `
+          <details style="margin-top:14px;background:#F8FAFC;border:1px solid #E2E8F0;border-radius:8px;padding:0;">
+            <summary style="cursor:pointer;padding:12px 16px;font-size:12.5px;font-weight:700;color:#475569;list-style:none;display:flex;align-items:center;justify-content:space-between;">
+              <span>📋 お客様用 URL (コピー / 手動共有)</span>
+              <span style="font-size:14px;">▾</span>
+            </summary>
+            <div style="padding:0 16px 14px;">
+              <code style="display:block;font-size:11px;font-family:'JetBrains Mono',monospace;color:#1F2A3F;word-break:break-all;line-height:1.5;background:#fff;padding:8px 10px;border-radius:6px;border:1px solid #E2E8F0;">${escapeHtml(result.zoomUrl)}</code>
+              <button id="fp-qz-copy" class="btn-mini-action" style="margin-top:10px;"><span class="icon">📋</span>URLを コピー</button>
+            </div>
+          </details>
+        ` : `
+          <!-- LINE 未連携時: 共有手段を プロミネント に出す -->
+          <div style="background:#fff;border:2px solid #C19A3A;border-radius:12px;padding:18px 20px;">
+            <div style="font-size:10.5px;font-weight:800;color:#9A5A18;letter-spacing:0.14em;margin-bottom:10px;">お客様 へ 共有する</div>
+            <code style="display:block;font-size:12px;font-family:'JetBrains Mono',monospace;color:#1F2A3F;word-break:break-all;line-height:1.6;background:#FBF5E3;padding:10px 12px;border-radius:6px;border:1px solid #E8D9A8;margin-bottom:14px;">${escapeHtml(result.zoomUrl)}</code>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;">
+              <button id="fp-qz-copy" class="btn-mini-action" style="justify-content:center;"><span class="icon">📋</span>コピー</button>
+              <a id="fp-qz-mail" href="${mailtoUrl}" class="btn-mini-action" style="justify-content:center;text-decoration:none;"><span class="icon">✉</span>メール 起動</a>
+              <a id="fp-qz-sms" href="${smsUrl}" class="btn-mini-action" style="justify-content:center;text-decoration:none;"><span class="icon">📱</span>SMS 起動</a>
+              <button id="fp-qz-toggle-qr" class="btn-mini-action" style="justify-content:center;"><span class="icon">▦</span>QR 表示</button>
+            </div>
+            <div id="fp-qz-qr-wrap" style="display:none;text-align:center;background:#fff;border:1px solid #E2E8F0;border-radius:8px;padding:14px;">
+              <img src="${qrSrc}" alt="Zoom URL QR" style="width:180px;height:180px;border-radius:6px;">
+              <div style="font-size:11px;color:#6B7280;margin-top:6px;">お客様 のスマホ で 読み取ると Zoom が 開きます</div>
+            </div>
           </div>
-        </details>
+        `}
 
         ${result.linePushError ? `<div style="margin-top:12px;background:#FEE2E2;border:1px solid #FCA5A5;border-radius:6px;padding:10px 14px;font-size:11.5px;color:#991B1B;line-height:1.6;"><strong>LINE 送信失敗:</strong> ${escapeHtml(result.linePushError.slice(0, 200))}</div>` : ''}
 
@@ -2566,6 +2609,11 @@
         </div>
       </div>`;
     document.body.appendChild(ov);
+    const qrToggle = document.getElementById('fp-qz-toggle-qr');
+    if (qrToggle) qrToggle.addEventListener('click', () => {
+      const w = document.getElementById('fp-qz-qr-wrap');
+      if (w) w.style.display = w.style.display === 'none' ? 'block' : 'none';
+    });
     document.getElementById('fp-qz-close').addEventListener('click', () => ov.remove());
     document.getElementById('fp-qz-copy').addEventListener('click', () => {
       navigator.clipboard.writeText(result.zoomUrl).then(() => {
@@ -2678,25 +2726,58 @@
       R.bookingTs = bookingTs;
       R.mediaRecorder = null;
       try { await fetch(CLOUD_RUN_BASE + '/api/recording/stop?ts=' + encodeURIComponent(bookingTs), { method: 'POST' }); } catch (_) {}
-      try {
-        const ext = mimeType.includes('mp4') ? 'm4a' : 'webm';
-        const fname = 'audio-only-' + Date.now() + '.' + ext;
-        const arrayBuf = await blob.arrayBuffer();
-        const bytes = new Uint8Array(arrayBuf);
-        let b64 = '';
-        const chunkSize = 8192;
-        for (let i = 0; i < bytes.length; i += chunkSize) {
-          b64 += btoa(String.fromCharCode(...bytes.subarray(i, i + chunkSize)));
-        }
-        const upRes = await fetch(CLOUD_RUN_BASE + '/api/upload-recording', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ ts: bookingTs, filename: fname, mimeType, base64: b64 }),
-        });
-        console.log('[audio-only] upload result:', await upRes.json());
-      } catch (upErr) { console.warn('[audio-only] upload fail:', upErr); }
+      // ★ 2026-06-22 roundJ: 録画停止後のフル AI パイプラインを startScreenRecording と同じく実装
+      //   旧: 単純 upload のみ で AI議事録 生成されず → 面談履歴に出ない
+      //   新: Drive 保存 + Whisper 文字起こし + Claude 解析 + 顧客カード自動保存 + 進捗パネル
+      const customerName = (function () {
+        try {
+          const meta = JSON.parse(localStorage.getItem('fp-quick-inperson-meta') || '[]');
+          const found = meta.find(m => m.ts === bookingTs);
+          return found?.clientName || 'お客様';
+        } catch (_) { return 'お客様'; }
+      })();
+      const customerId = (function () {
+        try {
+          const meta = JSON.parse(localStorage.getItem('fp-quick-inperson-meta') || '[]');
+          return meta.find(m => m.ts === bookingTs)?.clientId || '';
+        } catch (_) { return ''; }
+      })();
+      const fallbackBooking = { ts: bookingTs, name: customerName, userId: customerId, isInperson: true };
+
+      // 進捗パネル
+      try { showUnifiedProgressPanel(customerName, blob); } catch (_) {}
+      try { updateProgressStep('save', 'done'); updateProgressStep('drive', 'active'); updateProgressStep('ai', 'active'); } catch (_) {}
+      try { showCenterToast('議事録 を 生成中…', `${customerName} 様 の 対面録音 → AI で 文字起こし + 議事録 作成 中。 30-60秒 ほど お待ちください`, { tone: 'progress', duration: 0 }); } catch (_) {}
+
+      // Drive: 音声ファイル upload (並列)
+      const drivePromise = autoUploadRecording(blob, bookingTs, customerName, fallbackBooking)
+        .then(() => { try { updateProgressStep('drive', 'done'); } catch(_){} })
+        .catch(() => { try { updateProgressStep('drive', 'error'); } catch(_){} });
+
+      // AI: 同じ音声を Whisper + Claude で処理
+      let aiResult = null;
+      try { aiResult = await aiProcessRecording(blob, bookingTs, customerName, fallbackBooking); } catch (e) { console.error('aiProcessRecording fail:', e); }
+      if (aiResult && aiResult.ok) {
+        try { updateProgressStep('ai', 'done'); } catch(_){}
+        window._fpAIResult = { result: aiResult, customerName: customerName, booking: fallbackBooking };
+        try { autoSaveAIResult(aiResult, customerName, fallbackBooking); } catch(_){}
+        try { showProgressDoneAction(); } catch(_){}
+      } else {
+        try { updateProgressStep('ai', 'error', aiResult?.error); } catch(_){}
+        // AI 失敗ログも 保存して 面談履歴に「失敗」として 残す
+        try {
+          autoSaveAIResult({
+            ok: true, bookingTs, userId: customerId, customerName,
+            summary: '⚠ AI処理 失敗\n\nエラー: ' + (aiResult?.error || '不明') + '\n\n録画ファイル自体は Drive に保存されています。',
+            transcript: '', key_concerns: ['AI処理エラー'], tasks: [], error: true,
+          }, customerName, fallbackBooking);
+        } catch(_){}
+      }
+      await drivePromise;
+      try { await onRecordingComplete(bookingTs, blob, URL.createObjectURL(blob)); } catch(_){}
       await fetchLiveData();
-      renderLeadHubInner();
+      try { renderLeadHubInner(); } catch(_){}
+      try { if (typeof renderMeetingHistory === 'function') renderMeetingHistory(); } catch(_){}
     };
     indicator.addEventListener('click', () => {
       if (mr.state !== 'inactive') {
@@ -8245,7 +8326,7 @@ ${family} ${era}層は「教育費ピーク (子18歳) と退職金準備が重�
                       </div>
                     </div>
                     <div class="mh-actions">
-                      <button class="mh-btn mh-btn-minutes" data-view-mh-minutes="${escapeHtml(b.ts || '')}" data-ai-summary="${escapeHtml(String(ai && ai.summary || ''))}" data-ai-transcript="${escapeHtml(String(ai && (ai.transcript || ai.summary) || ''))}" data-client-name="${escapeHtml((b.name||'').replace(/様$/,'').trim())}" ${ai ? '' : 'disabled title="議事録未生成"'}>議事録</button>
+                      <button class="mh-btn mh-btn-minutes" data-view-mh-minutes="${escapeHtml(b.ts || '')}" data-ai-summary="${escapeHtml(String(ai && ai.summary || ''))}" data-ai-transcript="${escapeHtml(String(ai && (ai.transcript || ai.summary) || ''))}" data-has-ai="${ai ? '1' : '0'}" data-client-name="${escapeHtml((b.name||'').replace(/様$/,'').trim())}">議事録${ai ? '' : ' (未)'}</button>
                       ${b.userId ? `<button class="mh-btn mh-btn-client" data-open-mh-client="${escapeHtml(b.userId)}" data-client-name="${escapeHtml((b.name||'').replace(/様$/,'').trim())}">顧客カードへ</button>` : ''}
                     </div>
                   </div>`;
@@ -8259,11 +8340,52 @@ ${family} ${era}層は「教育費ピーク (子18歳) と退職金準備が重�
       root.querySelectorAll('[data-view-mh-minutes]').forEach(btn => {
         btn.addEventListener('click', () => {
           const ts = btn.dataset.viewMhMinutes;
+          const cname = btn.dataset.clientName || 'お客様';
+          const hasAi = btn.dataset.hasAi === '1';
+          // 多重 fallback: bookings.transcript / ai_results.transcript / ai_results.summary / aiResults リアル参照
           const liveBookings = (live.bookings || []);
           const matched = liveBookings.find(x => String(x.ts).slice(0, 19) === String(ts).slice(0, 19));
-          const transcript = (matched && matched.transcript) || btn.dataset.aiTranscript || btn.dataset.aiSummary || '';
-          if (!transcript) { alert('議事録が見つかりません'); return; }
-          showTranscriptModal(transcript, '議事録 — ' + (btn.dataset.clientName || ''));
+          const aiByTs = aiResults.find(r =>
+            (r.bookingTs && String(r.bookingTs).slice(0, 19) === String(ts).slice(0, 19)) ||
+            (r.customerName && r.customerName === cname)
+          );
+          const transcript = (matched && matched.transcript)
+            || btn.dataset.aiTranscript
+            || btn.dataset.aiSummary
+            || (aiByTs && (aiByTs.transcript || aiByTs.summary))
+            || '';
+          if (transcript) {
+            showTranscriptModal(transcript, '議事録 — ' + cname);
+            return;
+          }
+          // 議事録未生成 — 案内モーダル
+          const ov = document.createElement('div');
+          ov.style.cssText = 'position:fixed;inset:0;background:rgba(15,23,42,0.78);z-index:2147483647;display:flex;align-items:center;justify-content:center;font-family:"Hiragino Sans",sans-serif;padding:24px;';
+          ov.innerHTML = `
+            <div style="background:#fff;border-radius:14px;max-width:460px;width:100%;padding:28px 32px;box-shadow:0 28px 80px rgba(0,0,0,0.4);">
+              <div style="display:inline-flex;align-items:center;gap:8px;background:#FEF3C7;color:#92400E;font-size:11px;font-weight:800;padding:5px 12px;border-radius:99px;letter-spacing:0.12em;margin-bottom:14px;">⏳ 議事録 未生成</div>
+              <h2 style="font-family:'Noto Serif JP',serif;font-size:18px;font-weight:700;color:#111827;margin:0 0 8px;">${escapeHtml(cname)} 様 / 議事録</h2>
+              <p style="font-size:13px;color:#6b7280;line-height:1.75;margin:0 0 18px;">この面談の議事録は まだ 生成されていません。 次のいずれかが 原因です:</p>
+              <ul style="font-size:12.5px;color:#374151;line-height:1.85;padding-left:22px;margin:0 0 18px;">
+                <li>録画停止後 まだ AI 処理が <strong>完了していない</strong> (通常 30〜60 秒)</li>
+                <li>録音は終わったが <strong>音声が短すぎた</strong> / 検出できなかった</li>
+                <li>AI 処理が <strong>エラー</strong> で 止まった (録画ファイル自体は Drive に保存済)</li>
+              </ul>
+              <div style="display:flex;gap:10px;justify-content:flex-end;">
+                <button class="btn-cta-ghost" id="fp-mh-err-close">閉じる</button>
+                <button class="btn-cta-primary" id="fp-mh-err-refresh" style="justify-content:center;">
+                  <span>更新して再確認</span>
+                  <span class="cta-arrow">↻</span>
+                </button>
+              </div>
+            </div>`;
+          document.body.appendChild(ov);
+          document.getElementById('fp-mh-err-close').addEventListener('click', () => ov.remove());
+          document.getElementById('fp-mh-err-refresh').addEventListener('click', async () => {
+            ov.remove();
+            await fetchLiveData();
+            renderMeetingHistory();
+          });
         });
       });
       root.querySelectorAll('[data-open-mh-client]').forEach(btn => {
