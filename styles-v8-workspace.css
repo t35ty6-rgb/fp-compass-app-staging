@@ -6546,3 +6546,202 @@ body[data-prod="1"] .brand-badge { display: none !important; }
   .btn-cta-primary, .btn-cta-secondary, .cta-arrow, .cta-tail, .btn-cta-primary-chip { transition: none !important; }
   .btn-cta-primary:hover, .btn-cta-secondary:hover { transform: none !important; }
 }
+
+/* ============================================================
+   細部ボタン system v1 (2026-06-22 roundF)
+   主要 CTA (.btn-cta-primary) と整合する 小型 component 群
+   - .btn-mini-action : table行内 / カード内 の 24-28px 小ボタン
+   - .chip / .chip-* : 矩形 status pill
+   - .icon-btn       : 28x28 円形 icon-only
+   - .input-suffix-btn : input field 右隣接
+   既存 .ghost / .btn-mini は 壊さず 上塗りで 統一感UP
+   ============================================================ */
+
+/* ───── .btn-mini-action : 小ボタン (capsule gold ghost) ───── */
+.btn-mini-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: transparent;
+  color: var(--cta-ink, #1F2A3F);
+  border: 1.5px solid var(--cta-gold, #C19A3A);
+  border-radius: 99px;
+  padding: 5px 14px;
+  font-family: 'Hiragino Sans', 'Noto Sans JP', sans-serif;
+  font-weight: 700;
+  font-size: 11.5px;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  transition: background .12s, border-color .12s, color .12s, transform .12s;
+  white-space: nowrap;
+  line-height: 1.4;
+}
+.btn-mini-action:hover {
+  background: var(--cta-gold-cream, #FBF5E3);
+  border-color: var(--cta-gold-deep, #9A5A18);
+  color: var(--cta-gold-deep, #9A5A18);
+}
+.btn-mini-action:active { transform: scale(0.97); }
+.btn-mini-action:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  background: transparent;
+  color: #9CA3AF;
+  border-color: #E5E7EB;
+}
+.btn-mini-action.is-danger {
+  border-color: #DC2626;
+  color: #B91C1C;
+}
+.btn-mini-action.is-danger:hover {
+  background: #FEF2F2;
+  border-color: #991B1B;
+  color: #7F1D1D;
+}
+.btn-mini-action.is-line {
+  border-color: #06C755;
+  color: #047857;
+}
+.btn-mini-action.is-line:hover {
+  background: #F0FDF4;
+  border-color: #047857;
+  color: #065F46;
+}
+.btn-mini-action .icon {
+  font-size: 12px;
+  line-height: 1;
+}
+
+/* ───── .chip : 矩形 status pill (ink bg + cream text) ───── */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--cta-ink, #1F2A3F);
+  color: #FCFAF2;
+  font-family: 'Inter', 'Hiragino Sans', sans-serif;
+  font-weight: 800;
+  font-size: 10.5px;
+  letter-spacing: 0.08em;
+  padding: 3px 9px;
+  border-radius: 5px;
+  text-transform: uppercase;
+  line-height: 1.4;
+}
+.chip.chip-warn   { background: #92400E; color: #FEF3C7; }
+.chip.chip-success { background: #065F46; color: #D1FAE5; }
+.chip.chip-info   { background: #1E3A5F; color: #DBEAFE; }
+.chip.chip-line   { background: #06C755; color: #fff; }
+.chip.chip-danger { background: #991B1B; color: #FEE2E2; }
+.chip.chip-gold   { background: var(--cta-gold-cream, #FBF5E3); color: var(--cta-gold-deep, #9A5A18); }
+
+/* ───── .icon-btn : 円形 icon-only (28x28) ───── */
+.icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background: transparent;
+  color: #6B7280;
+  border: 1px solid transparent;
+  border-radius: 50%;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background .12s, color .12s, box-shadow .15s, border-color .12s;
+  flex-shrink: 0;
+  line-height: 1;
+}
+.icon-btn:hover {
+  background: var(--cta-gold-cream, #FBF5E3);
+  color: var(--cta-gold-deep, #9A5A18);
+  box-shadow: 0 0 0 2px rgba(193, 154, 58, 0.25);
+}
+.icon-btn:active { background: var(--cta-gold, #C19A3A); color: #fff; }
+.icon-btn.is-active {
+  background: var(--cta-gold, #C19A3A);
+  color: #fff;
+  border-color: var(--cta-gold-deep, #9A5A18);
+}
+.icon-btn.is-danger:hover {
+  background: #FEF2F2;
+  color: #B91C1C;
+  box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.18);
+}
+.icon-btn.lg { width: 36px; height: 36px; font-size: 17px; }
+.icon-btn.sm { width: 24px; height: 24px; font-size: 12px; }
+
+/* ───── .input-suffix-btn : input 右隣接 (gold solid) ───── */
+.input-suffix-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  background: linear-gradient(135deg, var(--cta-gold, #C19A3A) 0%, var(--cta-gold-deep, #9A5A18) 100%);
+  color: #fff;
+  border: none;
+  border-radius: 0 6px 6px 0;
+  padding: 0 16px;
+  font-family: 'Hiragino Sans', sans-serif;
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  transition: filter .12s;
+  white-space: nowrap;
+  min-height: 36px;
+  align-self: stretch;
+}
+.input-suffix-btn:hover { filter: brightness(1.06); }
+.input-suffix-btn:active { filter: brightness(0.95); }
+.input-suffix-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* input + suffix-btn を 連結 する wrapper */
+.input-with-suffix {
+  display: inline-flex;
+  align-items: stretch;
+  width: 100%;
+}
+.input-with-suffix > input,
+.input-with-suffix > textarea {
+  flex: 1;
+  border-top-right-radius: 0 !important;
+  border-bottom-right-radius: 0 !important;
+  border-right: none !important;
+  min-height: 36px;
+}
+
+/* ───── 既存マークアップ への 自動適用 (selector 上書きで 統一感) ───── */
+/* .btn-mini が 「コピー」「編集」 等の 行内ボタン として使われてる箇所を 上塗り */
+button.btn-mini:not(.btn-cta-primary):not(.btn-cta-secondary) {
+  /* roundE で 下線アンダー化したが それは ghost テキストリンク向け
+     btn-mini が 実ボタン (action) として使われてる時は capsule にする */
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+/* table 行内の 小ボタン (= class 指定無しの button) を gold ghost capsule に */
+table tbody button:not([class]),
+table tbody button.btn-mini {
+  background: transparent !important;
+  color: var(--cta-ink, #1F2A3F) !important;
+  border: 1.5px solid var(--cta-gold, #C19A3A) !important;
+  border-radius: 99px !important;
+  padding: 5px 14px !important;
+  font-weight: 700 !important;
+  font-size: 11.5px !important;
+  border-bottom-color: var(--cta-gold, #C19A3A) !important;
+}
+table tbody button:not([class]):hover,
+table tbody button.btn-mini:hover {
+  background: var(--cta-gold-cream, #FBF5E3) !important;
+  border-color: var(--cta-gold-deep, #9A5A18) !important;
+  color: var(--cta-gold-deep, #9A5A18) !important;
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .btn-mini-action, .icon-btn, .input-suffix-btn { transition: none !important; }
+  .btn-mini-action:active { transform: none !important; }
+}

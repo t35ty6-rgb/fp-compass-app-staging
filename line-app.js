@@ -1628,22 +1628,22 @@
       let cta = '';
       // キャンセルボタン (録画前のみ表示。録画開始したら出さない)
       const cancelBtnHtml = (rec !== 'recording' && rec !== 'saved')
-        ? `<button class="btn-mini fp-cancel-booking" data-cancel-ts="${tsEnc}" style="background:#fef2f2;color:#b91c1c;border:1px solid #fecaca;font-weight:700;">✕ キャンセル</button>`
+        ? `<button class="btn-mini-action is-danger fp-cancel-booking" data-cancel-ts="${tsEnc}"><span class="icon">✕</span>キャンセル</button>`
         : '';
       if (rec === 'recording') {
         cta = `<button class="btn-rec-stop" data-rec-stop="${tsEnc}">■ 録画停止</button>
                <a class="btn-mini" href="${zUrl}" target="_blank">Zoomを開く</a>`;
       } else if (rec === 'saved') {
         // ★ 「完了」 ボタン 廃止 — 録画停止で 自動 archive + 議事録 顧客カード反映
-        cta = `<button class="btn-mini" data-open-memo="${tsEnc}" style="background:linear-gradient(135deg,#b8893d,#d4a017);border:none;color:#fff;font-weight:700;">📝 メモ・タスク化${savedTasksCount > 0 ? ' ('+savedTasksCount+')' : ''}</button>`;
+        cta = `<button class="btn-mini-action" data-open-memo="${tsEnc}"><span class="icon">📝</span>メモ・タスク化${savedTasksCount > 0 ? ' ('+savedTasksCount+')' : ''}</button>`;
       } else if (zUrl) {
         // ★ 「完了」 ボタン 廃止 — 録画停止で 自動完了 (Zoom待ち から自動消去)
         cta = `<button class="btn-rec-start" data-rec-start="${tsEnc}" data-zoom="${zUrl}">● 録画ONでZoom開始</button>
-               <button class="btn-mini" data-open-memo="${tsEnc}" style="background:#f8fafc;border:1px solid #e5e7eb;color:#374151;">📝 メモ${savedTasksCount > 0 ? ' ('+savedTasksCount+'件)' : ''}</button>
+               <button class="btn-mini-action" data-open-memo="${tsEnc}"><span class="icon">📝</span>メモ${savedTasksCount > 0 ? ' ('+savedTasksCount+'件)' : ''}</button>
                ${cancelBtnHtml}`;
       } else {
         cta = `<button class="btn-rec-start" data-rec-start="${tsEnc}" data-rec-mode="inperson" style="background:linear-gradient(135deg,#7C3AED,#6D28D9);">● 対面録画開始</button>
-               <button class="btn-mini" data-open-memo="${tsEnc}" style="background:#f8fafc;border:1px solid #e5e7eb;color:#374151;">📝 メモ${savedTasksCount > 0 ? ' ('+savedTasksCount+'件)' : ''}</button>
+               <button class="btn-mini-action" data-open-memo="${tsEnc}"><span class="icon">📝</span>メモ${savedTasksCount > 0 ? ' ('+savedTasksCount+'件)' : ''}</button>
                ${cancelBtnHtml}`;
       }
       const recPill = rec === 'recording' ? '<span class="rec-pill recording">● 録画中</span>'
@@ -5191,7 +5191,7 @@ ${family} ${era}層は「教育費ピーク (子18歳) と退職金準備が重�
               <a class="btn-mini" href="${escapeHtml(b.driveUrl||'#')}" target="_blank" data-hint="Google Drive に保存された録画ファイルを開く">📁 録画を開く (Drive)</a>
               <a class="btn-mini" href="${escapeHtml(b.zoomUrl)}" target="_blank" data-hint="同じZoom URLを再度開く (フォロー面談用)">Zoomを開く</a>
               ${b.transcript
-                ? `<button class="btn-mini" data-view-transcript="${escapeHtml(b.ts)}" data-hint="AIが作った議事録を表示・コピー" style="background:#fff8e1;border-color:#f0d36b;color:#8a6f1e;font-weight:600;">📝 議事録を見る</button>`
+                ? `<button class="btn-mini-action" data-view-transcript="${escapeHtml(b.ts)}" data-hint="AIが作った議事録を表示・コピー"><span class="icon">📝</span>議事録を見る</button>`
                 : `<button class="btn-mini" data-gen-transcript="${escapeHtml(b.ts)}" data-hint="アンケート回答と顧客情報から議事録テンプレを自動生成。面談後に押す" style="background:linear-gradient(135deg,#b8893d,#d4a017);border:none;color:#fff;font-weight:700;">✨ AI議事録を生成</button>`}
             ` : `
               <button class="btn-rec-start" data-rec-start="${escapeHtml(b.ts)}" data-zoom="${escapeHtml(b.zoomUrl)}" data-hint="面談直前に押す。Zoomが別タブで開き、録画状態が「録画中」に">● 録画ONでZoom開始</button>
@@ -7845,11 +7845,11 @@ ${family} ${era}層は「教育費ピーク (子18歳) と退職金準備が重�
           .mh-minutes-preview .has { color: #065F46; font-weight: 700; }
           .mh-minutes-preview .none { color: #c0b8a5; font-style: italic; }
           .mh-actions { display: flex; gap: 8px; align-items: center; }
-          .mh-btn { padding: 8px 14px; border-radius: 6px; font-size: 11.5px; font-weight: 700; letter-spacing: 0.04em; cursor: pointer; font-family: 'Inter','Hiragino Sans',sans-serif; border: 1px solid transparent; transition: all 0.12s; white-space: nowrap; }
-          .mh-btn-minutes { background: #fdfbf4; border-color: #c19a3a; color: #5e4d1a; }
-          .mh-btn-minutes:hover { background: #fbf5e3; }
-          .mh-btn-minutes:disabled { background: #fafafa; border-color: #e5e7eb; color: #c0b8a5; cursor: not-allowed; }
-          .mh-btn-client { background: #fff; border-color: #cbd5e1; color: #1f2a3f; }
+          .mh-btn { display: inline-flex; align-items: center; gap: 5px; padding: 6px 14px; border-radius: 99px; font-size: 11.5px; font-weight: 700; letter-spacing: 0.02em; cursor: pointer; font-family: 'Hiragino Sans',sans-serif; border: 1.5px solid transparent; transition: background .12s, border-color .12s, color .12s; white-space: nowrap; background: transparent; }
+          .mh-btn-minutes { border-color: #c19a3a; color: #1f2a3f; }
+          .mh-btn-minutes:hover { background: #fbf5e3; border-color: #9a5a18; color: #9a5a18; }
+          .mh-btn-minutes:disabled { background: transparent; border-color: #e5e7eb; color: #c0b8a5; cursor: not-allowed; opacity: 0.55; }
+          .mh-btn-client { border-color: #cbd5e1; color: #1f2a3f; }
           .mh-btn-client:hover { background: #f8fafc; border-color: #94a3b8; }
           .mh-empty { background: #fff; border: 1px dashed #e8e2d4; border-radius: 10px; padding: 40px 36px; color: #6b7280; font-size: 13px; line-height: 1.8; text-align: center; }
           .mh-empty-title { font-family: 'Noto Serif JP', serif; font-size: 16px; font-weight: 700; color: #1f2a3f; margin-bottom: 10px; }
