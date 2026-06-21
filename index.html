@@ -696,11 +696,11 @@
       <span class="kbd">⌘K</span>
     </div>
 
-    <!-- ★ サイドバー直下: 急遽対面録画 (どの画面からでも 1クリック) -->
+    <!-- ★ サイドバー直下: 急遽 面談開始 (Zoom即発行 or 対面録音 を選べる) -->
     <button id="sidebar-quick-inperson" class="sidebar-quick-rec"
-      title="急に対面相談が始まった時 → ここから録画開始 (議事録自動生成)">
+      title="急にお客様から相談入った時 → Zoom 即発行 or 対面録音 を 選んで 即開始">
       <span class="sidebar-quick-rec-dot"></span>
-      <span class="sidebar-quick-rec-label">急遽 対面録画</span>
+      <span class="sidebar-quick-rec-label">急遽 面談スタート</span>
       <span class="sidebar-quick-rec-pill">予約不要</span>
     </button>
 
@@ -1199,7 +1199,7 @@ window.fpReadyAfterAuth = function() {
     });
   })();
 
-  const ver = "20260622J-rec-fallback";
+  const ver = "20260622K-quick-zoom";
   const scripts = [
     "life-events.js?v=" + ver,
     "recommender.js?v=" + ver,
@@ -1538,7 +1538,7 @@ window.fpReadyAfterAuth = function() {
 <script>
 (function(){
   // 最新の ver を 1 箇所に集約 (fpReadyAfterAuth 側と一致させる必要あり)
-  const FP_VERSION = "20260622J-rec-fallback";
+  const FP_VERSION = "20260622K-quick-zoom";
   const loadTime = new Date();
   const hhmm = String(loadTime.getHours()).padStart(2,'0') + ':' + String(loadTime.getMinutes()).padStart(2,'0');
   const dateLabel = (FP_VERSION.match(/^(\d{4})(\d{2})(\d{2})/) || []).slice(1).join('/').replace(/^(\d{4})\//,'$1/').replace(/\/(\d{2})\/(\d{2})$/,'/$1/$2') || FP_VERSION;

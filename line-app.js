@@ -1158,9 +1158,9 @@
     ov.style.cssText = 'position:fixed;inset:0;background:rgba(15,23,42,0.72);z-index:99999;display:flex;align-items:center;justify-content:center;font-family:"Hiragino Sans",sans-serif;';
     ov.innerHTML = `
       <div style="background:#fff;border-radius:16px;max-width:480px;width:92%;padding:28px;box-shadow:0 32px 80px rgba(0,0,0,0.4);">
-        <div style="font-size:11px;font-weight:800;color:#7C3AED;letter-spacing:0.14em;margin-bottom:6px;">QUICK START</div>
-        <h2 style="font-size:20px;font-weight:800;color:#111827;margin:0 0 6px;font-family:'Noto Serif JP',serif;">急遽 対面録画開始</h2>
-        <p style="font-size:13px;color:#6b7280;line-height:1.65;margin:0 0 18px;">予約なしで対面相談が始まった時はこちら。録画停止後、自動で AI 議事録が作られて 顧客カードに保存されます。</p>
+        <div style="font-size:11px;font-weight:800;color:#9A5A18;letter-spacing:0.14em;margin-bottom:6px;">QUICK START</div>
+        <h2 style="font-size:20px;font-weight:800;color:#111827;margin:0 0 6px;font-family:'Noto Serif JP',serif;">急遽 面談スタート</h2>
+        <p style="font-size:13px;color:#6b7280;line-height:1.65;margin:0 0 18px;">予約なしで お客様から相談が入った時はこちら。 <strong style="color:#9A5A18;">Zoom リンクを 即発行 して 双方参加</strong> するか、 <strong style="color:#1F2A3F;">対面で 録音だけ する</strong> かを 選んで 開始してください。</p>
 
         <label style="display:block;font-size:11.5px;font-weight:700;color:#374151;letter-spacing:0.04em;margin-bottom:6px;">お客様を選択</label>
         <select id="fp-qi-client" style="width:100%;padding:11px 12px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:14px;font-family:inherit;margin-bottom:14px;background:#fff;">
@@ -1176,30 +1176,30 @@
           <input id="fp-qi-newname" type="text" placeholder="例: 山田 太郎" style="width:100%;padding:11px 12px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:14px;font-family:inherit;">
         </div>
 
-        <!-- ★ 録画モード選択 (カメラ/マイク 不要を選べる) -->
-        <label style="display:block;font-size:11.5px;font-weight:700;color:#374151;letter-spacing:0.04em;margin-bottom:8px;">録画モード</label>
+        <!-- ★ 急遽 開始 — 2モード (Zoom即発行 / 対面録音) — カメラ/マイク権限は対面のみ必要 -->
+        <label style="display:block;font-size:11.5px;font-weight:700;color:#374151;letter-spacing:0.04em;margin-bottom:8px;">面談スタイル</label>
         <div id="fp-qi-mode-grid" style="display:grid;grid-template-columns:1fr;gap:8px;margin-bottom:16px;">
-          <label class="fp-qi-mode" data-mode="audio" style="display:flex;gap:12px;padding:14px 16px;border:1.5px solid #C19A3A;border-radius:10px;cursor:pointer;background:#FBF5E3;transition:border-color .12s,background .12s;">
-            <input type="radio" name="fp-qi-mode" value="audio" checked style="margin-top:3px;flex-shrink:0;">
+          <label class="fp-qi-mode" data-mode="zoom" style="display:flex;gap:12px;padding:16px 18px;border:1.5px solid #C19A3A;border-radius:10px;cursor:pointer;background:#FBF5E3;transition:border-color .12s,background .12s;">
+            <input type="radio" name="fp-qi-mode" value="zoom" checked style="margin-top:3px;flex-shrink:0;">
             <div style="flex:1;">
               <div style="font-size:11px;font-weight:800;color:#9A5A18;letter-spacing:0.12em;margin-bottom:3px;">RECOMMENDED</div>
-              <div style="font-size:14px;font-weight:800;color:#1F2A3F;line-height:1.4;">🎤 マイクだけで録音</div>
-              <div style="font-size:11.5px;color:#6b7280;margin-top:3px;line-height:1.55;">カメラ不要。音声→AI議事録までフル自動。</div>
+              <div style="font-size:15px;font-weight:800;color:#1F2A3F;line-height:1.4;">🎥 Zoom リンクを 今すぐ発行 → 双方参加</div>
+              <div style="font-size:12px;color:#6b7280;margin-top:4px;line-height:1.6;">お客様の LINE に Zoom URL を 即push。 FP も 新タブで host参加。 マイク/カメラ 権限は不要 (Zoom 側で設定)。</div>
             </div>
           </label>
-          <label class="fp-qi-mode" data-mode="webcam" style="display:flex;gap:12px;padding:14px 16px;border:1.5px solid #E5E7EB;border-radius:10px;cursor:pointer;background:#fff;transition:border-color .12s,background .12s;">
-            <input type="radio" name="fp-qi-mode" value="webcam" style="margin-top:3px;flex-shrink:0;">
+          <label class="fp-qi-mode" data-mode="audio" style="display:flex;gap:12px;padding:16px 18px;border:1.5px solid #E5E7EB;border-radius:10px;cursor:pointer;background:#fff;transition:border-color .12s,background .12s;">
+            <input type="radio" name="fp-qi-mode" value="audio" style="margin-top:3px;flex-shrink:0;">
             <div style="flex:1;">
-              <div style="font-size:11px;font-weight:800;color:#6B7280;letter-spacing:0.12em;margin-bottom:3px;">VIDEO</div>
-              <div style="font-size:14px;font-weight:800;color:#1F2A3F;line-height:1.4;">🎥 カメラ + マイクで録画</div>
-              <div style="font-size:11.5px;color:#6b7280;margin-top:3px;line-height:1.55;">表情も残す。 初回はブラウザの許可が必要。</div>
+              <div style="font-size:11px;font-weight:800;color:#6B7280;letter-spacing:0.12em;margin-bottom:3px;">IN-PERSON</div>
+              <div style="font-size:15px;font-weight:800;color:#1F2A3F;line-height:1.4;">🎤 対面で録音だけ する</div>
+              <div style="font-size:12px;color:#6b7280;margin-top:4px;line-height:1.6;">対面相談時に PC のマイクで 録音 → AI議事録 自動生成。 マイク権限が必要。</div>
             </div>
           </label>
-          <label class="fp-qi-mode" data-mode="memo" style="display:flex;gap:12px;padding:14px 16px;border:1.5px solid #E5E7EB;border-radius:10px;cursor:pointer;background:#fff;transition:border-color .12s,background .12s;">
+          <label class="fp-qi-mode" data-mode="memo" style="display:flex;gap:12px;padding:14px 18px;border:1.5px solid #E5E7EB;border-radius:10px;cursor:pointer;background:#fff;transition:border-color .12s,background .12s;">
             <input type="radio" name="fp-qi-mode" value="memo" style="margin-top:3px;flex-shrink:0;">
             <div style="flex:1;">
               <div style="font-size:11px;font-weight:800;color:#6B7280;letter-spacing:0.12em;margin-bottom:3px;">TEXT ONLY</div>
-              <div style="font-size:14px;font-weight:800;color:#1F2A3F;line-height:1.4;">📝 録音せず メモだけ書く</div>
+              <div style="font-size:14px;font-weight:800;color:#1F2A3F;line-height:1.4;">📝 録音せず メモだけ 書く</div>
               <div style="font-size:11.5px;color:#6b7280;margin-top:3px;line-height:1.55;">手入力で議事録を残す。 自動生成はなし。</div>
             </div>
           </label>
@@ -1207,7 +1207,7 @@
 
         <div style="display:flex;gap:10px;">
           <button id="fp-qi-start" class="btn-cta-primary" style="flex:2;justify-content:center;" disabled>
-            <span>選んだモードで開始</span>
+            <span>選んだスタイルで開始</span>
             <span class="cta-arrow">→</span>
           </button>
           <button id="fp-qi-cancel" class="btn-cta-ghost">キャンセル</button>
@@ -1247,17 +1247,17 @@
         clientName = c.name || 'お客様';
         clientId = c.id;
       }
-      const mode = ov.querySelector('input[name="fp-qi-mode"]:checked')?.value || 'audio';
-      const inpersonTs = 'inperson-' + Date.now();
+      const mode = ov.querySelector('input[name="fp-qi-mode"]:checked')?.value || 'zoom';
+      const inpersonTs = 'quick-' + Date.now();
       try {
         const existing = JSON.parse(localStorage.getItem('fp-quick-inperson-meta') || '[]');
-        existing.push({ ts: inpersonTs, clientId, clientName, startedAt: new Date().toISOString(), mode: 'inperson-' + mode });
+        existing.push({ ts: inpersonTs, clientId, clientName, startedAt: new Date().toISOString(), mode });
         localStorage.setItem('fp-quick-inperson-meta', JSON.stringify(existing.slice(-50)));
       } catch (_) {}
       ov.remove();
       // モード分岐
-      if (mode === 'audio')       await startAudioOnlyRecording(inpersonTs);
-      else if (mode === 'webcam') await startWebcamRecording(inpersonTs);
+      if (mode === 'zoom')        await startQuickZoom(clientId, clientName);
+      else if (mode === 'audio')  await startAudioOnlyRecording(inpersonTs);
       else                        await openMemoOnlyForQuick(inpersonTs, clientId, clientName);
     });
   }
@@ -2477,6 +2477,108 @@
     // ★ 同じく stopScreenRecording ボタン = 停止
     await fetchLiveData();
     renderLeadHubInner();
+  }
+
+  // ★ 2026-06-22 roundH: 急遽 Zoom 即発行 (オーナーfb: 「カメラ/マイク 関係ない、 Zoom リンク即発行 して双方参加」)
+  async function startQuickZoom(clientId, clientName) {
+    // 進行モーダル (Zoom発行中…)
+    const wait = document.createElement('div');
+    wait.id = 'fp-quick-zoom-wait';
+    wait.style.cssText = 'position:fixed;inset:0;background:rgba(15,23,42,0.78);z-index:2147483646;display:flex;align-items:center;justify-content:center;font-family:"Hiragino Sans",sans-serif;';
+    wait.innerHTML = `
+      <div style="background:#fff;border-radius:14px;padding:32px 40px;max-width:420px;width:90%;box-shadow:0 32px 80px rgba(0,0,0,0.5);text-align:center;">
+        <div style="width:56px;height:56px;border:4px solid #E2E8F0;border-top-color:#C19A3A;border-radius:50%;margin:0 auto 18px;animation:fp-spin 0.9s linear infinite;"></div>
+        <div style="font-size:11px;font-weight:800;color:#9A5A18;letter-spacing:0.14em;margin-bottom:6px;">QUICK ZOOM</div>
+        <div style="font-size:17px;font-weight:800;color:#111827;font-family:'Noto Serif JP',serif;margin-bottom:6px;">${escapeHtml(clientName)} 様 / Zoom 発行中…</div>
+        <div style="font-size:12.5px;color:#6b7280;line-height:1.7;">Zoom Meeting を 作成 → お客様に LINE で URL 通知 → FP は host で 参加 します</div>
+      </div>
+      <style>@keyframes fp-spin { to { transform: rotate(360deg); } }</style>`;
+    document.body.appendChild(wait);
+
+    let result;
+    try {
+      const { initializeApp, getApps } = await import('https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js');
+      const { getFunctions, httpsCallable } = await import('https://www.gstatic.com/firebasejs/10.13.2/firebase-functions.js');
+      const app = getApps()[0] || initializeApp({
+        apiKey: 'AIzaSyAmVAEe9l9e1Yo_dzzJdbTVU35wWKd2sH4',
+        authDomain: 'skeleton-fp-compass-632026.firebaseapp.com',
+        projectId: 'skeleton-fp-compass-632026',
+      });
+      const fn = httpsCallable(getFunctions(app, 'asia-northeast1'), 'quickZoomMeeting');
+      const payload = clientId.startsWith('quick-')
+        ? { topic: 'FP Compass 急遽相談 / ' + clientName }
+        : { customerId: clientId };
+      const res = await fn(payload);
+      result = res.data;
+    } catch (e) {
+      wait.remove();
+      const errMsg = e?.message || String(e);
+      const isNoZoom = /Zoom 未連携|failed-precondition/.test(errMsg);
+      alert(isNoZoom
+        ? `Zoom が 未連携 です。\n\nアカウント設定 → Zoom 連携 で 認証情報 (Account ID / Client ID / Client Secret) を 入れてから 再度 お試しください。\n\n→ /account.html#zoom`
+        : `Zoom 発行失敗: ${errMsg.slice(0, 300)}`);
+      return;
+    }
+
+    wait.remove();
+
+    // 成功 → 結果モーダル (host URL クリックで FP が Zoom 参加 / お客様にも LINE 送信済)
+    const ov = document.createElement('div');
+    ov.id = 'fp-quick-zoom-result';
+    ov.style.cssText = 'position:fixed;inset:0;background:rgba(15,23,42,0.78);z-index:2147483647;display:flex;align-items:center;justify-content:center;font-family:"Hiragino Sans",sans-serif;padding:24px;';
+    const pushedBadge = result.linePushed
+      ? `<div style="display:inline-flex;align-items:center;gap:6px;background:#D1FAE5;color:#065F46;font-size:11px;font-weight:800;padding:5px 12px;border-radius:99px;letter-spacing:0.08em;">✓ LINE 送信済</div>`
+      : `<div style="display:inline-flex;align-items:center;gap:6px;background:#FEF3C7;color:#92400E;font-size:11px;font-weight:800;padding:5px 12px;border-radius:99px;letter-spacing:0.08em;">⚠ LINE 未送信 (URLを 手動でお伝えください)</div>`;
+    ov.innerHTML = `
+      <div style="background:#fff;border-radius:14px;max-width:520px;width:100%;padding:28px 32px;box-shadow:0 32px 80px rgba(0,0,0,0.5);">
+        <div style="display:inline-flex;align-items:center;gap:8px;background:#FBF5E3;color:#9A5A18;font-size:11px;font-weight:800;padding:5px 12px;border-radius:99px;letter-spacing:0.12em;margin-bottom:14px;">⚡ Zoom 発行完了</div>
+        <h2 style="font-family:'Noto Serif JP',serif;font-size:20px;font-weight:700;color:#111827;margin:0 0 6px;">${escapeHtml(clientName)} 様 と Zoom 開始</h2>
+        <p style="font-size:12.5px;color:#6b7280;line-height:1.7;margin:0 0 16px;">下の「FPとして 参加」 を 押すと 新タブで Zoom が起動します。 お客様には すでに LINE で URL を 送信済 です。</p>
+
+        ${pushedBadge}
+
+        <!-- FP 用 host URL -->
+        <div style="background:#FBF5E3;border:1.5px solid #C19A3A;border-radius:10px;padding:14px 16px;margin-top:14px;">
+          <div style="font-size:10.5px;font-weight:800;color:#9A5A18;letter-spacing:0.14em;margin-bottom:6px;">FP HOST URL</div>
+          <code style="display:block;font-size:11px;font-family:'JetBrains Mono',monospace;color:#1F2A3F;word-break:break-all;line-height:1.5;margin-bottom:10px;background:#fff;padding:8px 10px;border-radius:6px;">${escapeHtml(result.hostZoomUrl).slice(0, 200)}…</code>
+          <a href="${escapeHtml(result.hostZoomUrl)}" target="_blank" rel="noopener noreferrer" class="btn-cta-primary" style="text-decoration:none;justify-content:center;width:100%;">
+            <span>FPとして Zoom に参加 (host)</span>
+            <span class="cta-arrow">→</span>
+          </a>
+        </div>
+
+        <!-- お客様用 join URL (コピー用) -->
+        <details style="margin-top:14px;background:#F8FAFC;border:1px solid #E2E8F0;border-radius:8px;padding:0;">
+          <summary style="cursor:pointer;padding:12px 16px;font-size:12.5px;font-weight:700;color:#475569;list-style:none;display:flex;align-items:center;justify-content:space-between;">
+            <span>📋 お客様用 URL (コピー / 手動共有)</span>
+            <span style="font-size:14px;">▾</span>
+          </summary>
+          <div style="padding:0 16px 14px;">
+            <code style="display:block;font-size:11px;font-family:'JetBrains Mono',monospace;color:#1F2A3F;word-break:break-all;line-height:1.5;background:#fff;padding:8px 10px;border-radius:6px;border:1px solid #E2E8F0;">${escapeHtml(result.zoomUrl)}</code>
+            <button id="fp-qz-copy" class="btn-mini-action" style="margin-top:10px;"><span class="icon">📋</span>URLを コピー</button>
+          </div>
+        </details>
+
+        ${result.linePushError ? `<div style="margin-top:12px;background:#FEE2E2;border:1px solid #FCA5A5;border-radius:6px;padding:10px 14px;font-size:11.5px;color:#991B1B;line-height:1.6;"><strong>LINE 送信失敗:</strong> ${escapeHtml(result.linePushError.slice(0, 200))}</div>` : ''}
+
+        <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:18px;">
+          <button class="btn-cta-ghost" id="fp-qz-close">閉じる</button>
+        </div>
+      </div>`;
+    document.body.appendChild(ov);
+    document.getElementById('fp-qz-close').addEventListener('click', () => ov.remove());
+    document.getElementById('fp-qz-copy').addEventListener('click', () => {
+      navigator.clipboard.writeText(result.zoomUrl).then(() => {
+        const t = document.createElement('div');
+        t.style.cssText = 'position:fixed;top:24px;left:50%;transform:translateX(-50%);background:#065F46;color:#fff;padding:10px 22px;border-radius:99px;font-weight:800;font-size:12px;z-index:2147483647;';
+        t.textContent = '✓ コピー完了';
+        document.body.appendChild(t);
+        setTimeout(() => t.remove(), 1800);
+      });
+    });
+
+    // Firestore 反映 (面談履歴に出るよう liveData refresh)
+    try { await fetchLiveData(); renderLeadHubInner(); } catch (_) {}
   }
 
   // ★ 2026-06-22 roundG: 録音せずメモだけ書く (急遽録画モーダルの 3rd option)
