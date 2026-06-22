@@ -7087,6 +7087,7 @@ table tbody button.btn-mini:hover {
    オーナーfb: 縦長すぎてスクロール必要 → 3列でコンパクトに
    ============================================================ */
 .fp-qa-grid {
+  display: grid !important;  /* ★ これが無いと grid-template-columns 効かず block fallback で縦並びになる */
   grid-template-columns: repeat(3, minmax(0, 1fr)) !important;  /* minmax(0,1fr) で content幅 折返し 防止 */
   row-gap: 26px !important;
   column-gap: 10px !important;
