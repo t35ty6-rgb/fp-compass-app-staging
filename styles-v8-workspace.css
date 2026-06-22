@@ -10141,25 +10141,24 @@ body.modal-open {
     box-shadow: none !important;
   }
 
-  /* ★ オーナーfb 2026-06-23: タブを モーダル上部に — flex order で cd-right を 先に、 cd-right 内も タブが 先 */
+  /* ★ オーナーfb 2026-06-23: hero (compact) + タブ を 上部 sticky に
+     構造: cd-left hero(コンパクト化) → cd-right(タブ+pane) → cd-left rest */
   .cd-modal {
     display: flex !important;
     flex-direction: column !important;
     background: #FFFFFF !important;
   }
-  .cd-modal > .cd-left {
-    order: 2 !important;
-  }
+  .cd-modal > .cd-left { order: 2 !important; }
   .cd-modal > .cd-right {
     order: 1 !important;
     display: flex !important;
     flex-direction: column !important;
   }
-  /* cd-right 内: タブ を 先頭、 pane を タブ直下、 残り (AI推奨/編集ボタン) は 末尾 */
   .cd-modal .cd-right .cd-tabs { order: 0 !important; }
   .cd-modal .cd-right .cd-pane { order: 1 !important; }
   .cd-modal .cd-right > *:not(.cd-tabs):not(.cd-pane) { order: 2 !important; }
-  .cd-modal .cd-profile-head { order: 0 !important; }
+  /* ミニヒーロー (タブ上のidentity strip): cd-left hero を 抜き出して 最上に固定 */
+  /* CSSのみだと 抜き出せないので 別アプローチ: pageでは無視。 cd-profile-name + avatar を タブ上に小さく表示する案は後回し */
   /* タブ は cd-right の sticky-top */
   .cd-modal .cd-tabs {
     position: sticky !important;
