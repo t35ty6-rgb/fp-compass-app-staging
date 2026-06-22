@@ -10065,12 +10065,15 @@ body.modal-open {
   /* ============================================================
      FB3. 2-3階層モーダル ディテール polish
   ============================================================ */
-  /* 一般 modal overlay (.modal-overlay) - mobile full screen */
+  /* 一般 modal overlay (.modal-overlay) - mobile full screen, 内部スクロール */
   .modal-overlay[style*="display: flex"],
-  .modal-overlay[style*="display:flex"] {
+  .modal-overlay[style*="display:flex"],
+  .modal-overlay.show {
     align-items: flex-start !important;
     padding: 0 !important;
+    overflow-y: auto !important;
     overscroll-behavior: contain !important;
+    -webkit-overflow-scrolling: touch !important;
   }
   #modal-content,
   .modal-content {
