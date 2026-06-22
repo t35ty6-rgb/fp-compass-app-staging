@@ -7772,3 +7772,25 @@ body.mobile-nav-open #mobile-hamburger .mh-bar:nth-child(3) { transform: transla
     align-items: flex-start !important;  /* center だと はみ出した時 上に行けない */
   }
 }
+
+/* ★ 2026-06-22 roundR: html/body overflow:hidden を モバイルで 解除 (オーナーfb: スクロール出来ない 真因) */
+@media (max-width: 768px) {
+  html, body {
+    height: auto !important;
+    min-height: 100% !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+  /* sidebar/main 内部の overflow も モバイルでは body scroll に渡す */
+  .sidebar { overflow-y: auto !important; }
+  .main, main {
+    overflow: visible !important;
+    height: auto !important;
+    min-height: auto !important;
+  }
+  .shell {
+    overflow: visible !important;
+    height: auto !important;
+  }
+}
