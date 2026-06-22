@@ -5813,29 +5813,152 @@ ${family} ${era}層は「教育費ピーク (子18歳) と退職金準備が重�
     });
   }
 
-  function showTranscriptModal(transcript, title) {
+  // ★ 2026-06-22 roundK: 議事録モーダル 3タブ化 (要約 / タスク / 全文)
+  // transcriptOrAI: string (旧: 全文だけ) OR object { transcript, summary, transcript_summary, key_concerns, tasks, next_meeting_suggestion }
+  function showTranscriptModal(transcriptOrAI, title) {
+    const isObj = transcriptOrAI && typeof transcriptOrAI === 'object';
+    const ai = isObj ? transcriptOrAI : null;
+    const transcript = isObj ? (ai.transcript || '') : String(transcriptOrAI || '');
+    const summary = ai?.transcript_summary || (ai?.summary && !Array.isArray(ai.summary) ? '' : '');
+    const summaryPoints = ai?.summary || '';
+    const concerns = Array.isArray(ai?.key_concerns) ? ai.key_concerns : [];
+    const tasks = Array.isArray(ai?.tasks) ? ai.tasks : [];
+    const nextMeeting = ai?.next_meeting_suggestion || '';
+    const hasAny = summary || summaryPoints || concerns.length || tasks.length;
+    // タブ初期値: タスクあればタスク優先 / なければ要約
+    const defaultTab = tasks.length > 0 ? 'tasks' : (hasAny ? 'summary' : 'full');
+
+    const tabs = [
+      { id: 'summary', label: '要約', icon: '◉', count: hasAny ? (concerns.length + (summaryPoints ? 1 : 0)) : 0 },
+      { id: 'tasks', label: 'タスク', icon: '✓', count: tasks.length },
+      { id: 'full', label: '全文', icon: '◧', count: transcript ? Math.ceil(transcript.length / 100) + 'p' : 0 },
+    ];
+
+    // タスク priority → 色マッピング (左ボーダー)
+    const priColor = (p) => {
+      if (/至急|即/.test(p || '')) return '#B91C3C';
+      if (/今週|today|今日/i.test(p || '')) return '#9A5A18';
+      if (/3ヶ月|three.month/i.test(p || '')) return '#5B21B6';
+      if (/半年|6.month/i.test(p || '')) return '#1E3A5F';
+      return '#6B7280';
+    };
+
     const html = `
-      <div class="modal-header">
-        <h2>${title || '議事録'}</h2>
+      <div class="modal-header" style="border-bottom:1px solid #E8E2D4;background:linear-gradient(180deg,#fdfbf4,#fff);">
+        <div style="display:flex;flex-direction:column;gap:2px;">
+          <div style="font-size:10.5px;font-weight:700;color:#9A5A18;letter-spacing:0.22em;text-transform:uppercase;font-family:'Inter',sans-serif;">Meeting Minutes</div>
+          <h2 style="font-family:'Noto Serif JP',serif;font-size:19px;font-weight:700;color:#1F2A3F;margin:0;letter-spacing:0.02em;">${escapeHtml(title || '議事録')}</h2>
+        </div>
         <button class="modal-close" id="tr-close">×</button>
       </div>
-      <div class="modal-body">
-        <div style="background:#fafbfc;border:1px solid var(--line);border-radius:8px;padding:18px 22px;font-family:'Noto Sans JP',monospace;font-size:12.5px;line-height:1.85;white-space:pre-wrap;max-height:600px;overflow-y:auto;letter-spacing:0.01em;">${escapeHtml(transcript)}</div>
-        <div style="display:flex;gap:8px;margin-top:14px;">
-          <button class="primary" id="tr-copy">📋 全文をコピー</button>
-          <button id="tr-close-btn">閉じる</button>
+      <div class="modal-body" style="padding:0;">
+        <!-- サブタブ inline -->
+        <div id="tr-tabs" style="display:flex;gap:0;border-bottom:1px solid #E8E2D4;background:#fff;padding:0 22px;">
+          ${tabs.map(t => `
+            <button data-tr-tab="${t.id}" class="tr-tab" style="background:transparent;border:none;padding:14px 18px 12px;font-family:'Hiragino Sans',sans-serif;font-size:13px;font-weight:700;color:#6B7280;cursor:pointer;border-bottom:3px solid transparent;letter-spacing:0.04em;display:inline-flex;align-items:center;gap:7px;">
+              <span style="font-size:14px;opacity:0.8;">${t.icon}</span>
+              ${t.label}
+              ${t.count ? `<span style="background:#F0EBDF;color:#9A5A18;font-size:10.5px;font-weight:800;padding:1px 7px;border-radius:99px;font-family:'Inter',sans-serif;">${t.count}</span>` : ''}
+            </button>
+          `).join('')}
         </div>
-        <div id="tr-msg" style="font-size:11.5px;color:var(--muted);margin-top:8px;text-align:center;"></div>
+
+        <!-- 要約 panel -->
+        <div id="tr-panel-summary" data-tr-panel="summary" style="display:none;padding:24px 28px;max-height:560px;overflow-y:auto;">
+          ${hasAny ? `
+            ${summary ? `
+              <div style="background:linear-gradient(135deg,#FBF5E3,#FDFBF4);border:1px solid #E8D9A8;border-left:3px solid #C19A3A;border-radius:10px;padding:18px 22px;margin-bottom:14px;">
+                <div style="font-size:10px;font-weight:800;color:#9A5A18;letter-spacing:0.18em;margin-bottom:6px;">TODAY'S THEME</div>
+                <div style="font-family:'Noto Serif JP',serif;font-size:15.5px;font-weight:600;color:#1F2A3F;line-height:1.75;">${escapeHtml(summary)}</div>
+              </div>
+            ` : ''}
+            ${concerns.length ? `
+              <div style="margin-bottom:14px;">
+                <div style="font-size:10px;font-weight:800;color:#9A5A18;letter-spacing:0.18em;margin-bottom:8px;">CONCERNS · お客様の懸念</div>
+                <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                  ${concerns.map(c => `<span style="background:#1F2A3F;color:#FCFAF2;font-family:'Hiragino Sans',sans-serif;font-weight:700;font-size:11.5px;padding:5px 12px;border-radius:99px;">${escapeHtml(c)}</span>`).join('')}
+                </div>
+              </div>
+            ` : ''}
+            ${summaryPoints ? `
+              <div style="background:#fff;border:1px solid #E8E2D4;border-radius:10px;padding:18px 22px;margin-bottom:14px;">
+                <div style="font-size:10px;font-weight:800;color:#9A5A18;letter-spacing:0.18em;margin-bottom:8px;">SUMMARY · ポイント</div>
+                <div style="font-family:'Hiragino Sans',sans-serif;font-size:13.5px;color:#1F2A3F;line-height:1.85;white-space:pre-wrap;">${escapeHtml(summaryPoints)}</div>
+              </div>
+            ` : ''}
+            ${nextMeeting ? `
+              <div style="background:#F0FDF4;border:1px solid #86EFAC;border-left:3px solid #065F46;border-radius:10px;padding:14px 18px;">
+                <div style="font-size:10px;font-weight:800;color:#065F46;letter-spacing:0.18em;margin-bottom:6px;">NEXT MEETING</div>
+                <div style="font-size:13px;color:#1F2A3F;line-height:1.7;">${escapeHtml(nextMeeting)}</div>
+              </div>
+            ` : ''}
+          ` : '<div style="padding:40px;text-align:center;color:#9CA3AF;font-size:13px;">要約はまだ生成されていません。 「全文」 タブで 文字起こしを確認できます。</div>'}
+        </div>
+
+        <!-- タスク panel -->
+        <div id="tr-panel-tasks" data-tr-panel="tasks" style="display:none;padding:24px 28px;max-height:560px;overflow-y:auto;">
+          ${tasks.length ? tasks.map(t => `
+            <div style="background:#fff;border:1px solid #E8E2D4;border-left:4px solid ${priColor(t.priority)};border-radius:10px;padding:16px 20px;margin-bottom:10px;">
+              <div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-bottom:8px;">
+                <strong style="font-family:'Hiragino Sans',sans-serif;font-size:14px;color:#1F2A3F;line-height:1.4;flex:1;">${escapeHtml(t.task || '')}</strong>
+                <span style="font-size:10.5px;font-weight:800;color:${priColor(t.priority)};letter-spacing:0.08em;white-space:nowrap;font-family:'Hiragino Sans',sans-serif;">${escapeHtml(t.priority || '')}${t.dueDate ? ' · ' + escapeHtml(t.dueDate) : ''}</span>
+              </div>
+              ${t.recommendedAction ? `<div style="font-size:12px;color:#5e4d1a;background:#FBF5E3;border-radius:6px;padding:9px 13px;line-height:1.7;margin-bottom:${t.lineDraft ? '8px' : '0'};">${escapeHtml(t.recommendedAction)}</div>` : ''}
+              ${t.lineDraft ? `
+                <div style="background:#F0FDF4;border:1px solid #86EFAC;border-radius:6px;padding:10px 13px;font-size:12px;color:#065F46;line-height:1.7;white-space:pre-wrap;margin-bottom:8px;">${escapeHtml(t.lineDraft)}</div>
+                <button class="btn-mini-action is-line" data-tr-copy-draft="${escapeHtml(t.lineDraft).replace(/&quot;/g, '&#34;')}"><span class="icon">📋</span>LINE文案コピー</button>
+              ` : ''}
+            </div>
+          `).join('') : '<div style="padding:40px;text-align:center;color:#9CA3AF;font-size:13px;">タスクはまだ抽出されていません。</div>'}
+        </div>
+
+        <!-- 全文 panel -->
+        <div id="tr-panel-full" data-tr-panel="full" style="display:none;padding:24px 28px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+            <div style="font-size:10px;font-weight:800;color:#9A5A18;letter-spacing:0.18em;">FULL TRANSCRIPT · 文字起こし全文 (${transcript.length}文字)</div>
+            <button class="btn-mini-action" id="tr-copy"><span class="icon">📋</span>全文コピー</button>
+          </div>
+          <div style="background:#fafbfc;border:1px solid #E8E2D4;border-radius:8px;padding:20px 24px;font-family:'Hiragino Sans',monospace;font-size:13px;line-height:1.95;white-space:pre-wrap;max-height:520px;overflow-y:auto;letter-spacing:0.02em;color:#1F2A3F;">${escapeHtml(transcript) || '<span style="color:#9CA3AF;">文字起こしがありません</span>'}</div>
+        </div>
+
+        <div style="padding:14px 28px;border-top:1px solid #E8E2D4;display:flex;justify-content:space-between;align-items:center;background:#fafaf7;">
+          <div id="tr-msg" style="font-size:11.5px;color:#6B7280;"></div>
+          <button class="btn-cta-ghost" id="tr-close-btn">閉じる</button>
+        </div>
       </div>
+      <style>
+        .tr-tab.is-active { color: #1F2A3F !important; border-bottom-color: #C19A3A !important; }
+        .tr-tab:hover:not(.is-active) { color: #1F2A3F !important; }
+      </style>
     `;
     document.getElementById('modal-content').innerHTML = html;
     document.getElementById('modal-overlay').style.display = 'flex';
     const close = () => { document.getElementById('modal-overlay').style.display = 'none'; };
     document.getElementById('tr-close').addEventListener('click', close);
     document.getElementById('tr-close-btn').addEventListener('click', close);
-    document.getElementById('tr-copy').addEventListener('click', () => {
+
+    // タブ切替
+    const switchTab = (id) => {
+      document.querySelectorAll('.tr-tab').forEach(b => b.classList.toggle('is-active', b.dataset.trTab === id));
+      document.querySelectorAll('[data-tr-panel]').forEach(p => p.style.display = p.dataset.trPanel === id ? 'block' : 'none');
+    };
+    document.querySelectorAll('.tr-tab').forEach(b => b.addEventListener('click', () => switchTab(b.dataset.trTab)));
+    switchTab(defaultTab);
+
+    // 全文コピー
+    const copyBtn = document.getElementById('tr-copy');
+    if (copyBtn) copyBtn.addEventListener('click', () => {
       navigator.clipboard.writeText(transcript);
       document.getElementById('tr-msg').textContent = '✓ クリップボードにコピーしました';
+      setTimeout(() => { document.getElementById('tr-msg').textContent = ''; }, 2200);
+    });
+    // タスク内 LINE文案コピー
+    document.querySelectorAll('[data-tr-copy-draft]').forEach(b => {
+      b.addEventListener('click', () => {
+        navigator.clipboard.writeText(b.dataset.trCopyDraft);
+        document.getElementById('tr-msg').textContent = '✓ LINE文案をコピーしました';
+        setTimeout(() => { document.getElementById('tr-msg').textContent = ''; }, 2200);
+      });
     });
   }
 
@@ -8342,17 +8465,34 @@ ${family} ${era}層は「教育費ピーク (子18歳) と退職金準備が重�
           const ts = btn.dataset.viewMhMinutes;
           const cname = btn.dataset.clientName || 'お客様';
           const hasAi = btn.dataset.hasAi === '1';
-          // 多重 fallback: bookings.transcript / ai_results.transcript / ai_results.summary / aiResults リアル参照
           const liveBookings = (live.bookings || []);
           const matched = liveBookings.find(x => String(x.ts).slice(0, 19) === String(ts).slice(0, 19));
+          // ★ 2026-06-22 roundK: AI結果オブジェクト全体を 渡して タブ構造で見せる
           const aiByTs = aiResults.find(r =>
             (r.bookingTs && String(r.bookingTs).slice(0, 19) === String(ts).slice(0, 19)) ||
             (r.customerName && r.customerName === cname)
           );
+          // tasks 等 JSON 文字列で 保存されてる場合は parse
+          const safeAi = aiByTs ? {
+            transcript: aiByTs.transcript || '',
+            summary: aiByTs.summary || '',
+            transcript_summary: aiByTs.transcript_summary || '',
+            key_concerns: typeof aiByTs.key_concerns === 'string'
+              ? (function () { try { return JSON.parse(aiByTs.key_concerns); } catch (_) { return aiByTs.key_concerns.split(/[,、]\s*/).filter(Boolean); } })()
+              : (aiByTs.key_concerns || []),
+            tasks: typeof aiByTs.tasks === 'string'
+              ? (function () { try { return JSON.parse(aiByTs.tasks); } catch (_) { return []; } })()
+              : (aiByTs.tasks || []),
+            next_meeting_suggestion: aiByTs.next_meeting_suggestion || '',
+          } : null;
+          // 多重 fallback
+          if (safeAi && (safeAi.transcript || safeAi.summary || safeAi.transcript_summary || safeAi.tasks?.length)) {
+            showTranscriptModal(safeAi, '議事録 — ' + cname);
+            return;
+          }
           const transcript = (matched && matched.transcript)
             || btn.dataset.aiTranscript
             || btn.dataset.aiSummary
-            || (aiByTs && (aiByTs.transcript || aiByTs.summary))
             || '';
           if (transcript) {
             showTranscriptModal(transcript, '議事録 — ' + cname);
