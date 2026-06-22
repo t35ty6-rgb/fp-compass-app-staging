@@ -8560,3 +8560,51 @@ body.mobile-nav-open #mobile-hamburger .mh-bar:nth-child(3) { transform: transla
   /* チャットbot ヒント (吹き出し) を 隠す → アイコンだけ */
   #mbFabHint, .mb-fab-hint { display: none !important; }
 }
+
+/* ★ 2026-06-22 roundU fix2: 顧客カード grid override を 取消し → シンプル縦並び */
+@media (max-width: 768px) {
+  table.clients tbody tr {
+    display: block !important;
+    grid-template-areas: none !important;
+    padding: 12px 14px !important;
+    margin-bottom: 8px !important;
+    background: #fff !important;
+    border: 1px solid #E8E2D4 !important;
+    border-radius: 12px !important;
+    box-shadow: 0 2px 6px rgba(15, 23, 42, 0.05) !important;
+  }
+  table.clients tbody td {
+    display: block !important;
+    grid-area: auto !important;
+    padding: 3px 0 !important;
+    font-size: 12px !important;
+    line-height: 1.5 !important;
+    color: #6B7280 !important;
+    margin: 0 !important;
+  }
+  /* 1列目 = 顧客名 */
+  table.clients tbody td:first-child {
+    font-size: 14.5px !important;
+    font-weight: 800 !important;
+    color: #1F2A3F !important;
+    padding-bottom: 6px !important;
+    margin-bottom: 4px !important;
+    border-bottom: 1px solid #F0EBDF !important;
+  }
+  /* td 内 chip / badge を 横並び に */
+  table.clients tbody td > div,
+  table.clients tbody td > span {
+    display: inline-block !important;
+    margin-right: 4px !important;
+    vertical-align: middle !important;
+  }
+  /* 「-」 だけ の td を 隠す (data label="…" の対応がない時) */
+  table.clients tbody td:not(:first-child) {
+    overflow: visible !important;
+  }
+  /* 数字 yen 等 (¥750万) は 強調 */
+  table.clients tbody td:has(> :contains("¥")) {
+    color: #1F2A3F !important;
+    font-weight: 700 !important;
+  }
+}
