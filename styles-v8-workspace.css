@@ -10104,10 +10104,10 @@ body.modal-open {
     flex-shrink: 0 !important;
     cursor: pointer !important;
   }
-  /* cd-close は absolute 配置 (cd-modal 相対) */
+  /* cd-close は fixed 配置 でスクロール しても 常に viewport 右上 */
   .cd-modal .cd-close {
-    position: absolute !important;
-    top: 12px !important;
+    position: fixed !important;
+    top: max(12px, env(safe-area-inset-top, 12px)) !important;
     right: 12px !important;
     box-shadow: 0 4px 12px rgba(15,23,42,0.15) !important;
   }
