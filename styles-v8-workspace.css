@@ -7087,9 +7087,17 @@ table tbody button.btn-mini:hover {
    オーナーfb: 縦長すぎてスクロール必要 → 3列でコンパクトに
    ============================================================ */
 .fp-qa-grid {
-  grid-template-columns: repeat(3, 1fr) !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;  /* minmax(0,1fr) で content幅 折返し 防止 */
   row-gap: 26px !important;
   column-gap: 10px !important;
+  width: 100% !important;
+}
+.fp-qa-grid > .fp-qa-pop { min-width: 0 !important; }
+.fp-qa-grid > .fp-qa-pop .fp-qa-label-main,
+.fp-qa-grid > .fp-qa-pop .fp-qa-label-sub {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 /* 3列なので 各 cell を コンパクト化 */
