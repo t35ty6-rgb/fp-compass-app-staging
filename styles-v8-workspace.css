@@ -8974,3 +8974,92 @@ body.modal-open {
     display: none !important;
   }
 }
+
+/* ============================================================
+   モバイル audit fix v1 (2026-06-22 roundW)
+   全15ページ細部点検で発覚した 8問題 一括修正
+   ============================================================ */
+@media (max-width: 768px) {
+  /* A/B. スケール縮小バグ: 配信タブ content / モーダル の親の transform を 解除 */
+  [data-line-view="distributionHub"],
+  [data-line-view="distributionHub"] *,
+  [data-view="distributionHub"],
+  .modal-overlay > *,
+  .modal#modal-content {
+    transform: none !important;
+    zoom: 1 !important;
+    width: 100% !important;
+  }
+  /* distributionHub view の min-width 解除 */
+  [data-line-view="distributionHub"] { min-width: 0 !important; max-width: 100% !important; }
+  /* 配信タブ内 サブタブ button (今日送る/予定/テンプレ/送信ログ) を 横並び 表示 */
+  [data-line-view="distributionHub"] > div:first-child {
+    flex-wrap: wrap !important;
+    gap: 6px !important;
+  }
+  [data-line-view="distributionHub"] [data-dist-subtab] {
+    padding: 10px 14px !important;
+    font-size: 12.5px !important;
+    min-height: 44px !important;
+    flex: 1 1 auto !important;
+  }
+
+  /* D. 設定 セクションヘッダ 紫×紫 解消 */
+  .hub-section-title {
+    background: linear-gradient(135deg, #FBF5E3, #FDFBF4) !important;
+    color: #1F2A3F !important;
+    border-left: 4px solid #C19A3A !important;
+    font-weight: 800 !important;
+    padding: 12px 16px !important;
+    border-radius: 8px !important;
+  }
+
+  /* E. ご無沙汰フォロー RE-ENGAGE バナー 縦書き圧縮解消 */
+  [data-view="dormantFollowup"] .page-sub + div,
+  [data-view="dormantFollowup"] > div > div:has([style*="background:linear-gradient(135deg,#FEF3C7"]),
+  div[style*="background:linear-gradient(135deg,#FEF3C7,#FFEDD5)"] {
+    display: block !important;
+    text-align: left !important;
+  }
+  div[style*="background:linear-gradient(135deg,#FEF3C7,#FFEDD5)"] > div {
+    flex-wrap: wrap !important;
+    flex-direction: column !important;
+    gap: 6px !important;
+    align-items: flex-start !important;
+  }
+
+  /* F. 新規相談 「3 件」 縦折れ修正: hero の数字/単位 横並び維持 */
+  [data-line-view="leadHub"] a[href*="section"] {
+    flex-wrap: wrap !important;
+  }
+  [data-line-view="leadHub"] [style*="font-size:42px"],
+  [data-line-view="leadHub"] [style*="font-size:30px"] {
+    white-space: nowrap !important;
+    display: inline-flex !important;
+    align-items: baseline !important;
+  }
+  [data-line-view="leadHub"] [style*="font-size:42px"] > span,
+  [data-line-view="leadHub"] [style*="font-size:30px"] > span {
+    white-space: nowrap !important;
+    display: inline !important;
+  }
+
+  /* G. drawer 新規相談 真っ赤バッジ → 既存と同じ 薄ピンク色に */
+  #nav-count-leadhub, #nav-count-newrequests {
+    background: #FEE2E2 !important;
+    color: #B91C1C !important;
+  }
+  /* drawer の nav-count 全部 統一 (赤/オレンジ系の濃さ揃え) */
+  .sidebar .nav-count[id*="leadhub"],
+  .sidebar .nav-count[id*="lead"] {
+    background: #FECACA !important;
+    color: #991B1B !important;
+  }
+
+  /* H. 顧客台帳 山田太郎テスト ピンク帯チラ見え (cd-action-pri or chip 残骸) */
+  table.clients tbody tr [class*="action-pri"],
+  table.clients tbody tr [style*="background:#fef2f2"],
+  table.clients tbody tr [style*="background:#fee2e2"] {
+    display: none !important;
+  }
+}
