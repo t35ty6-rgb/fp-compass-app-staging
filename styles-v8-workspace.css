@@ -8608,3 +8608,11 @@ body.mobile-nav-open #mobile-hamburger .mh-bar:nth-child(3) { transform: transla
     font-weight: 700 !important;
   }
 }
+
+/* ★ 2026-06-22 roundU fix3: モーダル開いてる時 body scroll lock */
+body.modal-open {
+  overflow: hidden !important;
+  position: fixed !important;
+  width: 100% !important;
+  height: 100% !important;
+}
