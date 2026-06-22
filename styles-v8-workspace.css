@@ -7980,3 +7980,19 @@ body.mobile-nav-open #mobile-hamburger .mh-bar:nth-child(3) { transform: transla
     grid-template-columns: 1fr !important;
   }
 }
+
+/* ★ 2026-06-22 roundR fix: モバイルで Zoomペア を 1列 + 改行崩れ防止 */
+@media (max-width: 768px) {
+  .cd-zoom-pair {
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+  }
+  .cd-zoom-pair > button {
+    padding: 14px 16px !important;
+    min-height: 64px !important;
+  }
+  .cd-zoom-pair > button > span:last-child {
+    white-space: nowrap !important;
+    flex: 1;
+  }
+}
