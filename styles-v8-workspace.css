@@ -10141,21 +10141,25 @@ body.modal-open {
     box-shadow: none !important;
   }
 
-  /* ★ オーナーfb 2026-06-23: タブ (cd-tabs) を モーダル上部に 移動
-     cd-modal を flex column 化 + display:contents で cd-left/cd-right の子を hoist + order で並べ替え */
+  /* ★ オーナーfb 2026-06-23: タブを モーダル上部に — シンプル flex order で cd-right を 先に */
   .cd-modal {
     display: flex !important;
     flex-direction: column !important;
+    background: #FFFFFF !important;
   }
-  .cd-modal > .cd-left,
-  .cd-modal > .cd-right {
-    display: contents !important;
-  }
-  /* hero (avatar+名前+chip) はいちばん上 */
-  .cd-modal .cd-profile-head { order: 1 !important; }
-  /* タブ は hero 直下、 スクロール時は fixed で viewport top に 張り付く */
-  .cd-modal .cd-tabs {
+  .cd-modal > .cd-left {
     order: 2 !important;
+  }
+  .cd-modal > .cd-right {
+    order: 1 !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+  /* hero (avatar+name) を cd-right の 真上 に sticky 風 浮かせる:
+     hero は cd-left 内 なので、 cd-left の中で 先頭順 維持。 hero は order:2 グループの 1番目 */
+  .cd-modal .cd-profile-head { order: 0 !important; }
+  /* タブ は cd-right の sticky-top */
+  .cd-modal .cd-tabs {
     position: sticky !important;
     top: 0 !important;
     z-index: 50 !important;
@@ -10166,7 +10170,6 @@ body.modal-open {
     -webkit-overflow-scrolling: touch !important;
     margin: 0 !important;
   }
-  /* sticky の親が overflow:auto でないと効かない → modal-overlay を scroll container に */
   .modal-overlay {
     overflow-y: auto !important;
     -webkit-overflow-scrolling: touch !important;
@@ -10175,23 +10178,9 @@ body.modal-open {
     min-height: 44px !important;
     flex-shrink: 0 !important;
   }
-  /* タブの中身 (pane) を タブ直下 に */
   .cd-modal .cd-pane {
-    order: 3 !important;
     padding: 0 0 24px !important;
     min-height: 30vh !important;
-  }
-  /* それ以外 (.cd-left 内の クイックアクション/タグ/KPI/プロフィール etc) は タブの 下に */
-  .cd-modal .cd-zoom-pair { order: 4 !important; }
-  .cd-modal #cd-tags-section { order: 5 !important; }
-  .cd-modal .cd-kpi-section { order: 6 !important; }
-  .cd-modal .cd-qa-collapse { order: 7 !important; }
-  .cd-modal button[data-open-hearing] { order: 8 !important; }
-  .cd-modal .cd-profile-stats { order: 9 !important; }
-  .cd-modal .cd-profile-section { order: 10 !important; }
-  /* 直接子の Zoom/タグ ボタン や 区切り を 上のグループに混ぜない: 不明な要素は 末尾 */
-  .cd-modal > .cd-left > *:not(.cd-profile-head):not(.cd-zoom-pair):not(#cd-tags-section):not(.cd-kpi-section):not(.cd-qa-collapse):not([data-open-hearing]):not(.cd-profile-stats):not(.cd-profile-section) {
-    order: 11 !important;
   }
 }
 /* ===== /roundX list style ===== */
