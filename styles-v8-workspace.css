@@ -7152,3 +7152,234 @@ table tbody button.btn-mini:hover {
   .fp-qa-pop { min-height: 76px; }
 }
 /* deploy-trigger 1782091790 */
+
+/* ============================================================
+   モバイル対応 v1 (2026-06-22 roundO)
+   ハンバーガー / サイドバー drawer / モーダル全画面 / table→カード
+   タッチ 44px+ / iOS auto-zoom 防止 (input font-size 16px)
+   ============================================================ */
+
+/* ハンバーガーボタン — PC では非表示、 < 768px で 左上 固定 表示 */
+#mobile-hamburger {
+  display: none;
+  position: fixed;
+  top: 12px; left: 12px;
+  z-index: 10100;
+  width: 44px; height: 44px;
+  background: #fff;
+  border: 1.5px solid #C19A3A;
+  border-radius: 12px;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.18);
+  padding: 0;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  transition: background .15s, border-color .15s;
+}
+#mobile-hamburger:hover { background: #FBF5E3; }
+#mobile-hamburger .mh-bar {
+  display: block;
+  width: 22px; height: 2.5px;
+  background: #1F2A3F;
+  border-radius: 2px;
+  transition: transform .25s, opacity .2s;
+}
+body.mobile-nav-open #mobile-hamburger .mh-bar:nth-child(1) { transform: translateY(7.5px) rotate(45deg); }
+body.mobile-nav-open #mobile-hamburger .mh-bar:nth-child(2) { opacity: 0; }
+body.mobile-nav-open #mobile-hamburger .mh-bar:nth-child(3) { transform: translateY(-7.5px) rotate(-45deg); }
+
+#mobile-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.55);
+  backdrop-filter: blur(2px);
+  z-index: 10080;
+  opacity: 0;
+  transition: opacity .25s;
+}
+
+/* ───── < 768px = モバイル ───── */
+@media (max-width: 768px) {
+  /* ハンバーガー / backdrop を 表示 */
+  #mobile-hamburger { display: flex; }
+
+  body.mobile-nav-open #mobile-backdrop {
+    display: block;
+    opacity: 1;
+  }
+
+  /* サイドバー: 左から slide-in (drawer) */
+  .sidebar {
+    position: fixed !important;
+    top: 0; left: 0;
+    width: 280px !important;
+    height: 100vh !important;
+    z-index: 10090 !important;
+    transform: translateX(-105%);
+    transition: transform .28s cubic-bezier(.2,.7,.2,1), box-shadow .28s;
+    overflow-y: auto !important;
+    box-shadow: none;
+  }
+  body.mobile-nav-open .sidebar {
+    transform: translateX(0);
+    box-shadow: 14px 0 36px rgba(0, 0, 0, 0.32);
+  }
+
+  /* メイン content: 全幅 + 上に hamburger 分の padding */
+  .shell {
+    display: block !important;
+    grid-template-columns: 1fr !important;
+  }
+  .main, main {
+    margin-left: 0 !important;
+    padding-top: 68px !important;
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+  }
+
+  /* topbar (breadcrumb 等) を 右に ずらして ハンバーガー 重ならないように */
+  .topbar, .breadcrumb, .crumbs {
+    padding-left: 60px !important;
+  }
+
+  /* ===== モーダル 全画面化 ===== */
+  .modal-overlay {
+    padding: 0 !important;
+  }
+  .modal#modal-content,
+  #modal-content,
+  .modal {
+    max-width: 100% !important;
+    width: 100% !important;
+    height: 100vh !important;
+    max-height: 100vh !important;
+    border-radius: 0 !important;
+    overflow-y: auto !important;
+  }
+  /* 顧客モーダル の grid (320+778) → flex column */
+  .cd-modal {
+    display: flex !important;
+    flex-direction: column !important;
+    grid-template-columns: 1fr !important;
+    height: 100vh !important;
+    max-height: 100vh !important;
+    overflow-y: auto !important;
+  }
+  .cd-left, .cd-right {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+  .cd-left {
+    border-right: none !important;
+    border-bottom: 1px solid #E8E2D4 !important;
+    padding-bottom: 16px !important;
+  }
+
+  /* CTA grid: 親が flex column になったので 全幅で 2列 */
+  .fp-qa-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    grid-column: auto !important;
+  }
+
+  /* ===== 顧客台帳 table → カード式 ===== */
+  table.clients {
+    display: block !important;
+    width: 100% !important;
+  }
+  table.clients thead { display: none !important; }
+  table.clients tbody { display: block !important; }
+  table.clients tbody tr {
+    display: block !important;
+    background: #fff !important;
+    border: 1px solid #E8E2D4 !important;
+    border-radius: 12px !important;
+    padding: 14px 16px !important;
+    margin-bottom: 10px !important;
+    box-shadow: 0 2px 6px rgba(15, 23, 42, 0.05);
+  }
+  table.clients tbody td {
+    display: block !important;
+    padding: 4px 0 !important;
+    border: none !important;
+    font-size: 13.5px !important;
+  }
+  table.clients tbody td:first-child {
+    font-weight: 800 !important;
+    font-size: 16px !important;
+    color: #1F2A3F !important;
+    margin-bottom: 8px !important;
+    padding-bottom: 6px !important;
+    border-bottom: 1px solid #F0EBDF !important;
+  }
+  table.clients tbody td::before {
+    content: attr(data-label);
+    display: inline-block;
+    font-size: 10.5px;
+    font-weight: 700;
+    color: #9A5A18;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-right: 8px;
+    min-width: 60px;
+  }
+
+  /* ===== タッチターゲット 44px+ + iOS auto-zoom 防止 ===== */
+  .tab, button, .btn, .btn-cta-primary, .btn-cta-secondary, .btn-mini-action, .fp-qa-pop, [role="button"] {
+    min-height: 44px;
+  }
+  input[type="text"], input[type="email"], input[type="search"], input[type="password"],
+  input[type="tel"], input[type="url"], input[type="number"], textarea, select {
+    font-size: 16px !important;  /* iOS auto-zoom 防止 (16px 未満で zoom) */
+    min-height: 44px;
+  }
+  textarea { min-height: 88px; }
+
+  /* font scale up + line-height ゆとり */
+  body { font-size: 14px !important; line-height: 1.7 !important; }
+
+  /* hero / 見出し もモバイルで縮める */
+  .hero-title { font-size: 24px !important; line-height: 1.35 !important; }
+  .hero-sub { font-size: 13px !important; }
+  .page-head { flex-direction: column; align-items: stretch; gap: 12px; }
+  .hero-actions { width: 100%; }
+  .hero-actions button { width: 100%; }
+
+  /* client-toolbar (検索 + フィルタ + ソート) を 縦に */
+  .client-toolbar {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 10px !important;
+  }
+  .client-toolbar > * { width: 100%; }
+  .client-toolbar input,
+  .client-toolbar select { width: 100% !important; }
+
+  /* タグセグメントbar: chip wrap */
+  #client-tag-segment-bar { flex-direction: column !important; align-items: stretch !important; }
+  #client-tag-chips { width: 100% !important; }
+
+  /* 面談履歴 mhカード モバイル */
+  .mh-card { grid-template-columns: 64px 1fr !important; }
+  .mh-actions { grid-column: 1 / -1; padding-top: 8px; border-top: 1px dashed #F0EBDF; margin-top: 4px; }
+
+  /* CTA pop モバイルで コンパクトに (3列→2列 / 1列) */
+  .fp-qa-pop .fp-qa-tip { font-size: 9px !important; padding: 2px 10px !important; }
+  .fp-qa-pop .fp-qa-label-main { font-size: 12.5px !important; }
+  .fp-qa-pop .fp-qa-label-sub { font-size: 10px !important; }
+}
+
+/* < 380px = 極小スマホ */
+@media (max-width: 380px) {
+  .fp-qa-grid { grid-template-columns: 1fr !important; }
+  .sidebar { width: 88vw !important; }
+}
+
+/* タッチデバイス: hover transform を 抑制 (sticky stuck 防止) */
+@media (hover: none) {
+  .btn-cta-primary:hover,
+  .btn-cta-secondary:hover,
+  .fp-qa-pop:hover .fp-qa-capsule { transform: none !important; }
+}
