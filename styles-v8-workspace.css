@@ -9514,14 +9514,14 @@ body.modal-open {
   table.clients tbody { display: block !important; background: #FFFFFF !important; width: 100% !important; }
   table.clients { display: block !important; width: 100% !important; max-width: 100% !important; box-sizing: border-box !important; }
 
-  /* 各行: シンプル 1行 layout — avatar / 名前+meta / ¥金額 / chevron */
+  /* 各行: シンプル grid 3列 layout — avatar / 名前+meta / ¥金額+chevron */
   table.clients tbody tr {
-    display: flex !important;
-    flex-direction: row !important;
-    flex-wrap: nowrap !important;
+    display: grid !important;
+    grid-template-columns: 44px minmax(0, 1fr) auto !important;
+    grid-template-rows: auto !important;
     align-items: center !important;
     gap: 10px !important;
-    padding: 14px 30px 14px 14px !important;
+    padding: 14px 32px 14px 14px !important;
     width: 100% !important;
     max-width: 100% !important;
     box-sizing: border-box !important;
@@ -9567,10 +9567,11 @@ body.modal-open {
     margin: 0 !important;
   }
 
-  /* 1番目td (顧客): avatar + 名前 — flex 1で 拡張 */
+  /* 1番目td (顧客): avatar + 名前 — col 1-2 spanning, internal flex */
   table.clients tbody td:nth-child(1) {
     grid-area: auto !important;
-    flex: 1 1 auto !important;
+    grid-column: 1 / 3 !important;
+    grid-row: 1 / 2 !important;
     display: flex !important;
     align-items: center !important;
     gap: 10px !important;
@@ -9623,15 +9624,10 @@ body.modal-open {
     display: none !important;
   }
 
-  /* ステータス列 (状態) pill — 名前直後に小さく */
+  /* ステータス列 (状態) pill — 名前の親内 inline 表示 (grid item 化 解除 → 第1tdに浮かべる) */
   table.clients tbody td:nth-child(9) {
     grid-area: auto !important;
-    flex: 0 0 auto !important;
-    display: flex !important;
-    align-items: center !important;
-    gap: 4px !important;
-    padding: 0 !important;
-    min-width: 0 !important;
+    display: none !important;
   }
   table.clients tbody td:nth-child(9) .status-pill {
     font-size: 10px !important;
@@ -9653,10 +9649,11 @@ body.modal-open {
     padding: 2px 8px !important;
   }
 
-  /* 管理資産 (10列目) — 右端 */
+  /* 管理資産 (10列目) — col 3 右端 */
   table.clients tbody td:nth-child(10) {
     grid-area: auto !important;
-    flex: 0 0 auto !important;
+    grid-column: 3 / 4 !important;
+    grid-row: 1 / 2 !important;
     display: block !important;
     text-align: right !important;
     font-size: 15px !important;
@@ -9665,9 +9662,11 @@ body.modal-open {
     line-height: 1.2 !important;
     padding: 0 !important;
     white-space: nowrap !important;
-    min-width: 60px !important;
+    width: auto !important;
+    min-width: 0 !important;
     max-width: none !important;
     overflow: visible !important;
+    justify-self: end !important;
   }
 
   /* 最終接触 (11列目): mobile では 隠す (情報過多 → chevron で 詳細誘導) */
