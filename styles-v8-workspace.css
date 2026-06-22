@@ -7794,3 +7794,189 @@ body.mobile-nav-open #mobile-hamburger .mh-bar:nth-child(3) { transform: transla
     height: auto !important;
   }
 }
+
+/* ============================================================
+   モバイル特化 v3 (2026-06-22 roundR) — 真のモバイルファースト
+   オーナーfb: 「全然 携帯UI じゃない」 + 「見づらい もっと特化」
+   ・drawer label 復活
+   ・ホーム hero 圧縮 + 大数値 強調
+   ・顧客台帳 collapsible filter + FAB
+   ・顧客モーダル CTA 1列フル幅 + コンパクトhero
+   ============================================================ */
+@media (max-width: 768px) {
+  /* ───── drawer label 復活 (1024px @media の display:none を 上書き) ───── */
+  body.mobile-nav-open .sidebar-nav .tab span,
+  body.mobile-nav-open .sidebar-brand .brand-text,
+  body.mobile-nav-open .sidebar-search input,
+  body.mobile-nav-open .sidebar-label,
+  body.mobile-nav-open .nav-count,
+  body.mobile-nav-open .user-text {
+    display: inline-block !important;
+  }
+  body.mobile-nav-open .sidebar-nav .tab {
+    justify-content: flex-start !important;
+    padding: 12px 18px !important;
+    gap: 12px !important;
+    min-height: 48px;
+  }
+  body.mobile-nav-open .sidebar-search { padding: 10px 14px !important; justify-content: flex-start !important; }
+  body.mobile-nav-open .sidebar-brand { justify-content: flex-start !important; padding: 16px 18px !important; }
+  body.mobile-nav-open .sidebar-user { padding: 12px 18px !important; justify-content: flex-start !important; }
+
+  /* ───── ホーム hero モバイル特化 ───── */
+  .view[data-view="dashboard"] .page-head { padding: 12px 4px 8px !important; border: none !important; }
+  .view[data-view="dashboard"] .hero-title {
+    text-align: left !important;
+    font-family: 'Noto Serif JP', serif !important;
+    font-size: 20px !important;
+    font-weight: 700 !important;
+    line-height: 1.5 !important;
+    margin: 0 0 6px !important;
+    color: #1F2A3F;
+    white-space: normal !important;
+  }
+  .view[data-view="dashboard"] .hero-sub {
+    display: block !important;
+    text-align: left !important;
+    font-size: 12.5px !important;
+    color: #6B7280 !important;
+    margin: 0 0 14px !important;
+  }
+  /* ステータス3カード — 数字大 / ラベル下 */
+  .view[data-view="dashboard"] .kpi-row,
+  .view[data-view="dashboard"] .stat-row,
+  .view[data-view="dashboard"] .summary-stats {
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 8px !important;
+    margin-bottom: 18px !important;
+  }
+  /* hero action 1列 */
+  .view[data-view="dashboard"] .hero-actions {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 10px !important;
+    width: 100% !important;
+  }
+
+  /* ───── 顧客台帳: collapsible filter + FAB ───── */
+  /* hero-actions の「新規顧客を登録」 を 隠して FAB で表示 */
+  .view[data-view="clients"] .hero-actions { display: none !important; }
+  /* 検索バーは常時、 他は折りたたみ */
+  .view[data-view="clients"] .client-toolbar input[type="search"] {
+    order: -1;
+    width: 100% !important;
+  }
+  .view[data-view="clients"] .client-toolbar select,
+  .view[data-view="clients"] #client-col-config,
+  .view[data-view="clients"] .count {
+    display: none !important;  /* 折りたたみ ボタン経由 (将来) */
+  }
+  /* 「全フィルタ」 ボタン (toggle) を追加 */
+  .view[data-view="clients"] .client-toolbar::after {
+    content: '🔍 検索のみ表示 (フィルタは PC 推奨)';
+    display: block;
+    font-size: 11px;
+    color: #94A3B8;
+    text-align: center;
+    margin-top: 4px;
+    padding: 6px 0;
+  }
+  /* タグ filter bar 隠す (狭い画面では邪魔) */
+  #client-tag-segment-bar { display: none !important; }
+
+  /* FAB「+ 新規顧客」 */
+  body.has-mobile-fab::after {
+    content: none;  /* placeholder */
+  }
+  #mobile-fab-new-client {
+    position: fixed;
+    bottom: calc(80px + env(safe-area-inset-bottom, 0px));
+    right: 16px;
+    width: 56px; height: 56px;
+    background: linear-gradient(135deg, #C19A3A 0%, #9A5A18 100%);
+    color: #fff;
+    border: none;
+    border-radius: 50%;
+    box-shadow: 0 10px 24px rgba(193, 154, 58, 0.45);
+    font-size: 28px;
+    font-weight: 800;
+    cursor: pointer;
+    z-index: 9100;
+    line-height: 1;
+    display: none;  /* 顧客タブ時のみ表示 (JSで切替) */
+    align-items: center;
+    justify-content: center;
+    padding-bottom: 4px;
+    transition: transform .15s;
+  }
+  #mobile-fab-new-client:active { transform: scale(0.94); }
+  body.tab-clients-active #mobile-fab-new-client { display: flex; }
+
+  /* ───── 顧客モーダル: コンパクトhero + CTA 1列フル幅 ───── */
+  /* 中央寄せ大型 hero → 左寄せ コンパクト header に */
+  .cd-hero, .cd-header, .cd-modal-head {
+    padding: 12px 16px !important;
+    border-bottom: 1px solid #E8E2D4;
+  }
+  /* CTA grid を **1列** 縦並びに override (モバイルでは 2列だと中身改行) */
+  .fp-qa-grid {
+    grid-template-columns: 1fr !important;
+    row-gap: 16px !important;
+    grid-column: auto !important;
+  }
+  .fp-qa-pop {
+    padding-top: 14px !important;
+    min-height: 76px;
+  }
+  .fp-qa-pop .fp-qa-capsule {
+    min-height: 60px !important;
+    padding: 16px 18px !important;
+    gap: 14px !important;
+  }
+  .fp-qa-pop .fp-qa-label-main {
+    font-size: 14.5px !important;
+    white-space: nowrap !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
+  }
+  .fp-qa-pop .fp-qa-label-sub {
+    font-size: 11px !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+  .fp-qa-pop .fp-qa-arrow { width: 28px; height: 28px; font-size: 14px; }
+  .fp-qa-pop .fp-qa-tip {
+    top: 0 !important;
+    font-size: 10px !important;
+    padding: 3px 14px !important;
+  }
+
+  /* 顧客モーダル ヘッダ アバター サイズ縮小 */
+  .cd-modal .cd-avatar,
+  .cd-modal img[class*="avatar"] {
+    width: 56px !important; height: 56px !important;
+  }
+
+  /* CTA セクション 上に余白追加 (tip ぶん) */
+  .fp-qa-grid::before { content: ''; display: block; height: 4px; }
+
+  /* タッチターゲット 56px に格上げ (主要だけ) */
+  .fp-qa-pop, .btn-cta-primary { min-height: 60px !important; }
+
+  /* ───── 一般 ボタン active 状態 (touch ripple 風) ───── */
+  button:active, .tab:active, .m-tab:active, .fp-qa-pop:active {
+    transform: scale(0.97);
+    transition: transform .08s;
+  }
+}
+
+/* < 380px 極小 */
+@media (max-width: 380px) {
+  .view[data-view="dashboard"] .kpi-row,
+  .view[data-view="dashboard"] .stat-row,
+  .view[data-view="dashboard"] .summary-stats {
+    grid-template-columns: 1fr !important;
+  }
+}
