@@ -7724,3 +7724,20 @@ body.mobile-nav-open #mobile-hamburger .mh-bar:nth-child(3) { transform: transla
   .fp-qa-pop:hover .fp-qa-capsule,
   .m-tab:hover { transform: none !important; }
 }
+
+/* ★ 2026-06-22 roundP fix: モバイルで 隠す追加要素 */
+@media (max-width: 768px) {
+  #fp-user-bar { display: none !important; }
+  #fp-version-badge {
+    display: none !important;  /* モバイルでは下に被るので隠す */
+  }
+  /* チャットbot (mb-fab) も モバイルではボトムナビ被る → 上にずらす */
+  #mbFab {
+    bottom: calc(80px + env(safe-area-inset-bottom, 0px)) !important;
+    right: 14px !important;
+  }
+  #mbPanel {
+    bottom: calc(72px + env(safe-area-inset-bottom, 0px)) !important;
+    max-height: calc(100vh - 56px - 80px - env(safe-area-inset-top, 0px)) !important;
+  }
+}
