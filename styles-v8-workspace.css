@@ -7996,3 +7996,83 @@ body.mobile-nav-open #mobile-hamburger .mh-bar:nth-child(3) { transform: transla
     flex: 1;
   }
 }
+
+/* ★ 2026-06-22 roundR fix2: ホーム mega-hero モバイル + drawer label 表示領域拡大 */
+@media (max-width: 768px) {
+  /* mega-hero: hero タイトル 圧縮 + 左寄せ + 行詰める */
+  .mega-hero, .mega-hero-grid { padding: 12px 4px !important; }
+  .mega-hero-grid { grid-template-columns: 1fr !important; gap: 14px !important; }
+  .mega-hero-left { text-align: left !important; }
+  .mega-hero-date {
+    font-size: 11px !important;
+    color: #94A3B8 !important;
+    margin-bottom: 6px !important;
+  }
+  .mega-hero-title {
+    font-family: 'Noto Serif JP', serif !important;
+    font-size: 20px !important;
+    line-height: 1.55 !important;
+    font-weight: 700 !important;
+    margin: 0 0 10px !important;
+    color: #1F2A3F !important;
+    white-space: normal !important;
+  }
+  /* <br> はモバイルで邪魔 (横幅 狭くて 改行 自然に起きる) */
+  .mega-hero-title br { display: none !important; }
+  .mega-hero-name { color: #9A5A18 !important; font-family: inherit !important; }
+  .mega-hero-highlight {
+    font-family: 'Inter', sans-serif !important;
+    font-size: 26px !important;
+    font-weight: 900 !important;
+    color: #C19A3A !important;
+    padding: 0 4px;
+  }
+  .mega-hero-lead {
+    font-size: 12.5px !important;
+    color: #6B7280 !important;
+    line-height: 1.7 !important;
+    margin: 0 0 14px !important;
+  }
+  /* stats: 3カード grid */
+  .mega-hero-stats {
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 8px !important;
+    margin-top: 14px !important;
+  }
+  .mega-hero-stat {
+    background: rgba(255, 255, 255, 0.06) !important;
+    border: 1px solid rgba(193, 154, 58, 0.25) !important;
+    border-radius: 10px !important;
+    padding: 10px 6px !important;
+    text-align: center !important;
+  }
+  .mega-hero-stat-label {
+    font-size: 10px !important;
+    color: #94A3B8 !important;
+    letter-spacing: 0.04em;
+    display: block !important;
+  }
+  .mega-hero-stat-value {
+    font-family: 'Inter', sans-serif !important;
+    font-size: 22px !important;
+    font-weight: 800 !important;
+    color: #C19A3A !important;
+    margin-top: 4px !important;
+  }
+
+  /* drawer の label 領域を 広げる (truncate しない) */
+  body.mobile-nav-open .sidebar-nav .tab span {
+    max-width: none !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
+    white-space: nowrap !important;
+    font-size: 13.5px !important;
+  }
+  body.mobile-nav-open .sidebar-nav .tab .nav-count {
+    margin-left: auto !important;
+    flex-shrink: 0;
+  }
+  /* sidebar を 88vw に拡げて label 表示余裕に */
+  body.mobile-nav-open .sidebar { width: 86vw !important; max-width: 340px !important; }
+}
