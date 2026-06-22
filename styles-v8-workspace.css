@@ -8918,3 +8918,59 @@ body.modal-open {
     text-overflow: ellipsis !important;
   }
 }
+
+/* ★ 2026-06-22 roundV fix2: 顧客台帳 重要列だけ + 横並びcompact (1顧客 = 1スクリーン 1/6 ) */
+@media (max-width: 768px) {
+  table.clients tbody tr {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+    padding: 12px 30px 12px 14px !important;
+    gap: 8px !important;
+    min-height: 64px !important;
+    max-height: 90px;
+    overflow: hidden !important;
+  }
+  /* 名前 (1列目) — 100% 幅、 太字 */
+  table.clients tbody td:nth-child(1) {
+    width: 100% !important;
+    flex: 0 0 100% !important;
+    font-size: 14.5px !important;
+    font-weight: 800 !important;
+    color: #1F2A3F !important;
+    padding-bottom: 4px !important;
+    margin-bottom: 4px !important;
+    border-bottom: 1px solid #F0EBDF !important;
+  }
+  /* 状態 (9列目) — chip 用 */
+  table.clients tbody td:nth-child(9) {
+    flex: 0 0 auto !important;
+    font-size: 11px !important;
+  }
+  /* 管理資産 (10列目) — 数字、 右寄 */
+  table.clients tbody td:nth-child(10) {
+    flex: 1 1 auto !important;
+    font-size: 12.5px !important;
+    font-weight: 700 !important;
+    color: #1F2A3F !important;
+    text-align: right !important;
+  }
+  /* 最終接触 (11列目) — 小さく */
+  table.clients tbody td:nth-child(11) {
+    flex: 0 0 100% !important;
+    font-size: 10.5px !important;
+    color: #94A3B8 !important;
+    border: none !important;
+  }
+  /* 他 td (年齢/職業/家族/緊急度/悩み/希望/保有商品) は 全hide */
+  table.clients tbody td:nth-child(2),
+  table.clients tbody td:nth-child(3),
+  table.clients tbody td:nth-child(4),
+  table.clients tbody td:nth-child(5),
+  table.clients tbody td:nth-child(6),
+  table.clients tbody td:nth-child(7),
+  table.clients tbody td:nth-child(8) {
+    display: none !important;
+  }
+}
