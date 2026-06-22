@@ -8229,3 +8229,240 @@ body.mobile-nav-open #mobile-hamburger .mh-bar:nth-child(3) { transform: transla
 @media (min-width: 769px) {
   .m-screen-home { display: none !important; }
 }
+
+/* ============================================================
+   モバイル ホーム 再々改修 v2 (2026-06-22 roundT) — Boxed
+   オーナーfb: 「文字はみ出る / 縦長 / ボックスに大幅変更」
+   既存 dashboard view を 全hide → .m-screen-home だけ表示
+   ============================================================ */
+@media (max-width: 768px) {
+  /* dashboard view の 直下 子要素 を 全hide (.m-screen-home だけ表示) */
+  .view[data-view="dashboard"] > *:not(.m-screen-home) {
+    display: none !important;
+  }
+
+  /* ★ m-screen-home コンテナ */
+  .m-screen-home {
+    display: flex !important;
+    flex-direction: column;
+    gap: 10px;
+    padding: 4px 2px 16px;
+  }
+
+  /* ─── 1) Greet (横並び 圧縮) ─── */
+  .m-greet {
+    background: linear-gradient(135deg, #1F2A3F 0%, #2A3854 100%);
+    border-radius: 14px;
+    padding: 14px 18px;
+    color: #FBF5E3;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    box-shadow: 0 6px 16px rgba(15, 23, 42, 0.18);
+    min-height: 64px;
+  }
+  .m-greet-l {
+    flex: 1;
+    min-width: 0;
+  }
+  .m-greet-date {
+    font-size: 10.5px;
+    color: #94A3B8;
+    letter-spacing: 0.06em;
+    font-family: 'Inter', sans-serif;
+    margin-bottom: 3px;
+  }
+  .m-greet-msg {
+    font-family: 'Noto Serif JP', serif;
+    font-size: 14.5px;
+    font-weight: 700;
+    line-height: 1.4;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .m-greet-name {
+    color: #FCD34D;
+    font-weight: 800;
+  }
+  .m-greet-r {
+    flex-shrink: 0;
+    text-align: right;
+    line-height: 1;
+  }
+  .m-greet-num {
+    font-family: 'Inter', sans-serif;
+    font-size: 38px;
+    font-weight: 900;
+    letter-spacing: -0.02em;
+    background: linear-gradient(135deg, #FCD34D 0%, #F59E0B 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+    line-height: 1;
+  }
+  .m-greet-unit {
+    font-size: 10px;
+    color: #CBD5E1;
+    margin-top: 4px;
+    letter-spacing: 0.04em;
+  }
+
+  /* ─── 2) Stats 2x2 grid ─── */
+  .m-stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  .m-stat-box {
+    background: #fff;
+    border: 1px solid #E8E2D4;
+    border-radius: 12px;
+    padding: 14px 14px 12px;
+    box-shadow: 0 2px 6px rgba(15, 23, 42, 0.04);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    opacity: 0;
+    transform: translateY(8px);
+    animation: m-stat-in .35s ease forwards;
+  }
+  .m-stat-box:nth-child(1) { animation-delay: .05s; }
+  .m-stat-box:nth-child(2) { animation-delay: .12s; }
+  .m-stat-box:nth-child(3) { animation-delay: .19s; }
+  .m-stat-box:nth-child(4) { animation-delay: .26s; }
+  @keyframes m-stat-in {
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .m-stat-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .m-stat-icon {
+    width: 28px; height: 28px;
+    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    background: #FBF5E3;
+    color: #9A5A18;
+  }
+  .m-stat-num {
+    font-family: 'Inter', sans-serif;
+    font-size: 24px;
+    font-weight: 900;
+    color: #1F2A3F;
+    line-height: 1;
+    letter-spacing: -0.02em;
+  }
+  .m-stat-label {
+    font-size: 11px;
+    color: #6B7280;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+  }
+
+  /* ─── 3) Today action box ─── */
+  .m-today-box {
+    background: linear-gradient(135deg, #FBF5E3 0%, #FDFBF4 100%);
+    border: 1px solid #C19A3A;
+    border-radius: 14px;
+    padding: 16px 18px;
+    margin-top: 4px;
+  }
+  .m-today-eyebrow {
+    font-size: 10px;
+    font-weight: 800;
+    color: #9A5A18;
+    letter-spacing: 0.18em;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .m-today-eyebrow::before {
+    content: '';
+    width: 4px; height: 4px;
+    background: #C19A3A;
+    border-radius: 50%;
+    animation: m-pulse 1.6s ease-in-out infinite;
+  }
+  @keyframes m-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+  .m-today-name {
+    font-family: 'Noto Serif JP', serif;
+    font-size: 17px;
+    font-weight: 700;
+    color: #1F2A3F;
+    margin-bottom: 4px;
+  }
+  .m-today-sub {
+    font-size: 12px;
+    color: #5e4d1a;
+    line-height: 1.55;
+    margin-bottom: 12px;
+  }
+  .m-today-empty {
+    font-size: 12px;
+    color: #6B7280;
+    text-align: center;
+    padding: 8px 0;
+  }
+  .m-today-cta {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    background: linear-gradient(135deg, #C19A3A 0%, #9A5A18 100%);
+    color: #fff;
+    border: none;
+    border-radius: 99px;
+    padding: 10px 22px;
+    font-family: 'Hiragino Sans', sans-serif;
+    font-weight: 800;
+    font-size: 13px;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(193, 154, 58, 0.32);
+  }
+
+  /* ─── 4) Quick actions row (2 buttons) ─── */
+  .m-quick-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-top: 4px;
+  }
+  .m-qa2 {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    background: #fff;
+    border: 1.5px solid #C19A3A;
+    color: #1F2A3F;
+    border-radius: 12px;
+    padding: 12px 8px;
+    font-family: 'Hiragino Sans', sans-serif;
+    font-weight: 800;
+    font-size: 12.5px;
+    cursor: pointer;
+    min-height: 52px;
+  }
+  .m-qa2.is-primary {
+    background: linear-gradient(135deg, #7C3AED 0%, #5B21B6 100%);
+    color: #fff;
+    border: none;
+    box-shadow: 0 4px 14px rgba(124, 58, 237, 0.32);
+  }
+  .m-qa2-icon { font-size: 16px; }
+}
+
+/* PC 非表示 (上書き) */
+@media (min-width: 769px) {
+  .m-screen-home { display: none !important; }
+}
