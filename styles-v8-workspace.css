@@ -9547,19 +9547,25 @@ body.modal-open {
     pointer-events: none !important;
   }
 
-  /* td 全部 横並びに溶かす */
+  /* td 全部 横並びに溶かす — 旧 roundV の grid-area:meta を override */
   table.clients tbody td {
     display: block !important;
+    grid-area: auto !important;
     padding: 0 !important;
     border: none !important;
     background: transparent !important;
     font-size: 12.5px !important;
     color: #6B7280 !important;
     line-height: 1.4 !important;
+    overflow: visible !important;
+    white-space: normal !important;
+    text-overflow: clip !important;
+    margin: 0 !important;
   }
 
-  /* 1番目td (顧客): avatar左 + 名前/meta */
+  /* 1番目td (顧客): avatar左 + 名前/meta — grid-area:auto を 強制 */
   table.clients tbody td:nth-child(1) {
+    grid-area: auto !important;
     grid-column: 1 / 3 !important;
     grid-row: 1 / 2 !important;
     display: flex !important;
@@ -9615,6 +9621,7 @@ body.modal-open {
 
   /* ステータス列 (状態) — 行2 左 */
   table.clients tbody td:nth-child(9) {
+    grid-area: auto !important;
     grid-column: 1 / 2 !important;
     grid-row: 2 / 3 !important;
     display: flex !important;
@@ -9630,6 +9637,7 @@ body.modal-open {
 
   /* 管理資産 (10列目) — 行1 右端 */
   table.clients tbody td:nth-child(10) {
+    grid-area: auto !important;
     grid-column: 3 / 4 !important;
     grid-row: 1 / 2 !important;
     display: block !important;
@@ -9644,9 +9652,11 @@ body.modal-open {
 
   /* 最終接触 (11列目) — 行2 右 */
   table.clients tbody td:nth-child(11) {
+    grid-area: auto !important;
     grid-column: 2 / 4 !important;
     grid-row: 2 / 3 !important;
     text-align: right !important;
+    display: block !important;
   }
   table.clients tbody td:nth-child(11) > div {
     flex-direction: row !important;
