@@ -9959,7 +9959,8 @@ body.modal-open {
      ターゲット: `.btn-rec-start` を含む 確定済み 予約 カード
   ============================================================ */
   /* カード wrapper (grid-template-columns: 104px 1fr のもの) を 縦並びに */
-  div:has(> div > .btn-rec-start) {
+  div[style*="grid-template-columns:104px 1fr"],
+  div[style*="grid-template-columns: 104px 1fr"] {
     display: block !important;
     grid-template-columns: none !important;
     padding: 14px !important;
@@ -9973,7 +9974,7 @@ body.modal-open {
     gap: 0 !important;
   }
   /* 日付列 (06/22 + 曜日 + 時刻) を 横並びに圧縮 */
-  div:has(> div > .btn-rec-start) > div:first-child {
+  div[style*="grid-template-columns: 104px 1fr"] > div:first-child {
     border-right: none !important;
     border-bottom: none !important;
     padding: 0 0 6px !important;
@@ -9981,17 +9982,17 @@ body.modal-open {
     align-items: baseline !important;
     gap: 8px !important;
   }
-  div:has(> div > .btn-rec-start) > div:first-child > div:nth-child(1) {
+  div[style*="grid-template-columns: 104px 1fr"] > div:first-child > div:nth-child(1) {
     font-size: 14px !important;
     color: #8C7A4B !important;
     font-weight: 700 !important;
   }
-  div:has(> div > .btn-rec-start) > div:first-child > div:nth-child(2) {
+  div[style*="grid-template-columns: 104px 1fr"] > div:first-child > div:nth-child(2) {
     font-size: 11px !important;
     color: #9CA3AF !important;
     margin-top: 0 !important;
   }
-  div:has(> div > .btn-rec-start) > div:first-child > div:nth-child(3) {
+  div[style*="grid-template-columns: 104px 1fr"] > div:first-child > div:nth-child(3) {
     font-size: 14px !important;
     color: #1F2A3F !important;
     font-weight: 800 !important;
@@ -9999,12 +10000,12 @@ body.modal-open {
     margin-left: auto !important;
   }
   /* 右列 */
-  div:has(> div > .btn-rec-start) > div:nth-child(2) {
+  div[style*="grid-template-columns: 104px 1fr"] > div:nth-child(2) {
     padding: 0 !important;
     min-width: 0 !important;
   }
   /* zoom URL を 短く 1行で 省略 */
-  div:has(> div > .btn-rec-start) > div:nth-child(2) > div:nth-child(2) {
+  div[style*="grid-template-columns: 104px 1fr"] > div:nth-child(2) > div:nth-child(2) {
     overflow: hidden !important;
     text-overflow: ellipsis !important;
     white-space: nowrap !important;
@@ -10013,10 +10014,10 @@ body.modal-open {
     color: #9CA3AF !important;
   }
   /* 顧客名 row */
-  div:has(> div > .btn-rec-start) > div:nth-child(2) > div:nth-child(1) {
+  div[style*="grid-template-columns: 104px 1fr"] > div:nth-child(2) > div:nth-child(1) {
     margin-bottom: 8px !important;
   }
-  div:has(> div > .btn-rec-start) > div:nth-child(2) > div:nth-child(1) strong {
+  div[style*="grid-template-columns: 104px 1fr"] > div:nth-child(2) > div:nth-child(1) strong {
     font-size: 15px !important;
   }
   /* 録画ONでZoom開始 ボタン: 巨大円形 → 横長 row ボタンに */
@@ -10042,17 +10043,17 @@ body.modal-open {
     box-shadow: 0 6px 16px rgba(193,154,58,0.30) !important;
   }
   /* メモ / キャンセル */
-  div:has(> div > .btn-rec-start) > div:nth-child(2) > div:last-child {
+  div[style*="grid-template-columns: 104px 1fr"] > div:nth-child(2) > div:last-child {
     display: grid !important;
     grid-template-columns: 1fr 1fr !important;
     gap: 8px !important;
     flex-wrap: nowrap !important;
   }
-  div:has(> div > .btn-rec-start) > div:nth-child(2) > div:last-child .btn-rec-start {
+  div[style*="grid-template-columns: 104px 1fr"] > div:nth-child(2) > div:last-child .btn-rec-start {
     grid-column: 1 / -1 !important;
     margin-bottom: 0 !important;
   }
-  div:has(> div > .btn-rec-start) > div:nth-child(2) > div:last-child .btn-mini-action {
+  div[style*="grid-template-columns: 104px 1fr"] > div:nth-child(2) > div:last-child .btn-mini-action {
     width: 100% !important;
     min-height: 44px !important;
     padding: 10px 12px !important;
