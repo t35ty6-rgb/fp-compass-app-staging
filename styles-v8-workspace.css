@@ -8466,3 +8466,97 @@ body.mobile-nav-open #mobile-hamburger .mh-bar:nth-child(3) { transform: transla
 @media (min-width: 769px) {
   .m-screen-home { display: none !important; }
 }
+
+/* ============================================================
+   モバイル 致命的修正 v3 (2026-06-22 roundU)
+   オーナーfb スクショ で 判明:
+   - モーダルが背景顧客台帳に重ならない (二重表示)
+   - 顧客カードが縦長すぎ (1人で半画面)
+   - コンパちゃん bot が中央被る
+   ============================================================ */
+@media (max-width: 768px) {
+  /* ───── モーダル overlay を 確実に 全面 重ねる ───── */
+  .modal-overlay {
+    position: fixed !important;
+    inset: 0 !important;
+    top: 0 !important; left: 0 !important; right: 0 !important; bottom: 0 !important;
+    background: rgba(15, 23, 42, 0.75) !important;  /* 半透明黒で 完全に 後ろを覆う */
+    z-index: 10200 !important;  /* ボトムナビ (10100) の上 */
+    width: 100vw !important;
+    height: 100vh !important;
+    margin: 0 !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    padding: 0 !important;
+    align-items: flex-start !important;
+    justify-content: center !important;
+  }
+  .modal#modal-content,
+  #modal-content,
+  .modal {
+    background: #fff !important;
+    margin: 0 !important;
+    min-height: 100vh !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  /* ───── 顧客カード コンパクト化 (1人 = 1画面の 1/4 以下) ───── */
+  table.clients tbody tr {
+    padding: 12px 14px !important;
+    margin-bottom: 8px !important;
+    /* グリッドで 2列レイアウト: 左に名前/属性、 右に状態/接触日 */
+    display: grid !important;
+    grid-template-columns: 1fr auto;
+    grid-template-areas:
+      "name name"
+      "info info";
+    gap: 4px 8px;
+  }
+  table.clients tbody td {
+    padding: 0 !important;
+    font-size: 12px !important;
+    line-height: 1.5 !important;
+  }
+  /* 1列目 = 名前 (顧客欄) */
+  table.clients tbody td:first-child {
+    grid-area: name !important;
+    font-weight: 800 !important;
+    font-size: 14.5px !important;
+    color: #1F2A3F !important;
+    padding-bottom: 4px !important;
+    margin-bottom: 2px !important;
+    border-bottom: 1px solid #F0EBDF !important;
+  }
+  /* 1列目以降 は インライン (横並び) で 短く */
+  table.clients tbody td:not(:first-child) {
+    display: inline-flex !important;
+    grid-area: info !important;
+    font-size: 11.5px !important;
+    color: #6B7280 !important;
+    margin-right: 8px !important;
+  }
+  /* 空セル ( - ) は 隠す */
+  table.clients tbody td:not(:first-child):empty,
+  table.clients tbody td:not(:first-child):has(> div:only-child:contains("-")) {
+    display: none !important;
+  }
+
+  /* ───── コンパちゃん bot モバイル: 顧客タブ / モーダル時 隠す ───── */
+  body.tab-clients-active #mbFab,
+  body.tab-clients-active #mbPanel { display: none !important; }
+  /* モーダル開いてる時 = #modal-overlay visible */
+  body:has(#modal-overlay[style*="display: flex"]) #mbFab,
+  body:has(#modal-overlay[style*="display:flex"]) #mbFab {
+    display: none !important;
+  }
+  /* デフォルト位置を 左下 (右下は FAB と被る) */
+  #mbFab {
+    right: auto !important;
+    left: 14px !important;
+    bottom: calc(80px + env(safe-area-inset-bottom, 0px)) !important;
+    width: 48px !important; height: 48px !important;
+  }
+  /* チャットbot ヒント (吹き出し) を 隠す → アイコンだけ */
+  #mbFabHint, .mb-fab-hint { display: none !important; }
+}
