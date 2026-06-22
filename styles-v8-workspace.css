@@ -10153,7 +10153,7 @@ body.modal-open {
   }
   /* hero (avatar+名前+chip) はいちばん上 */
   .cd-modal .cd-profile-head { order: 1 !important; }
-  /* タブ は hero 直下 */
+  /* タブ は hero 直下、 スクロール時は fixed で viewport top に 張り付く */
   .cd-modal .cd-tabs {
     order: 2 !important;
     position: sticky !important;
@@ -10163,6 +10163,12 @@ body.modal-open {
     padding: 0 12px !important;
     border-top: 1px solid #ECE6D6 !important;
     border-bottom: 1px solid #ECE6D6 !important;
+    -webkit-overflow-scrolling: touch !important;
+    margin: 0 !important;
+  }
+  /* sticky の親が overflow:auto でないと効かない → modal-overlay を scroll container に */
+  .modal-overlay {
+    overflow-y: auto !important;
     -webkit-overflow-scrolling: touch !important;
   }
   .cd-modal .cd-tab {
