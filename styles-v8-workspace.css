@@ -10141,22 +10141,51 @@ body.modal-open {
     box-shadow: none !important;
   }
 
-  /* タブ (cd-tabs) を sticky に */
+  /* ★ オーナーfb 2026-06-23: タブ (cd-tabs) を モーダル上部に 移動
+     cd-modal を flex column 化 + display:contents で cd-left/cd-right の子を hoist + order で並べ替え */
+  .cd-modal {
+    display: flex !important;
+    flex-direction: column !important;
+  }
+  .cd-modal > .cd-left,
+  .cd-modal > .cd-right {
+    display: contents !important;
+  }
+  /* hero (avatar+名前+chip) はいちばん上 */
+  .cd-modal .cd-profile-head { order: 1 !important; }
+  /* タブ は hero 直下 */
   .cd-modal .cd-tabs {
+    order: 2 !important;
     position: sticky !important;
     top: 0 !important;
     z-index: 50 !important;
     background: #FFFFFF !important;
     padding: 0 12px !important;
+    border-top: 1px solid #ECE6D6 !important;
+    border-bottom: 1px solid #ECE6D6 !important;
     -webkit-overflow-scrolling: touch !important;
   }
   .cd-modal .cd-tab {
     min-height: 44px !important;
     flex-shrink: 0 !important;
   }
+  /* タブの中身 (pane) を タブ直下 に */
   .cd-modal .cd-pane {
-    padding: 0 0 80px !important;
-    min-height: 50vh !important;
+    order: 3 !important;
+    padding: 0 0 24px !important;
+    min-height: 30vh !important;
+  }
+  /* それ以外 (.cd-left 内の クイックアクション/タグ/KPI/プロフィール etc) は タブの 下に */
+  .cd-modal .cd-zoom-pair { order: 4 !important; }
+  .cd-modal #cd-tags-section { order: 5 !important; }
+  .cd-modal .cd-kpi-section { order: 6 !important; }
+  .cd-modal .cd-qa-collapse { order: 7 !important; }
+  .cd-modal button[data-open-hearing] { order: 8 !important; }
+  .cd-modal .cd-profile-stats { order: 9 !important; }
+  .cd-modal .cd-profile-section { order: 10 !important; }
+  /* 直接子の Zoom/タグ ボタン や 区切り を 上のグループに混ぜない: 不明な要素は 末尾 */
+  .cd-modal > .cd-left > *:not(.cd-profile-head):not(.cd-zoom-pair):not(#cd-tags-section):not(.cd-kpi-section):not(.cd-qa-collapse):not([data-open-hearing]):not(.cd-profile-stats):not(.cd-profile-section) {
+    order: 11 !important;
   }
 }
 /* ===== /roundX list style ===== */
