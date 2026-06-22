@@ -9063,3 +9063,605 @@ body.modal-open {
     display: none !important;
   }
 }
+
+/* =================================================================
+   roundX (v.20260623L-list-style): iOS設定アプリ風 グループ化リスト
+   オーナー指示「カードタイプ→表タイプ」 顧客モーダル & 顧客台帳
+   設計トークン:
+     bg: #FFFFFF / divider: #ECE6D6 hairline / gold accent: #C19A3A
+     row min-height: 52px / label 12.5px #6B7280 / value 14px #1F2A3F
+     group label: 11.5px uppercase #8C7A4B + 4px gold left bar
+================================================================= */
+@media (max-width: 768px) {
+  /* ---- 0. cd-modal 全体: PC左右2カラム → mobile 1カラム平坦化 ---- */
+  .cd-modal {
+    background: #FFFFFF !important;
+    padding: 0 !important;
+    gap: 0 !important;
+    border-radius: 0 !important;
+  }
+  .cd-modal > .cd-left,
+  .cd-modal > .cd-right {
+    background: #FFFFFF !important;
+    box-shadow: none !important;
+    border: none !important;
+    padding: 0 !important;
+    border-radius: 0 !important;
+  }
+
+  /* ---- 1. プロフィール hero (アバター+名前+chip) ---- */
+  .cd-modal .cd-profile-head {
+    background: linear-gradient(180deg, #FDFBF4 0%, #FFFFFF 100%) !important;
+    padding: 22px 18px 18px !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    text-align: center !important;
+    border-bottom: 1px solid #ECE6D6 !important;
+  }
+  .cd-modal .cd-profile-avatar {
+    width: 76px !important;
+    height: 76px !important;
+    font-size: 30px !important;
+    margin: 0 auto 12px !important;
+    box-shadow: 0 8px 20px rgba(193,154,58,0.18) !important;
+  }
+  .cd-modal .cd-profile-name {
+    font-size: 20px !important;
+    font-weight: 800 !important;
+    color: #1F2A3F !important;
+    letter-spacing: 0.01em !important;
+    margin-bottom: 2px !important;
+  }
+  .cd-modal .cd-profile-kana {
+    font-size: 11.5px !important;
+    color: #8C7A4B !important;
+    letter-spacing: 0.08em !important;
+    margin-bottom: 12px !important;
+  }
+  .cd-modal .cd-profile-pills {
+    display: inline-flex !important;
+    flex-wrap: wrap !important;
+    justify-content: center !important;
+    gap: 6px !important;
+  }
+
+  /* ---- 2. グループ ラベル (iOS Settings の セクション見出し) ---- */
+  /* セクションラベル / 設定ラベル を 共通の group-label に統一 */
+  .cd-modal .cd-section-label,
+  .cd-modal .cd-kpi-label,
+  .cd-modal .cd-flow-eyebrow,
+  .cd-modal .cd-stat-label {
+    font-size: 11.5px !important;
+    font-weight: 800 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.1em !important;
+    color: #8C7A4B !important;
+    padding: 14px 18px 6px 14px !important;
+    background: #FAF6EB !important;
+    border-left: 4px solid #C19A3A !important;
+    margin: 0 !important;
+    border-radius: 0 !important;
+    display: block !important;
+  }
+
+  /* ---- 3. profile-section / cd-flow / cd-kpi-section / cd-zoom-pair 共通 ---- */
+  /* 全部 同じ list group の見た目に揃える */
+  .cd-modal .cd-profile-section,
+  .cd-modal .cd-kpi-section,
+  .cd-modal .cd-flow,
+  .cd-modal .cd-qa-collapse,
+  .cd-modal #cd-tags-section,
+  .cd-modal .cd-profile-stats {
+    background: #FFFFFF !important;
+    border: none !important;
+    border-top: 1px solid #ECE6D6 !important;
+    border-radius: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+  }
+  /* 上の hero 直後の 最初の border-top を 消す */
+  .cd-modal .cd-profile-head + * {
+    border-top: none !important;
+  }
+
+  /* ---- 4. dl (プロフィール key-value) を 表行に ---- */
+  .cd-modal .cd-dl {
+    display: block !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #FFFFFF !important;
+  }
+  .cd-modal .cd-dl dt {
+    display: inline-block !important;
+    width: 38% !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    color: #6B7280 !important;
+    padding: 13px 0 13px 18px !important;
+    margin: 0 !important;
+    vertical-align: top !important;
+    letter-spacing: 0.02em !important;
+  }
+  .cd-modal .cd-dl dd {
+    display: inline-block !important;
+    width: 60% !important;
+    font-size: 14px !important;
+    font-weight: 700 !important;
+    color: #1F2A3F !important;
+    padding: 13px 18px 13px 0 !important;
+    margin: 0 !important;
+    text-align: right !important;
+    border-bottom: 1px solid #F4EFE0 !important;
+    letter-spacing: 0.01em !important;
+  }
+  .cd-modal .cd-dl dt {
+    border-bottom: 1px solid #F4EFE0 !important;
+  }
+  .cd-modal .cd-dl dt:last-of-type,
+  .cd-modal .cd-dl dd:last-of-type {
+    border-bottom: none !important;
+  }
+
+  /* ---- 5. cd-profile-stats (管理資産/最終接触/年齢) を 縦並びrowに ---- */
+  .cd-modal .cd-profile-stats {
+    display: block !important;
+    grid-template-columns: none !important;
+    gap: 0 !important;
+  }
+  .cd-modal .cd-stat {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    padding: 14px 18px !important;
+    border-bottom: 1px solid #F4EFE0 !important;
+    background: #FFFFFF !important;
+    text-align: left !important;
+    min-height: 52px !important;
+    gap: 12px !important;
+  }
+  .cd-modal .cd-stat:last-child { border-bottom: none !important; }
+  .cd-modal .cd-stat .cd-stat-label {
+    flex: 0 0 38% !important;
+    background: transparent !important;
+    border: none !important;
+    padding: 0 !important;
+    color: #6B7280 !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    text-transform: none !important;
+    letter-spacing: 0.02em !important;
+    text-align: left !important;
+  }
+  .cd-modal .cd-stat .cd-stat-value {
+    flex: 1 1 auto !important;
+    font-size: 16px !important;
+    font-weight: 800 !important;
+    color: #1F2A3F !important;
+    text-align: right !important;
+    line-height: 1.2 !important;
+    margin: 0 !important;
+  }
+  .cd-modal .cd-stat .cd-stat-unit {
+    font-size: 12px !important;
+    color: #8C7A4B !important;
+    font-weight: 700 !important;
+    margin-left: 3px !important;
+  }
+  .cd-modal .cd-stat .cd-stat-sub {
+    display: block !important;
+    flex: 1 1 100% !important;
+    width: 100% !important;
+    text-align: right !important;
+    font-size: 11px !important;
+    color: #8C7A4B !important;
+    margin-top: 2px !important;
+    font-weight: 600 !important;
+  }
+
+  /* ---- 6. cd-family-list / cd-note / cd-cancel-list の余白詰め ---- */
+  .cd-modal .cd-family-list,
+  .cd-modal .cd-note,
+  .cd-modal .cd-cancel-list {
+    padding: 12px 18px 14px !important;
+    margin: 0 !important;
+    background: #FFFFFF !important;
+    border: none !important;
+  }
+  .cd-modal .cd-note {
+    font-size: 13.5px !important;
+    color: #1F2A3F !important;
+    line-height: 1.65 !important;
+  }
+
+  /* ---- 7. KPI section (この方に必要なフォロー) ---- */
+  .cd-modal .cd-kpi-section .cd-kpi-badges {
+    padding: 8px 18px 14px !important;
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 6px !important;
+  }
+  .cd-modal .cd-kpi-section .senior-kpi-badge {
+    font-size: 12px !important;
+    padding: 6px 11px !important;
+  }
+
+  /* ---- 8. cd-flow (AI推奨) ---- */
+  .cd-modal .cd-flow {
+    padding: 14px 16px 14px !important;
+  }
+  .cd-modal .cd-flow .cd-flow-eyebrow {
+    padding: 0 !important;
+    background: transparent !important;
+    border-left: none !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    margin-bottom: 8px !important;
+  }
+  .cd-modal .cd-flow .cd-flow-eyebrow-pill {
+    background: linear-gradient(135deg, #C19A3A, #A0822E) !important;
+    color: #FFFFFF !important;
+    padding: 4px 10px !important;
+    border-radius: 999px !important;
+    font-size: 10.5px !important;
+    font-weight: 900 !important;
+    letter-spacing: 0.08em !important;
+    display: inline-flex !important;
+    gap: 4px !important;
+    align-items: center !important;
+  }
+  .cd-modal .cd-flow-title {
+    font-size: 15.5px !important;
+    font-weight: 800 !important;
+    color: #1F2A3F !important;
+    line-height: 1.4 !important;
+    margin-bottom: 4px !important;
+  }
+  .cd-modal .cd-flow-reason {
+    font-size: 12.5px !important;
+    color: #6B7280 !important;
+    line-height: 1.55 !important;
+    margin-bottom: 12px !important;
+  }
+
+  /* ---- 9. Zoom ペア ボタン: rowスタイルに ---- */
+  .cd-modal .cd-zoom-pair {
+    display: block !important;
+    grid-template-columns: none !important;
+    gap: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #FFFFFF !important;
+  }
+  .cd-modal .cd-zoom-pair > button {
+    width: 100% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    gap: 12px !important;
+    background: #FFFFFF !important;
+    border: none !important;
+    border-bottom: 1px solid #F4EFE0 !important;
+    border-radius: 0 !important;
+    padding: 14px 36px 14px 16px !important;
+    min-height: 60px !important;
+    box-shadow: none !important;
+    font-size: 14.5px !important;
+    color: #1F2A3F !important;
+    font-weight: 800 !important;
+    position: relative !important;
+    text-align: left !important;
+  }
+  .cd-modal .cd-zoom-pair > button::after {
+    content: '›';
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #C19A3A;
+    font-size: 22px;
+    font-weight: 400;
+    line-height: 1;
+  }
+  .cd-modal .cd-zoom-pair > button svg {
+    width: 30px !important;
+    height: 30px !important;
+  }
+  .cd-modal .cd-zoom-pair > button span {
+    font-size: 14px !important;
+    line-height: 1.35 !important;
+  }
+  .cd-modal .cd-zoom-pair > button span span {
+    font-size: 11px !important;
+    color: #8C7A4B !important;
+    font-weight: 600 !important;
+  }
+
+  /* ---- 10. タグ section ---- */
+  .cd-modal #cd-tags-section {
+    padding: 0 !important;
+  }
+  .cd-modal #cd-tags-section > div:first-child {
+    padding: 14px 16px 8px !important;
+    margin: 0 !important;
+  }
+  .cd-modal #cd-tags-section #cd-tags-list {
+    padding: 0 16px 14px !important;
+    margin: 0 !important;
+    min-height: 0 !important;
+  }
+  .cd-modal #cd-tags-section #cd-tags-edit {
+    padding: 7px 14px !important;
+    font-size: 12px !important;
+    background: #FFFFFF !important;
+    color: #C19A3A !important;
+    border: 1px solid #C19A3A !important;
+    box-shadow: none !important;
+    border-radius: 999px !important;
+  }
+
+  /* ---- 11. QA collapse (連絡手段) ---- */
+  .cd-modal .cd-qa-collapse .cd-qa-summary {
+    padding: 14px 18px !important;
+    background: #FFFFFF !important;
+    font-size: 14px !important;
+    color: #1F2A3F !important;
+    font-weight: 700 !important;
+    border-radius: 0 !important;
+  }
+  .cd-modal .cd-qa-collapse .cd-qa-inner {
+    padding: 0 16px 14px !important;
+    background: #FFFFFF !important;
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 8px !important;
+  }
+  .cd-modal .cd-qa-collapse .cd-qa-btn {
+    background: #FAF6EB !important;
+    border: 1px solid #ECE6D6 !important;
+    padding: 12px !important;
+    font-size: 12.5px !important;
+    color: #1F2A3F !important;
+    font-weight: 700 !important;
+    border-radius: 10px !important;
+  }
+
+  /* ---- 12. アンケート ボタン -> row形式 ---- */
+  .cd-modal button[data-open-hearing] {
+    width: calc(100% - 32px) !important;
+    margin: 12px 16px !important;
+    padding: 13px 16px !important;
+    background: #FFFFFF !important;
+    color: #1F2A3F !important;
+    border: 1px solid #ECE6D6 !important;
+    border-radius: 12px !important;
+    font-size: 14px !important;
+    font-weight: 700 !important;
+    text-align: left !important;
+    position: relative !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+  }
+  .cd-modal button[data-open-hearing]::after {
+    content: '›';
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #C19A3A;
+    font-size: 22px;
+    font-weight: 400;
+  }
+
+  /* ---- 13. cd-section-label-warn (キャンセル履歴) ---- */
+  .cd-modal .cd-section-label-warn {
+    background: linear-gradient(90deg, #FEF3C7 0%, #FFFFFF 70%) !important;
+    color: #92400E !important;
+    border-left: 4px solid #F59E0B !important;
+  }
+
+  /* ---- 14. cd-right (右ペイン) も モバイル では 同じ list 形式に ---- */
+  /* タブ ナビ (cd-tabs) は そのまま、 中の panel だけ 平坦化 */
+  .cd-modal .cd-pane {
+    padding: 0 !important;
+    background: #FFFFFF !important;
+  }
+  .cd-modal .cd-tabs {
+    background: #FFFFFF !important;
+    border-top: 1px solid #ECE6D6 !important;
+    border-bottom: 1px solid #ECE6D6 !important;
+    padding: 0 !important;
+    overflow-x: auto !important;
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    gap: 0 !important;
+  }
+  .cd-modal .cd-tab {
+    flex: 0 0 auto !important;
+    padding: 12px 16px !important;
+    font-size: 13px !important;
+    color: #6B7280 !important;
+    background: transparent !important;
+    border: none !important;
+    border-bottom: 2px solid transparent !important;
+    border-radius: 0 !important;
+    font-weight: 700 !important;
+    white-space: nowrap !important;
+  }
+  .cd-modal .cd-tab.active {
+    color: #1F2A3F !important;
+    border-bottom-color: #C19A3A !important;
+    background: transparent !important;
+  }
+
+  /* ============================================================
+     B. 顧客台帳 (table.clients) — iOS list 風に再構築
+  ============================================================ */
+  /* table 自体の余白 リセット */
+  table.clients {
+    background: #FFFFFF !important;
+    border-radius: 0 !important;
+    border: none !important;
+    box-shadow: none !important;
+    border-spacing: 0 !important;
+    border-collapse: collapse !important;
+    width: 100% !important;
+  }
+  table.clients thead { display: none !important; }
+  table.clients tbody { display: block !important; background: #FFFFFF !important; }
+
+  /* 各行: 60px 高さ avatar / name+meta / 金額+chev */
+  table.clients tbody tr {
+    display: grid !important;
+    grid-template-columns: 44px 1fr auto !important;
+    grid-template-rows: auto auto !important;
+    align-items: center !important;
+    gap: 4px 12px !important;
+    padding: 12px 30px 12px 14px !important;
+    background: #FFFFFF !important;
+    border: none !important;
+    border-bottom: 1px solid #ECE6D6 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    min-height: 64px !important;
+    position: relative !important;
+    cursor: pointer !important;
+  }
+  table.clients tbody tr:hover { background: #FBF5E3 !important; }
+  table.clients tbody tr:active { background: #F4EFE0 !important; }
+
+  /* chevron 右端 */
+  table.clients tbody tr::after {
+    content: '›' !important;
+    position: absolute !important;
+    right: 12px !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    color: #C19A3A !important;
+    font-size: 22px !important;
+    font-weight: 400 !important;
+    line-height: 1 !important;
+    pointer-events: none !important;
+  }
+
+  /* td 全部 横並びに溶かす */
+  table.clients tbody td {
+    display: block !important;
+    padding: 0 !important;
+    border: none !important;
+    background: transparent !important;
+    font-size: 12.5px !important;
+    color: #6B7280 !important;
+    line-height: 1.4 !important;
+  }
+
+  /* 1番目td (顧客): avatar左 + 名前/meta */
+  table.clients tbody td:nth-child(1) {
+    grid-column: 1 / 3 !important;
+    grid-row: 1 / 2 !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    min-width: 0 !important;
+  }
+  table.clients tbody td:nth-child(1) .client-row-name {
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    min-width: 0 !important;
+    flex: 1 1 auto !important;
+  }
+  table.clients tbody td:nth-child(1) .avatar {
+    width: 38px !important;
+    height: 38px !important;
+    font-size: 14px !important;
+    flex-shrink: 0 !important;
+  }
+  table.clients tbody td:nth-child(1) strong {
+    font-size: 15px !important;
+    font-weight: 800 !important;
+    color: #1F2A3F !important;
+    letter-spacing: 0.005em !important;
+    display: block !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+    max-width: 180px !important;
+  }
+  table.clients tbody td:nth-child(1) .client-row-name > div {
+    min-width: 0 !important;
+    flex: 1 1 auto !important;
+  }
+  /* 名前直後のかな は隠す (情報密度優先) */
+  table.clients tbody td:nth-child(1) [style*="font-size:11px"][style*="muted"],
+  table.clients tbody td:nth-child(1) .client-row-name div > div:not([style*="flex-wrap"]) {
+    font-size: 10.5px !important;
+    color: #8C7A4B !important;
+  }
+
+  /* 2列目以降 (年齢/職業/家族/緊急/悩み/希望/商品) は 行2に集約 */
+  table.clients tbody td:nth-child(2),
+  table.clients tbody td:nth-child(3),
+  table.clients tbody td:nth-child(4),
+  table.clients tbody td:nth-child(5),
+  table.clients tbody td:nth-child(6),
+  table.clients tbody td:nth-child(7),
+  table.clients tbody td:nth-child(8) {
+    display: none !important;
+  }
+
+  /* ステータス列 (状態) — 行2 左 */
+  table.clients tbody td:nth-child(9) {
+    grid-column: 1 / 2 !important;
+    grid-row: 2 / 3 !important;
+    display: flex !important;
+    align-items: center !important;
+    flex-wrap: wrap !important;
+    gap: 4px !important;
+    padding-left: 48px !important;
+  }
+  table.clients tbody td:nth-child(9) .status-pill {
+    font-size: 10px !important;
+    padding: 2px 8px !important;
+  }
+
+  /* 管理資産 (10列目) — 行1 右端 */
+  table.clients tbody td:nth-child(10) {
+    grid-column: 3 / 4 !important;
+    grid-row: 1 / 2 !important;
+    display: block !important;
+    text-align: right !important;
+    font-size: 15px !important;
+    font-weight: 800 !important;
+    color: #1F2A3F !important;
+    line-height: 1.2 !important;
+    padding-right: 4px !important;
+    white-space: nowrap !important;
+  }
+
+  /* 最終接触 (11列目) — 行2 右 */
+  table.clients tbody td:nth-child(11) {
+    grid-column: 2 / 4 !important;
+    grid-row: 2 / 3 !important;
+    text-align: right !important;
+  }
+  table.clients tbody td:nth-child(11) > div {
+    flex-direction: row !important;
+    justify-content: flex-end !important;
+    align-items: center !important;
+    gap: 6px !important;
+  }
+  table.clients tbody td:nth-child(11) span {
+    font-size: 10.5px !important;
+  }
+
+  /* 検索 + filter bar 上部 */
+  #client-tools, .client-tools-row, .filter-bar {
+    background: #FFFFFF !important;
+    border-bottom: 1px solid #ECE6D6 !important;
+  }
+}
+/* ===== /roundX list style ===== */
