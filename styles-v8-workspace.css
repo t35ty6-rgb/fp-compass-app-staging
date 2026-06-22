@@ -10141,7 +10141,7 @@ body.modal-open {
     box-shadow: none !important;
   }
 
-  /* ★ オーナーfb 2026-06-23: タブを モーダル上部に — シンプル flex order で cd-right を 先に */
+  /* ★ オーナーfb 2026-06-23: タブを モーダル上部に — flex order で cd-right を 先に、 cd-right 内も タブが 先 */
   .cd-modal {
     display: flex !important;
     flex-direction: column !important;
@@ -10155,8 +10155,10 @@ body.modal-open {
     display: flex !important;
     flex-direction: column !important;
   }
-  /* hero (avatar+name) を cd-right の 真上 に sticky 風 浮かせる:
-     hero は cd-left 内 なので、 cd-left の中で 先頭順 維持。 hero は order:2 グループの 1番目 */
+  /* cd-right 内: タブ を 先頭、 pane を タブ直下、 残り (AI推奨/編集ボタン) は 末尾 */
+  .cd-modal .cd-right .cd-tabs { order: 0 !important; }
+  .cd-modal .cd-right .cd-pane { order: 1 !important; }
+  .cd-modal .cd-right > *:not(.cd-tabs):not(.cd-pane) { order: 2 !important; }
   .cd-modal .cd-profile-head { order: 0 !important; }
   /* タブ は cd-right の sticky-top */
   .cd-modal .cd-tabs {
