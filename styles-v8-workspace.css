@@ -7741,3 +7741,34 @@ body.mobile-nav-open #mobile-hamburger .mh-bar:nth-child(3) { transform: transla
     max-height: calc(100vh - 56px - 80px - env(safe-area-inset-top, 0px)) !important;
   }
 }
+
+/* ★ 2026-06-22 roundQ: モーダル内 二重ネストスクロール解消 (オーナーfb: スクロール効かない箇所がある) */
+@media (max-width: 768px) {
+  /* モバイルでは .cd-modal だけが scroll、 内部 ペイン は 自然な高さに */
+  .cd-left, .cd-right {
+    overflow: visible !important;
+    height: auto !important;
+    max-height: none !important;
+  }
+  /* .cd-modal も 自然な高さ → body 直 scroll に渡す (二重ネスト 解消) */
+  .cd-modal {
+    overflow: visible !important;
+    height: auto !important;
+    max-height: none !important;
+  }
+  /* モーダル自体 は scrollable に */
+  .modal#modal-content,
+  #modal-content,
+  .modal {
+    height: auto !important;
+    max-height: none !important;
+    min-height: calc(100vh - 56px - env(safe-area-inset-top, 0px) - 64px - env(safe-area-inset-bottom, 0px));
+    margin-bottom: calc(64px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+  /* modal-overlay は scroll 容器 */
+  .modal-overlay {
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    align-items: flex-start !important;  /* center だと はみ出した時 上に行けない */
+  }
+}
