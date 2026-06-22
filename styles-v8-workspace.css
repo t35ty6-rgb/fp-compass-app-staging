@@ -9619,21 +9619,33 @@ body.modal-open {
     display: none !important;
   }
 
-  /* ステータス列 (状態) — 行2 名前列 (col 2) */
+  /* ステータス列 (状態) — 行2 col 2-3 横全幅で status pill + 接触日 */
   table.clients tbody td:nth-child(9) {
     grid-area: auto !important;
-    grid-column: 2 / 3 !important;
+    grid-column: 2 / 4 !important;
     grid-row: 2 / 3 !important;
     display: flex !important;
     align-items: center !important;
     flex-wrap: wrap !important;
-    gap: 4px !important;
+    gap: 6px !important;
     padding-left: 0 !important;
     min-width: 0 !important;
+    justify-content: space-between !important;
   }
   table.clients tbody td:nth-child(9) .status-pill {
     font-size: 10px !important;
-    padding: 2px 7px !important;
+    padding: 2px 8px !important;
+  }
+  /* unread 要返事 badge は コンパクト化 */
+  table.clients tbody td:nth-child(9) .fp-unread-badge {
+    font-size: 9px !important;
+    padding: 2px 6px !important;
+    margin-right: 4px !important;
+  }
+  /* task badge */
+  table.clients tbody td:nth-child(9) .fp-task-badge {
+    font-size: 9px !important;
+    padding: 1px 5px !important;
   }
   table.clients tbody td:nth-child(9) .status-pill {
     font-size: 10px !important;
@@ -9657,26 +9669,9 @@ body.modal-open {
     max-width: 90px !important;
   }
 
-  /* 最終接触 (11列目) — 行2 右 (price 列の下) */
+  /* 最終接触 (11列目): mobile では 隠す (情報過多 → chevron で 詳細誘導) */
   table.clients tbody td:nth-child(11) {
-    grid-area: auto !important;
-    grid-column: 3 / 4 !important;
-    grid-row: 2 / 3 !important;
-    text-align: right !important;
-    display: block !important;
-    min-width: 0 !important;
-    max-width: 90px !important;
-    overflow: hidden !important;
-  }
-  table.clients tbody td:nth-child(11) > div {
-    display: flex !important;
-    flex-direction: column !important;
-    align-items: flex-end !important;
-    gap: 2px !important;
-  }
-  table.clients tbody td:nth-child(11) span {
-    font-size: 10px !important;
-    white-space: nowrap !important;
+    display: none !important;
   }
   table.clients tbody td:nth-child(11) > div {
     flex-direction: row !important;
