@@ -7091,6 +7091,9 @@ table tbody button.btn-mini:hover {
   row-gap: 26px !important;
   column-gap: 10px !important;
   width: 100% !important;
+  /* ★ 親が grid (左376+右268の2カラム) で 右カラムに押し込まれてた → 2カラム両方占有して 658px 確保 */
+  grid-column: 1 / -1 !important;
+  margin-top: 16px !important;
 }
 .fp-qa-grid > .fp-qa-pop { min-width: 0 !important; }
 .fp-qa-grid > .fp-qa-pop .fp-qa-label-main,
