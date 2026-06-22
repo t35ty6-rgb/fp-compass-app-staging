@@ -7527,35 +7527,38 @@ body.mobile-nav-open #mobile-hamburger .mh-bar:nth-child(3) { transform: transla
     position: relative;
     z-index: 2;
   }
-  .m-tab.is-active {
-    color: #9A5A18;
-  }
-  /* ★ オーナーfb 2026-06-23: 白アイコンが背景と重なるので gold pill 上に白icon の layering を確実化 */
-  .m-tab.is-active svg {
-    stroke: #fff !important;
-    transform: scale(1.05);
-    position: relative;
-    z-index: 2;
-  }
-  /* ゴールドピル背景 — signature element. z-index:0 で アイコンの 真下に確実に */
-  .m-tab .m-pill {
-    position: absolute;
-    top: 6px; left: 50%;
-    transform: translateX(-50%);
-    width: 44px; height: 30px;
-    border-radius: 99px;
-    background: transparent;
-    transition: background .25s;
-    z-index: 1;
-  }
-  .m-tab.is-active .m-pill {
-    background: linear-gradient(135deg, #C19A3A 0%, #9A5A18 100%);
-    box-shadow: 0 4px 12px rgba(193,154,58,0.32);
-  }
-  /* ラベル文字 (ホーム/顧客 等) は pill の下に */
   .m-tab span {
     position: relative;
     z-index: 2;
+  }
+  /* ★ オーナーfb 2026-06-23: 白アイコンが背景と重なって見えない → gold pill を ::before で 注入 */
+  .m-tab {
+    position: relative;
+  }
+  .m-tab::before {
+    content: '';
+    position: absolute;
+    top: 5px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 44px;
+    height: 30px;
+    border-radius: 99px;
+    background: transparent;
+    transition: background .25s, box-shadow .25s;
+    z-index: 1;
+    pointer-events: none;
+  }
+  .m-tab.is-active {
+    color: #9A5A18;
+  }
+  .m-tab.is-active::before {
+    background: linear-gradient(135deg, #C19A3A 0%, #9A5A18 100%) !important;
+    box-shadow: 0 4px 12px rgba(193,154,58,0.32) !important;
+  }
+  .m-tab.is-active svg {
+    stroke: #fff !important;
+    transform: scale(1.05);
   }
 
   /* ===== content area: topbar 下から bottomnav 上まで ===== */
