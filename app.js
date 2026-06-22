@@ -2877,7 +2877,7 @@
                       <span class="fp-qa-arrow">→</span>
                     </span>
                   </button>
-                  <button class="fp-qa-pop" data-accent="zoom" data-quick-schedule="${escapeHtml(c.id)}">
+                  <button class="fp-qa-pop" data-accent="schedule" data-quick-schedule="${escapeHtml(c.id)}">
                     <span class="fp-qa-tip">＼ 候補日 → 確定 ／</span>
                     <span class="fp-qa-capsule">
                       <span class="fp-qa-dot"></span>

@@ -6939,3 +6939,145 @@ table tbody button.btn-mini:hover {
   .fp-qa-pop:hover .fp-qa-tip,
   .fp-qa-pop:hover .fp-qa-arrow { transform: none !important; }
 }
+
+/* ============================================================
+   顧客モーダル CTA v3 (2026-06-22 roundM) — Jewel Tones
+   オーナーfb: 「色が一緒で見づらい / バランス悪い」
+   解決: capsule の base color を data-accent ごとに 大胆に変える + balance fix
+   ============================================================ */
+
+/* バランス: tip を absolute (上部中央固定) + capsule 統一サイズ */
+.fp-qa-pop {
+  position: relative !important;
+  padding-top: 18px !important;
+  min-height: 100px;
+}
+.fp-qa-pop .fp-qa-tip {
+  position: absolute !important;
+  top: 4px;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-bottom: 0 !important;
+  z-index: 3;
+  pointer-events: none;
+}
+.fp-qa-pop:hover .fp-qa-tip {
+  transform: translateX(-50%) translateY(-2px) !important;
+}
+.fp-qa-pop .fp-qa-capsule {
+  width: 100%;
+  min-height: 76px;
+  padding: 18px 16px 16px 20px !important;
+  border-radius: 16px !important;
+  gap: 14px !important;
+}
+
+/* 色: data-accent ごとに capsule gradient + arrow color */
+
+/* ━━ Sapphire (Zoom今すぐ) — vivid Zoom blue ━━ */
+.fp-qa-pop[data-accent="zoom"] .fp-qa-capsule {
+  background: linear-gradient(135deg, #2D8CFF 0%, #0F62D1 100%) !important;
+  box-shadow:
+    0 6px 18px rgba(45, 140, 255, 0.36),
+    inset 0 1px 0 rgba(255, 255, 255, 0.28) !important;
+}
+.fp-qa-pop[data-accent="zoom"]:hover .fp-qa-capsule {
+  box-shadow: 0 12px 30px rgba(45, 140, 255, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.35) !important;
+}
+.fp-qa-pop[data-accent="zoom"] .fp-qa-arrow { color: #0F62D1 !important; }
+.fp-qa-pop[data-accent="zoom"] .fp-qa-tip::before,
+.fp-qa-pop[data-accent="zoom"] .fp-qa-tip::after { background: #2D8CFF !important; }
+
+/* ━━ Night Blue (日時指定 Zoom) — calendar感 navy ━━ */
+.fp-qa-pop[data-accent="schedule"] .fp-qa-capsule {
+  background: linear-gradient(135deg, #1E3A5F 0%, #0F1B2F 100%) !important;
+  box-shadow:
+    0 6px 18px rgba(30, 58, 95, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.18) !important;
+}
+.fp-qa-pop[data-accent="schedule"]:hover .fp-qa-capsule {
+  box-shadow: 0 12px 30px rgba(30, 58, 95, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.25) !important;
+}
+.fp-qa-pop[data-accent="schedule"] .fp-qa-arrow { color: #1E3A5F !important; }
+.fp-qa-pop[data-accent="schedule"] .fp-qa-tip::before,
+.fp-qa-pop[data-accent="schedule"] .fp-qa-tip::after { background: #5B7BAA !important; }
+
+/* ━━ Amber (候補日3つ) — gold gradient (base) ━━ */
+/* 既存 .fp-qa-capsule の デフォルト gold は そのまま — slots アクセントは override 不要 */
+.fp-qa-pop[data-accent="slots"] .fp-qa-tip::before,
+.fp-qa-pop[data-accent="slots"] .fp-qa-tip::after { background: #C19A3A !important; }
+
+/* ━━ Amethyst (タグ) — purple ━━ */
+.fp-qa-pop[data-accent="tag"] .fp-qa-capsule {
+  background: linear-gradient(135deg, #7C3AED 0%, #5B21B6 100%) !important;
+  box-shadow:
+    0 6px 18px rgba(124, 58, 237, 0.38),
+    inset 0 1px 0 rgba(255, 255, 255, 0.22) !important;
+}
+.fp-qa-pop[data-accent="tag"]:hover .fp-qa-capsule {
+  box-shadow: 0 12px 30px rgba(124, 58, 237, 0.52), inset 0 1px 0 rgba(255, 255, 255, 0.3) !important;
+}
+.fp-qa-pop[data-accent="tag"] .fp-qa-arrow { color: #5B21B6 !important; }
+.fp-qa-pop[data-accent="tag"] .fp-qa-tip::before,
+.fp-qa-pop[data-accent="tag"] .fp-qa-tip::after { background: #A78BFA !important; }
+
+/* ━━ Emerald (自分で書く) — forest green ━━ */
+.fp-qa-pop[data-accent="brief"] .fp-qa-capsule {
+  background: linear-gradient(135deg, #047857 0%, #064E3B 100%) !important;
+  box-shadow:
+    0 6px 18px rgba(4, 120, 87, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.22) !important;
+}
+.fp-qa-pop[data-accent="brief"]:hover .fp-qa-capsule {
+  box-shadow: 0 12px 30px rgba(4, 120, 87, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.3) !important;
+}
+.fp-qa-pop[data-accent="brief"] .fp-qa-arrow { color: #047857 !important; }
+.fp-qa-pop[data-accent="brief"] .fp-qa-tip::before,
+.fp-qa-pop[data-accent="brief"] .fp-qa-tip::after { background: #34D399 !important; }
+
+/* ━━ Pewter (顧客情報) — ghost / neutral ━━ */
+.fp-qa-pop[data-accent="info"] .fp-qa-capsule {
+  background: #fff !important;
+  border: 1.5px solid #CBD5E1 !important;
+  box-shadow:
+    0 4px 12px rgba(15, 23, 42, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6) !important;
+}
+.fp-qa-pop[data-accent="info"]:hover .fp-qa-capsule {
+  border-color: #94A3B8 !important;
+  background: #F8FAFC !important;
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.8) !important;
+}
+.fp-qa-pop[data-accent="info"] .fp-qa-label-main {
+  color: #1F2A3F !important;
+  text-shadow: none !important;
+}
+.fp-qa-pop[data-accent="info"] .fp-qa-label-sub {
+  color: #64748B !important;
+}
+.fp-qa-pop[data-accent="info"] .fp-qa-arrow {
+  background: #1F2A3F !important;
+  color: #fff !important;
+}
+.fp-qa-pop[data-accent="info"] .fp-qa-tip::before,
+.fp-qa-pop[data-accent="info"] .fp-qa-tip::after { background: #CBD5E1 !important; }
+.fp-qa-pop[data-accent="info"] .fp-qa-dot {
+  background: #475569 !important;
+  box-shadow: 0 0 0 2px rgba(71,85,105,0.18), 0 0 8px rgba(71,85,105,0.3) !important;
+}
+
+/* dot を 各色に 自動同期 (左ドットを目立たせる) */
+.fp-qa-pop[data-accent="zoom"] .fp-qa-dot     { background: #BFDBFE !important; box-shadow: 0 0 0 2px rgba(255,255,255,0.5), 0 0 10px rgba(191,219,254,0.6) !important; }
+.fp-qa-pop[data-accent="schedule"] .fp-qa-dot { background: #94A3B8 !important; box-shadow: 0 0 0 2px rgba(255,255,255,0.5), 0 0 10px rgba(148,163,184,0.5) !important; }
+.fp-qa-pop[data-accent="slots"] .fp-qa-dot    { background: #FDE68A !important; box-shadow: 0 0 0 2px rgba(255,255,255,0.5), 0 0 10px rgba(253,230,138,0.6) !important; }
+.fp-qa-pop[data-accent="tag"] .fp-qa-dot      { background: #DDD6FE !important; box-shadow: 0 0 0 2px rgba(255,255,255,0.5), 0 0 10px rgba(221,214,254,0.6) !important; }
+.fp-qa-pop[data-accent="brief"] .fp-qa-dot    { background: #A7F3D0 !important; box-shadow: 0 0 0 2px rgba(255,255,255,0.5), 0 0 10px rgba(167,243,208,0.6) !important; }
+
+/* グリッドのバランス: 吹き出し分の row gap 確保 */
+.fp-qa-grid { row-gap: 28px !important; column-gap: 14px !important; }
+
+/* モバイル: 1列 */
+@media (max-width: 520px) {
+  .fp-qa-grid { grid-template-columns: 1fr !important; }
+  .fp-qa-pop { min-height: 96px; }
+}

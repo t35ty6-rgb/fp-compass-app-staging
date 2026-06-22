@@ -1249,16 +1249,35 @@
       }
       const mode = ov.querySelector('input[name="fp-qi-mode"]:checked')?.value || 'zoom';
       const inpersonTs = 'quick-' + Date.now();
+      // ★ 2026-06-22 roundM: 新規お客様 (clientId が quick-) で 録音/メモ モード時は、
+      //   先に Firestore に customer doc を 作成して resolvedClientId を 取得 → 顧客台帳 自動反映
+      let effectiveClientId = clientId;
+      if (clientId.startsWith('quick-') && (mode === 'audio' || mode === 'memo')) {
+        try {
+          const { addDoc, collection, serverTimestamp } = await import('https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js');
+          const tid = window.__fp?.tenantId;
+          if (tid) {
+            const newRef = await addDoc(collection(window.__fp.db, `tenants/${tid}/customers`), {
+              name: clientName, status: 'new', source: 'quick-inperson',
+              createdAt: serverTimestamp(), firstContactAt: serverTimestamp(),
+              note: '急遽 ' + (mode === 'audio' ? '対面録音' : '対面メモ') + ' から 自動追加',
+            });
+            effectiveClientId = newRef.id;
+            // refresh CRM 顧客台帳
+            if (window.refreshFirestoreCustomers) await window.refreshFirestoreCustomers();
+          }
+        } catch (e) { console.warn('quick customer firestore create failed:', e); }
+      }
       try {
         const existing = JSON.parse(localStorage.getItem('fp-quick-inperson-meta') || '[]');
-        existing.push({ ts: inpersonTs, clientId, clientName, startedAt: new Date().toISOString(), mode });
+        existing.push({ ts: inpersonTs, clientId: effectiveClientId, clientName, startedAt: new Date().toISOString(), mode });
         localStorage.setItem('fp-quick-inperson-meta', JSON.stringify(existing.slice(-50)));
       } catch (_) {}
       ov.remove();
       // モード分岐
-      if (mode === 'zoom')        await startQuickZoom(clientId, clientName);
+      if (mode === 'zoom')        await startQuickZoom(effectiveClientId, clientName);
       else if (mode === 'audio')  await startAudioOnlyRecording(inpersonTs);
-      else                        await openMemoOnlyForQuick(inpersonTs, clientId, clientName);
+      else                        await openMemoOnlyForQuick(inpersonTs, effectiveClientId, clientName);
     });
   }
 
@@ -2524,10 +2543,28 @@
       });
       const fn = httpsCallable(getFunctions(app, 'asia-northeast1'), 'quickZoomMeeting');
       const payload = clientId.startsWith('quick-')
-        ? { topic: 'FP Compass 急遽相談 / ' + clientName }
+        ? { customerId: clientId, topic: clientName }   // quick-* + topic=clientName → CF が auto-create
         : { customerId: clientId };
       const res = await fn(payload);
       result = res.data;
+      // ★ 2026-06-22 roundM: 新規顧客自動追加バグ修正
+      //   CF で Firestore に作っても CRM の DUMMY_CLIENTS に同期されてないとき 顧客台帳に出ない
+      //   → refreshFirestoreCustomers で 即同期 + ローカル meta も更新
+      if (result.autoCreatedCustomer && result.customerId) {
+        try {
+          if (window.refreshFirestoreCustomers) await window.refreshFirestoreCustomers();
+          // localStorage の急遽meta も resolvedCustomerId に書き換え (議事録 紐付け維持)
+          try {
+            const meta = JSON.parse(localStorage.getItem('fp-quick-inperson-meta') || '[]');
+            const last = meta[meta.length - 1];
+            if (last && last.clientId === clientId) {
+              last.clientId = result.customerId;
+              last.autoLinkedFromQuick = true;
+              localStorage.setItem('fp-quick-inperson-meta', JSON.stringify(meta));
+            }
+          } catch (_) {}
+        } catch (e) { console.warn('auto-create sync failed:', e); }
+      }
     } catch (e) {
       wait.remove();
       const errMsg = e?.message || String(e);
