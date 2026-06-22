@@ -9619,16 +9619,21 @@ body.modal-open {
     display: none !important;
   }
 
-  /* ステータス列 (状態) — 行2 左 */
+  /* ステータス列 (状態) — 行2 名前列 (col 2) */
   table.clients tbody td:nth-child(9) {
     grid-area: auto !important;
-    grid-column: 1 / 2 !important;
+    grid-column: 2 / 3 !important;
     grid-row: 2 / 3 !important;
     display: flex !important;
     align-items: center !important;
     flex-wrap: wrap !important;
     gap: 4px !important;
-    padding-left: 48px !important;
+    padding-left: 0 !important;
+    min-width: 0 !important;
+  }
+  table.clients tbody td:nth-child(9) .status-pill {
+    font-size: 10px !important;
+    padding: 2px 7px !important;
   }
   table.clients tbody td:nth-child(9) .status-pill {
     font-size: 10px !important;
@@ -9652,13 +9657,26 @@ body.modal-open {
     max-width: 90px !important;
   }
 
-  /* 最終接触 (11列目) — 行2 右 */
+  /* 最終接触 (11列目) — 行2 右 (price 列の下) */
   table.clients tbody td:nth-child(11) {
     grid-area: auto !important;
-    grid-column: 2 / 4 !important;
+    grid-column: 3 / 4 !important;
     grid-row: 2 / 3 !important;
     text-align: right !important;
     display: block !important;
+    min-width: 0 !important;
+    max-width: 90px !important;
+    overflow: hidden !important;
+  }
+  table.clients tbody td:nth-child(11) > div {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-end !important;
+    gap: 2px !important;
+  }
+  table.clients tbody td:nth-child(11) span {
+    font-size: 10px !important;
+    white-space: nowrap !important;
   }
   table.clients tbody td:nth-child(11) > div {
     flex-direction: row !important;
