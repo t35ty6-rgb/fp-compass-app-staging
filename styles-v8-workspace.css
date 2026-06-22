@@ -9511,7 +9511,8 @@ body.modal-open {
     width: 100% !important;
   }
   table.clients thead { display: none !important; }
-  table.clients tbody { display: block !important; background: #FFFFFF !important; }
+  table.clients tbody { display: block !important; background: #FFFFFF !important; width: 100% !important; }
+  table.clients { display: block !important; width: 100% !important; max-width: 100% !important; box-sizing: border-box !important; }
 
   /* 各行: シンプル 1行 layout — avatar / 名前+meta / ¥金額 / chevron */
   table.clients tbody tr {
@@ -9519,8 +9520,11 @@ body.modal-open {
     flex-direction: row !important;
     flex-wrap: nowrap !important;
     align-items: center !important;
-    gap: 12px !important;
-    padding: 14px 32px 14px 14px !important;
+    gap: 10px !important;
+    padding: 14px 30px 14px 14px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
     background: #FFFFFF !important;
     border: none !important;
     border-bottom: 1px solid #ECE6D6 !important;
