@@ -9516,11 +9516,11 @@ body.modal-open {
   /* 各行: 60px 高さ avatar / name+meta / 金額+chev */
   table.clients tbody tr {
     display: grid !important;
-    grid-template-columns: 44px minmax(140px, 1fr) max-content !important;
+    grid-template-columns: 44px minmax(120px, 1fr) auto !important;
     grid-template-rows: auto auto !important;
     align-items: center !important;
     gap: 4px 10px !important;
-    padding: 12px 28px 12px 12px !important;
+    padding: 12px 38px 12px 12px !important;
     background: #FFFFFF !important;
     border: none !important;
     border-bottom: 1px solid #ECE6D6 !important;
