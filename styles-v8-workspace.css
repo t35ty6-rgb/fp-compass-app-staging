@@ -9663,5 +9663,27 @@ body.modal-open {
     background: #FFFFFF !important;
     border-bottom: 1px solid #ECE6D6 !important;
   }
+
+  /* 防御: 旧 roundV/roundU の カード型 td/tr bg を 一掃 (cream stripe 防止) */
+  table.clients tbody tr,
+  table.clients tbody tr td,
+  table.clients tbody tr td > div {
+    background-color: transparent !important;
+  }
+  table.clients tbody tr {
+    background-color: #FFFFFF !important;
+  }
+  /* 旧 roundV: tbody tr の inset shadow / margin を 消して 連続 list に */
+  table.clients tbody tr {
+    margin: 0 !important;
+    box-shadow: none !important;
+    border: none !important;
+    border-bottom: 1px solid #ECE6D6 !important;
+  }
+  table.clients {
+    border: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+  }
 }
 /* ===== /roundX list style ===== */
