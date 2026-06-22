@@ -8076,3 +8076,156 @@ body.mobile-nav-open #mobile-hamburger .mh-bar:nth-child(3) { transform: transla
   /* sidebar を 88vw に拡げて label 表示余裕に */
   body.mobile-nav-open .sidebar { width: 86vw !important; max-width: 340px !important; }
 }
+
+/* ★ 2026-06-22 roundR fix3: mega-hero (navy bg) の text color を 白系に戻す */
+@media (max-width: 768px) {
+  .mega-hero {
+    background: linear-gradient(135deg, #1F2A3F 0%, #2A3854 100%) !important;
+    border-radius: 16px !important;
+    padding: 18px 18px 20px !important;
+    margin: 0 0 16px !important;
+  }
+  .mega-hero-title { color: #FBF5E3 !important; }
+  .mega-hero-name { color: #FCD34D !important; font-weight: 800 !important; }
+  .mega-hero-lead { color: #CBD5E1 !important; }
+  .mega-hero-stat { background: rgba(255,255,255,0.08) !important; }
+  .mega-hero-stat-label { color: #CBD5E1 !important; }
+  .mega-hero-stat-value { color: #FCD34D !important; }
+}
+
+/* ============================================================
+   モバイル専用 完全 リビルド v1 (2026-06-22 roundS)
+   オーナーfb: 「縦長すぎ携帯専用に1から組むべき」
+   既存 PC マークアップは モバイルで 全hide → 代わりに 新規 .m-screen-* を 動的注入
+   ============================================================ */
+@media (max-width: 768px) {
+  /* 既存 ヒーロー系 を 全部 hide */
+  .mega-hero,
+  .view[data-view="dashboard"] .page-head,
+  .view[data-view="dashboard"] > div:not(.m-screen-home):first-child {
+    display: none !important;
+  }
+  /* PC用大型 hero エリア / クライアントタブ ツールバー の余計な装飾 を hide */
+  .view[data-view="clients"] .page-head { display: none !important; }
+  /* 顧客モーダル の 大型 ヘッダ を 隠して モバイル専用ヘッダ */
+  .cd-flow-empty, .cd-empty-state { padding: 16px !important; }
+
+  /* ===== モバイル専用 ホーム ===== */
+  .m-screen-home { display: block; padding: 8px 4px 24px; }
+  .m-greet {
+    background: linear-gradient(135deg, #1F2A3F 0%, #2A3854 100%);
+    border-radius: 16px;
+    padding: 18px 20px;
+    margin-bottom: 14px;
+    color: #FBF5E3;
+    box-shadow: 0 8px 22px rgba(15, 23, 42, 0.16);
+  }
+  .m-greet-date { font-size: 11px; color: #94A3B8; letter-spacing: 0.06em; margin-bottom: 6px; font-family: 'Inter', sans-serif; }
+  .m-greet-line {
+    font-family: 'Noto Serif JP', serif;
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 1.5;
+    margin: 0 0 10px;
+  }
+  .m-greet-name { color: #FCD34D; font-weight: 800; }
+  .m-greet-big {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    margin-top: 6px;
+  }
+  .m-greet-num {
+    font-family: 'Inter', sans-serif;
+    font-size: 44px;
+    font-weight: 900;
+    color: #FCD34D;
+    line-height: 1;
+    letter-spacing: -0.02em;
+  }
+  .m-greet-unit { font-size: 13px; color: #CBD5E1; }
+
+  /* ステータス 3 boxes */
+  .m-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+  .m-stat {
+    background: #fff;
+    border: 1px solid #E8E2D4;
+    border-radius: 12px;
+    padding: 12px 8px;
+    text-align: center;
+    box-shadow: 0 2px 6px rgba(15, 23, 42, 0.04);
+  }
+  .m-stat-num {
+    font-family: 'Inter', sans-serif;
+    font-size: 22px;
+    font-weight: 800;
+    color: #1F2A3F;
+    line-height: 1;
+  }
+  .m-stat-label {
+    font-size: 10.5px;
+    color: #6B7280;
+    margin-top: 6px;
+    letter-spacing: 0.02em;
+  }
+
+  /* クイックアクション 2 buttons */
+  .m-quick-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 18px;
+  }
+  .m-qa {
+    background: linear-gradient(135deg, #C19A3A, #9A5A18);
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    padding: 14px 12px;
+    font-family: 'Hiragino Sans', sans-serif;
+    font-weight: 800;
+    font-size: 13.5px;
+    cursor: pointer;
+    min-height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    box-shadow: 0 6px 16px rgba(193, 154, 58, 0.3);
+  }
+  .m-qa.is-secondary {
+    background: #fff;
+    color: #1F2A3F;
+    border: 1.5px solid #C19A3A;
+    box-shadow: none;
+  }
+  .m-qa-icon { font-size: 18px; }
+
+  /* "今日 話すべき方" セクション header */
+  .m-section-h {
+    font-family: 'Noto Serif JP', serif;
+    font-size: 17px;
+    font-weight: 700;
+    color: #1F2A3F;
+    margin: 18px 0 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .m-section-h::before {
+    content: '';
+    width: 4px; height: 18px;
+    background: #C19A3A;
+    border-radius: 2px;
+  }
+}
+
+/* PC では モバイル専用 要素 非表示 */
+@media (min-width: 769px) {
+  .m-screen-home { display: none !important; }
+}
