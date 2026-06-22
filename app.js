@@ -2863,72 +2863,72 @@
                 </span>
                 <i data-lucide="wand-2" class="cd-flow-step-icon"></i>
               </button>
-              <!-- ★ 2026-06-22 roundL: 吹き出し付き gold capsule CTA (オーナー指定パターン) + 色分け -->
-              <div class="fp-qa-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:18px 12px;margin-top:6px;">
+              <!-- ★ 2026-06-22 roundN: 3列×2行 横長レイアウト + 文言短縮 -->
+              <div class="fp-qa-grid">
                 ${c.lineFriendId ? `
                   <button class="fp-qa-pop" data-accent="zoom" data-quick-instant="${escapeHtml(c.id)}">
-                    <span class="fp-qa-tip">＼ 1クリックで開始 ／</span>
+                    <span class="fp-qa-tip">＼ 1クリック開始 ／</span>
                     <span class="fp-qa-capsule">
                       <span class="fp-qa-dot"></span>
                       <span class="fp-qa-label">
                         <span class="fp-qa-label-main">⚡ 今すぐ Zoom</span>
-                        <span class="fp-qa-label-sub">LINE で URL 自動送付</span>
+                        <span class="fp-qa-label-sub">URL 自動送付</span>
                       </span>
                       <span class="fp-qa-arrow">→</span>
                     </span>
                   </button>
                   <button class="fp-qa-pop" data-accent="schedule" data-quick-schedule="${escapeHtml(c.id)}">
-                    <span class="fp-qa-tip">＼ 候補日 → 確定 ／</span>
+                    <span class="fp-qa-tip">＼ 候補日 確定 ／</span>
                     <span class="fp-qa-capsule">
                       <span class="fp-qa-dot"></span>
                       <span class="fp-qa-label">
-                        <span class="fp-qa-label-main">📅 日時指定 Zoom</span>
-                        <span class="fp-qa-label-sub">日時を 決めて 予約</span>
+                        <span class="fp-qa-label-main">📅 日時指定</span>
+                        <span class="fp-qa-label-sub">日付を 決めて 予約</span>
                       </span>
                       <span class="fp-qa-arrow">→</span>
                     </span>
                   </button>
                   <button class="fp-qa-pop" data-accent="slots" data-quick-slots="${escapeHtml(c.id)}">
-                    <span class="fp-qa-tip">＼ LINEで送信 ／</span>
+                    <span class="fp-qa-tip">＼ LINE 送信 ／</span>
                     <span class="fp-qa-capsule">
                       <span class="fp-qa-dot"></span>
                       <span class="fp-qa-label">
                         <span class="fp-qa-label-main">🗓 候補日 3つ</span>
-                        <span class="fp-qa-label-sub">お客様 にタップ選択 してもらう</span>
+                        <span class="fp-qa-label-sub">お客様 タップ</span>
                       </span>
                       <span class="fp-qa-arrow">→</span>
                     </span>
                   </button>
                 ` : ''}
                 <button class="fp-qa-pop" data-accent="tag" data-quick-tag="${escapeHtml(c.id)}">
-                  <span class="fp-qa-tip">＼ セグメント分け ／</span>
+                  <span class="fp-qa-tip">＼ セグメント ／</span>
                   <span class="fp-qa-capsule">
                     <span class="fp-qa-dot"></span>
                     <span class="fp-qa-label">
                       <span class="fp-qa-label-main">🏷 タグ</span>
-                      <span class="fp-qa-label-sub">分類 / 絞込 / 配信対象</span>
+                      <span class="fp-qa-label-sub">分類 / 絞込</span>
                     </span>
                     <span class="fp-qa-arrow">→</span>
                   </span>
                 </button>
                 <button class="modal-brief-btn fp-qa-pop" data-accent="brief" data-line-brief="${c.id}">
-                  <span class="fp-qa-tip">＼ AIなし 自由文 ／</span>
+                  <span class="fp-qa-tip">＼ 自由文 ／</span>
                   <span class="fp-qa-capsule">
                     <span class="fp-qa-dot"></span>
                     <span class="fp-qa-label">
                       <span class="fp-qa-label-main">✍ 自分で書く</span>
-                      <span class="fp-qa-label-sub">LINE メッセージ 手入力</span>
+                      <span class="fp-qa-label-sub">手入力 LINE</span>
                     </span>
                     <span class="fp-qa-arrow">→</span>
                   </span>
                 </button>
                 <button class="cd-flow-edit fp-qa-pop" data-accent="info" id="modal-edit-btn">
-                  <span class="fp-qa-tip">＼ 編集 / 削除 ／</span>
+                  <span class="fp-qa-tip">＼ 編集 ／</span>
                   <span class="fp-qa-capsule">
                     <span class="fp-qa-dot"></span>
                     <span class="fp-qa-label">
                       <span class="fp-qa-label-main">✏ 顧客情報</span>
-                      <span class="fp-qa-label-sub">名前 / 家族 / 連絡先 編集</span>
+                      <span class="fp-qa-label-sub">名前/家族 編集</span>
                     </span>
                     <span class="fp-qa-arrow">→</span>
                   </span>

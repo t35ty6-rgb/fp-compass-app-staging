@@ -7081,3 +7081,61 @@ table tbody button.btn-mini:hover {
   .fp-qa-grid { grid-template-columns: 1fr !important; }
   .fp-qa-pop { min-height: 96px; }
 }
+
+/* ============================================================
+   顧客モーダル CTA v4 (2026-06-22 roundN) — 3列×2行 横長レイアウト
+   オーナーfb: 縦長すぎてスクロール必要 → 3列でコンパクトに
+   ============================================================ */
+.fp-qa-grid {
+  grid-template-columns: repeat(3, 1fr) !important;
+  row-gap: 26px !important;
+  column-gap: 10px !important;
+}
+
+/* 3列なので 各 cell を コンパクト化 */
+.fp-qa-pop {
+  padding-top: 16px !important;
+  min-height: 84px;
+}
+.fp-qa-pop .fp-qa-capsule {
+  min-height: 64px;
+  padding: 14px 12px 12px 14px !important;
+  gap: 9px !important;
+  border-radius: 14px !important;
+}
+.fp-qa-pop .fp-qa-dot {
+  width: 7px; height: 7px;
+}
+.fp-qa-pop .fp-qa-arrow {
+  width: 24px; height: 24px;
+  font-size: 12px;
+  box-shadow: 0 1.5px 4px rgba(0,0,0,0.2);
+}
+.fp-qa-pop .fp-qa-label-main {
+  font-size: 12px !important;
+  letter-spacing: 0.01em;
+}
+.fp-qa-pop .fp-qa-label-sub {
+  font-size: 9.5px !important;
+  letter-spacing: 0.01em;
+}
+.fp-qa-pop .fp-qa-tip {
+  font-size: 9.5px !important;
+  padding: 3px 12px !important;
+  letter-spacing: 0.03em !important;
+  top: 2px;
+}
+.fp-qa-pop .fp-qa-tip::before,
+.fp-qa-pop .fp-qa-tip::after {
+  height: 10px;
+  width: 1.3px;
+}
+
+/* レスポンシブ: 中間幅 (≤780px) で 2列、 狭い (≤500px) で 1列 */
+@media (max-width: 780px) {
+  .fp-qa-grid { grid-template-columns: repeat(2, 1fr) !important; }
+}
+@media (max-width: 500px) {
+  .fp-qa-grid { grid-template-columns: 1fr !important; }
+  .fp-qa-pop { min-height: 76px; }
+}

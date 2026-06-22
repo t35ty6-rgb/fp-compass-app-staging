@@ -1339,21 +1339,20 @@
       const snap = await getDocs(collection(db, 'tenants', tenantId, 'customers'));
       const pendingFs = [];
       const confirmedFs = [];
+      const allFs = []; // ★ 2026-06-22 roundN: 全顧客 (source問わず) を DUMMY_CLIENTS 同期対象に
       snap.forEach(d => {
         const c = d.data();
-        if (c.source !== 'line_survey') return;
-        if ((c.meetingCandidates||[]).length > 0 && !c.confirmedSlot) {
-          pendingFs.push({ docId: d.id, ...c });
-        }
-        if (c.confirmedSlot && c.zoomUrl) {
-          confirmedFs.push({ docId: d.id, ...c });
+        const obj = { docId: d.id, ...c };
+        allFs.push(obj);  // ★ 全 source を sync 対象 (旧バグ: source!=='line_survey' で除外 → quick-zoom/quick-inperson 顧客が 顧客台帳に出なかった)
+        if (c.source === 'line_survey') {
+          if ((c.meetingCandidates||[]).length > 0 && !c.confirmedSlot) pendingFs.push(obj);
+          if (c.confirmedSlot && c.zoomUrl) confirmedFs.push(obj);
         }
       });
       window._fpFirestoreCustomers = pendingFs;
       window._fpFirestoreConfirmed = confirmedFs;
-      // ★ Firestore 多テナント顧客 を CRM顧客台帳 (DUMMY_CLIENTS) に 自動同期
-      //   未同期だと openClientModal('fs-xxx') が clients.find undefined で early return = 「クリックで何も起きない」
-      try { syncFirestoreCustomersToClients(pendingFs.concat(confirmedFs)); } catch (e) { console.warn('syncFirestoreCustomersToClients:', e); }
+      // ★ Firestore 全顧客 (line_survey + quick-zoom + quick-inperson 含む) を DUMMY_CLIENTS に sync
+      try { syncFirestoreCustomersToClients(allFs); } catch (e) { console.warn('syncFirestoreCustomersToClients:', e); }
       try { if (currentSubview === 'leadHub') renderLeadHubInner(); } catch(_) {}
     } catch (e) { console.warn('refreshFirestoreCustomers:', e); }
   }
