@@ -9516,11 +9516,11 @@ body.modal-open {
   /* 各行: 60px 高さ avatar / name+meta / 金額+chev */
   table.clients tbody tr {
     display: grid !important;
-    grid-template-columns: 44px 1fr auto !important;
+    grid-template-columns: 44px minmax(140px, 1fr) max-content !important;
     grid-template-rows: auto auto !important;
     align-items: center !important;
-    gap: 4px 12px !important;
-    padding: 12px 30px 12px 14px !important;
+    gap: 4px 10px !important;
+    padding: 12px 28px 12px 12px !important;
     background: #FFFFFF !important;
     border: none !important;
     border-bottom: 1px solid #ECE6D6 !important;
@@ -9595,7 +9595,7 @@ body.modal-open {
     overflow: hidden !important;
     text-overflow: ellipsis !important;
     white-space: nowrap !important;
-    max-width: 180px !important;
+    max-width: 100% !important;
   }
   table.clients tbody td:nth-child(1) .client-row-name > div {
     min-width: 0 !important;
@@ -9642,12 +9642,14 @@ body.modal-open {
     grid-row: 1 / 2 !important;
     display: block !important;
     text-align: right !important;
-    font-size: 15px !important;
+    font-size: 14.5px !important;
     font-weight: 800 !important;
     color: #1F2A3F !important;
     line-height: 1.2 !important;
-    padding-right: 4px !important;
+    padding-right: 0 !important;
     white-space: nowrap !important;
+    min-width: 0 !important;
+    max-width: 90px !important;
   }
 
   /* 最終接触 (11列目) — 行2 右 */
