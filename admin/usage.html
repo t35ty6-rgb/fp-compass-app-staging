@@ -392,21 +392,26 @@ table.ledger tbody td.muted-cell { color: var(--muted); }
     $('today-meta').textContent = `${now.getFullYear()}年 ${now.getMonth() + 1}月 ${now.getDate()}日`;
     $('hero-month-label').textContent = `${now.getMonth() + 1}月 ${now.getDate()}日 時点`;
 
-    // 今月分 logs
+    // 今月分 logs (orderBy 無しで index 不要、 sort は client 側)
     const q = query(
       collection(db, 'usage_logs'),
-      where('yyyymm', '==', yyyymm),
-      orderBy('createdAt', 'desc')
+      where('yyyymm', '==', yyyymm)
     );
     let snap;
     try {
       snap = await getDocs(q);
     } catch (e) {
-      $('feed').innerHTML = `<div class="empty">読み込み失敗: ${e.message}<br><span style="font-size:10px">複合インデックス未作成の可能性 → console で 作成</span></div>`;
+      $('feed').innerHTML = `<div class="empty">読み込み失敗: ${e.message}</div>`;
       console.error('Firestore query fail', e);
       return;
     }
-    const logs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    const logs = snap.docs
+      .map(d => ({ id: d.id, ...d.data() }))
+      .sort((a, b) => {
+        const ta = a.createdAt?.toDate?.()?.getTime() || 0;
+        const tb = b.createdAt?.toDate?.()?.getTime() || 0;
+        return tb - ta;
+      });
     console.log('loaded', logs.length, 'usage_logs for', yyyymm);
 
     if (logs.length === 0) {
