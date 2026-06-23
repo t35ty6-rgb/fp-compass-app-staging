@@ -216,7 +216,10 @@ table.ledger tbody td.muted-cell { color: var(--muted); }
   <div class="topbar">
     <div class="topbar-left">
       <div class="topbar-brand">FP COMPASS <strong>/ OPS</strong></div>
-      <div class="topbar-title">API コスト台帳</div>
+      <div style="display:flex;gap:4px;">
+        <a href="/admin/usage.html" style="background:rgba(193,154,58,0.1);color:var(--gold);border:1px solid var(--gold);padding:6px 13px;border-radius:3px;font-family:var(--num);font-size:10.5px;text-decoration:none;letter-spacing:0.06em;">コスト</a>
+        <a href="/admin/questions.html" style="background:transparent;color:rgba(255,255,255,0.5);border:1px solid rgba(255,255,255,0.15);padding:6px 13px;border-radius:3px;font-family:var(--num);font-size:10.5px;text-decoration:none;letter-spacing:0.06em;">質問</a>
+      </div>
     </div>
     <div class="topbar-right">
       <div class="topbar-meta" id="today-meta"></div>

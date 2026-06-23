@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>OPS — 質問アーカイブ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&family=Noto+Sans+JP:wght@400;500;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #FBF5E3;
+  --sheet: #FFFBF1;
+  --ink: #1F2A3F;
+  --ink-2: #4A556A;
+  --muted: #8B7D5D;
+  --hair: #E8D9A8;
+  --gold: #C19A3A;
+  --gold-d: #8B6F26;
+  --moss: #3F6B4C;
+  --warn: #A03D2E;
+  --num: 'JetBrains Mono', ui-monospace, Menlo, monospace;
+  --jp: 'Noto Sans JP', -apple-system, 'Hiragino Sans', sans-serif;
+  --en: 'Inter', sans-serif;
+}
+* { box-sizing: border-box; }
+html, body { background: var(--bg); color: var(--ink); margin: 0; font-family: var(--jp); }
+body { font-size: 14px; line-height: 1.65; min-height: 100vh; }
+a { color: var(--gold-d); }
+
+.gate { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 28px; }
+.gate-card { background: var(--sheet); border: 1px solid var(--hair); border-radius: 6px; padding: 36px 32px; max-width: 360px; width: 100%; }
+.gate-card .eyebrow { font-family: var(--en); font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+.gate-card h1 { font-size: 18px; margin: 0 0 18px; font-weight: 800; }
+.gate-card input { width: 100%; padding: 10px 12px; border: 1px solid var(--hair); background: #fff; border-radius: 4px; font-family: inherit; font-size: 14px; margin-bottom: 10px; }
+.gate-card button { width: 100%; padding: 11px; background: var(--ink); color: #fff; border: none; border-radius: 4px; font-family: inherit; font-size: 14px; font-weight: 700; letter-spacing: 0.04em; cursor: pointer; }
+.gate-card .err { color: var(--warn); font-size: 12px; margin-top: 8px; min-height: 16px; }
+
+.topbar { background: var(--ink); color: #fff; padding: 12px 22px; display: flex; align-items: center; justify-content: space-between; gap: 18px; border-bottom: 1px solid var(--gold); }
+.topbar-left { display: flex; align-items: baseline; gap: 14px; }
+.topbar-brand { font-family: var(--en); font-weight: 800; letter-spacing: 0.16em; font-size: 11.5px; color: rgba(255,255,255,0.7); }
+.topbar-brand strong { color: var(--gold); }
+.topbar-title { font-family: var(--num); font-weight: 700; font-size: 13.5px; letter-spacing: 0.02em; }
+.topbar-tabs { display: flex; gap: 4px; }
+.topbar-tab { background: transparent; color: rgba(255,255,255,0.5); border: 1px solid rgba(255,255,255,0.15); padding: 6px 13px; border-radius: 3px; font-family: var(--num); font-size: 10.5px; cursor: pointer; letter-spacing: 0.06em; text-decoration: none; }
+.topbar-tab.active { color: var(--gold); border-color: var(--gold); background: rgba(193,154,58,0.1); }
+.topbar-tab:hover { color: #fff; border-color: var(--gold); }
+.btn-logout { background: transparent; color: rgba(255,255,255,0.6); border: 1px solid rgba(255,255,255,0.18); padding: 6px 12px; border-radius: 3px; font-family: var(--num); font-size: 10.5px; cursor: pointer; letter-spacing: 0.06em; }
+
+.wrap { max-width: 1280px; margin: 0 auto; padding: 28px 22px 80px; }
+
+.sec { background: var(--sheet); border: 1px solid var(--hair); border-left: 4px solid var(--gold); margin-bottom: 18px; padding: 22px 24px; border-radius: 2px; }
+.sec-head { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; margin-bottom: 14px; flex-wrap: wrap; }
+.sec-label { font-family: var(--en); font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--muted); font-weight: 700; }
+.sec-title { font-size: 15px; font-weight: 800; margin: 2px 0 0; }
+.sec-note { font-family: var(--num); font-size: 10.5px; color: var(--muted); }
+
+.hero { background: var(--ink); color: #fff; border: none; border-left: 4px solid var(--gold); padding: 32px 28px 28px; display: grid; grid-template-columns: 1fr auto; gap: 24px; align-items: end; }
+.hero-label { font-family: var(--en); font-size: 10.5px; letter-spacing: 0.22em; text-transform: uppercase; color: rgba(255,255,255,0.55); margin-bottom: 10px; }
+.hero-num { font-family: var(--num); font-weight: 800; font-size: 64px; line-height: 0.95; letter-spacing: -0.02em; font-variant-numeric: tabular-nums lining-nums; }
+.hero-num .unit { color: var(--gold); font-weight: 500; font-size: 24px; margin-left: 6px; }
+.hero-sub { font-family: var(--num); font-size: 11.5px; color: rgba(255,255,255,0.55); margin-top: 10px; }
+.hero-right { font-family: var(--num); font-size: 11px; color: rgba(255,255,255,0.7); text-align: right; line-height: 1.85; }
+.hero-right strong { color: var(--gold); font-weight: 700; }
+
+/* category bar chart */
+.cat-list { display: flex; flex-direction: column; gap: 10px; }
+.cat-row { display: grid; grid-template-columns: 140px 1fr 60px; gap: 12px; align-items: center; }
+.cat-name { font-size: 12.5px; font-weight: 700; }
+.cat-bar-wrap { background: var(--hair); height: 22px; border-radius: 2px; overflow: hidden; }
+.cat-bar { height: 100%; background: var(--gold); transition: width .4s; }
+.cat-bar.education { background: #06b6d4; }
+.cat-bar.nisa { background: #5B5BF0; }
+.cat-bar.house { background: #f59e0b; }
+.cat-bar.retire { background: #8b5cf6; }
+.cat-bar.insurance { background: #ec4899; }
+.cat-bar.tax { background: #dc2626; }
+.cat-bar.inherit { background: #10b981; }
+.cat-bar.other { background: var(--muted); }
+.cat-count { font-family: var(--num); font-size: 12px; font-weight: 700; text-align: right; }
+.cat-count .pct { color: var(--muted); font-weight: 500; margin-left: 4px; }
+
+/* table */
+table.ledger { width: 100%; border-collapse: collapse; }
+table.ledger th, table.ledger td { padding: 9px 10px; vertical-align: top; }
+table.ledger thead th { font-family: var(--en); font-size: 9.5px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted); font-weight: 700; text-align: left; border-bottom: 1px solid var(--hair); }
+table.ledger thead th.num, table.ledger td.num { text-align: right; font-family: var(--num); }
+table.ledger tbody tr { border-bottom: 1px solid var(--hair); }
+table.ledger tbody tr:hover { background: rgba(193,154,58,0.06); }
+table.ledger tbody td { font-size: 13px; }
+table.ledger tbody td.num { font-weight: 600; font-variant-numeric: tabular-nums lining-nums; }
+.cat-chip { display: inline-block; font-family: var(--num); font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 99px; letter-spacing: 0.04em; }
+.cat-chip.education { background: rgba(6,182,212,0.15); color: #0e7490; }
+.cat-chip.nisa { background: rgba(91,91,240,0.15); color: #4338ca; }
+.cat-chip.house { background: rgba(245,158,11,0.15); color: #b45309; }
+.cat-chip.retire { background: rgba(139,92,246,0.15); color: #6b21a8; }
+.cat-chip.insurance { background: rgba(236,72,153,0.15); color: #9d174d; }
+.cat-chip.tax { background: rgba(220,38,38,0.15); color: #991b1b; }
+.cat-chip.inherit { background: rgba(16,185,129,0.15); color: #047857; }
+.cat-chip.other { background: rgba(139,125,93,0.15); color: var(--muted); }
+
+.filter-bar { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.filter-bar select, .filter-bar input { background: #fff; border: 1px solid var(--hair); border-radius: 3px; padding: 6px 10px; font-family: var(--num); font-size: 11px; color: var(--ink); }
+
+.empty { padding: 40px 24px; text-align: center; color: var(--muted); font-family: var(--num); font-size: 12px; letter-spacing: 0.04em; }
+
+.loading { font-family: var(--num); font-size: 11px; color: var(--muted); padding: 12px 0; letter-spacing: 0.06em; }
+
+.foot { font-family: var(--num); font-size: 10px; color: var(--muted); margin-top: 24px; padding-top: 14px; border-top: 1px solid var(--hair); letter-spacing: 0.04em; line-height: 1.85; }
+
+@media (max-width: 880px) {
+  .wrap { padding: 18px 14px 60px; }
+  .hero { grid-template-columns: 1fr; padding: 22px 18px 20px; }
+  .hero-num { font-size: 48px; }
+  .hero-right { text-align: left; }
+  .cat-row { grid-template-columns: 110px 1fr 56px; gap: 8px; }
+  .topbar { padding: 10px 14px; gap: 10px; }
+  .sec { padding: 16px 16px; }
+}
+</style>
+</head>
+<body>
+
+<div id="gate" class="gate" style="display:none">
+  <div class="gate-card">
+    <div class="eyebrow">FP Compass / Operations</div>
+    <h1>質問アーカイブ</h1>
+    <input id="gate-email" type="email" placeholder="オーナー email" autocomplete="email" />
+    <input id="gate-pw" type="password" placeholder="パスワード" autocomplete="current-password" />
+    <button id="gate-btn">ログイン</button>
+    <div id="gate-err" class="err"></div>
+  </div>
+</div>
+
+<div id="main" style="display:none">
+  <div class="topbar">
+    <div class="topbar-left">
+      <div class="topbar-brand">FP COMPASS <strong>/ OPS</strong></div>
+      <div class="topbar-tabs">
+        <a class="topbar-tab" href="/admin/usage.html">コスト</a>
+        <a class="topbar-tab active" href="/admin/questions.html">質問</a>
+      </div>
+    </div>
+    <button class="btn-logout" id="logout">LOGOUT</button>
+  </div>
+
+  <div class="wrap">
+    <div class="sec hero">
+      <div>
+        <div class="hero-label" id="hero-label">— 月 までの 累計</div>
+        <div class="hero-num"><span id="hero-num">0</span><span class="unit">問</span></div>
+        <div class="hero-sub" id="hero-sub">全テナント横断 · お客様 LINE 質問 蓄積</div>
+      </div>
+      <div class="hero-right" id="hero-right">
+        <div>テナント数 &nbsp;<strong id="hero-tenants">0</strong></div>
+        <div>顧客数 &nbsp;&nbsp;&nbsp; <strong id="hero-customers">0</strong></div>
+        <div style="margin-top:8px;">最頻 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <strong id="hero-topcat">—</strong></div>
+      </div>
+    </div>
+
+    <!-- フィルター -->
+    <div class="sec">
+      <div class="sec-head">
+        <div>
+          <div class="sec-label">Filter</div>
+          <div class="sec-title">範囲</div>
+        </div>
+        <div class="sec-note" id="filter-result">—</div>
+      </div>
+      <div class="filter-bar">
+        <select id="f-range">
+          <option value="all">全期間</option>
+          <option value="thismonth">今月</option>
+          <option value="lastmonth">先月</option>
+          <option value="7d">過去7日</option>
+          <option value="30d">過去30日</option>
+        </select>
+        <select id="f-cat">
+          <option value="">全カテゴリ</option>
+          <option>NISA・iDeCo</option>
+          <option>教育資金</option>
+          <option>住宅ローン</option>
+          <option>老後資金</option>
+          <option>保険</option>
+          <option>相続・贈与</option>
+          <option>税金</option>
+          <option>その他</option>
+        </select>
+        <select id="f-tenant"><option value="">全テナント</option></select>
+        <input id="f-search" type="search" placeholder="質問 検索…" style="flex:1;min-width:160px;" />
+      </div>
+    </div>
+
+    <!-- カテゴリ別棒グラフ -->
+    <div class="sec">
+      <div class="sec-head">
+        <div>
+          <div class="sec-label">By Category</div>
+          <div class="sec-title">カテゴリ別 質問数</div>
+        </div>
+        <div class="sec-note" id="cat-total">— 件</div>
+      </div>
+      <div class="cat-list" id="cat-list"><div class="loading">読込中…</div></div>
+    </div>
+
+    <!-- 最頻出 質問 (重複統合) -->
+    <div class="sec">
+      <div class="sec-head">
+        <div>
+          <div class="sec-label">Top Questions</div>
+          <div class="sec-title">最頻出 質問 TOP 20</div>
+        </div>
+        <div class="sec-note">類似質問 = 同じ重み</div>
+      </div>
+      <table class="ledger" id="top-table">
+        <thead><tr>
+          <th style="width:32px;">#</th>
+          <th>質問</th>
+          <th style="width:120px;">カテゴリ</th>
+          <th class="num" style="width:80px;">出現回数</th>
+        </tr></thead>
+        <tbody id="top-tbody">
+          <tr><td colspan="4" class="loading">読込中…</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- 全質問 一覧 (フィルター後) -->
+    <div class="sec">
+      <div class="sec-head">
+        <div>
+          <div class="sec-label">All Questions</div>
+          <div class="sec-title">全質問 一覧</div>
+        </div>
+        <div class="sec-note" id="all-count">—</div>
+      </div>
+      <table class="ledger" id="all-table">
+        <thead><tr>
+          <th style="width:90px;">日付</th>
+          <th>質問</th>
+          <th style="width:110px;">カテゴリ</th>
+          <th>テナント</th>
+          <th>顧客</th>
+        </tr></thead>
+        <tbody id="all-tbody">
+          <tr><td colspan="5" class="loading">読込中…</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="foot">
+      <strong>データソース</strong>: <code>question_archive</code> Firestore コレクション。
+      <strong>蓄積タイミング</strong>: 各 FP が 顧客モーダルの「Q&A」タブを 開いた時 に AI 分類 → 自動アーカイブ。
+      <strong>更新</strong>: ページ リロードで 最新化。 重複質問 (同じテナント × 顧客 × 質問テキスト) は merge で 1docに 統合。
+    </div>
+  </div>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
+  import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut, browserLocalPersistence, setPersistence } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
+  import { getFirestore, collection, query, getDocs } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyAmVAEe9l9e1Yo_dzzJdbTVU35wWKd2sH4",
+    authDomain: "skeleton-fp-compass-632026.firebaseapp.com",
+    projectId: "skeleton-fp-compass-632026",
+    storageBucket: "skeleton-fp-compass-632026.firebasestorage.app",
+    messagingSenderId: "833972948597",
+    appId: "1:833972948597:web:b7310cc22ce41d9738f23c",
+  };
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+  await setPersistence(auth, browserLocalPersistence);
+
+  const OWNER_EMAILS = ['t3.5ty6@gmail.com'];
+  const $ = (id) => document.getElementById(id);
+  const pad = (n) => String(n).padStart(2, '0');
+  const escapeHtml = (s) => String(s || '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const catSlug = (n) => ({
+    'NISA・iDeCo': 'nisa', '教育資金': 'education', '住宅ローン': 'house',
+    '老後資金': 'retire', '保険': 'insurance', '相続・贈与': 'inherit', '税金': 'tax', 'その他': 'other',
+  })[n] || 'other';
+
+  let ALL_DOCS = [];
+
+  onAuthStateChanged(auth, async (user) => {
+    if (user && OWNER_EMAILS.includes(user.email)) {
+      $('gate').style.display = 'none';
+      $('main').style.display = 'block';
+      await loadAll();
+    } else {
+      if (user) await signOut(auth);
+      $('main').style.display = 'none';
+      $('gate').style.display = 'flex';
+    }
+  });
+  $('gate-btn').addEventListener('click', async () => {
+    const email = $('gate-email').value.trim();
+    const pw = $('gate-pw').value;
+    $('gate-err').textContent = '';
+    if (!OWNER_EMAILS.includes(email)) { $('gate-err').textContent = 'オーナー未登録'; return; }
+    try { await signInWithEmailAndPassword(auth, email, pw); } catch (e) { $('gate-err').textContent = e.code || e.message; }
+  });
+  $('gate-pw').addEventListener('keydown', (e) => { if (e.key === 'Enter') $('gate-btn').click(); });
+  $('logout').addEventListener('click', () => signOut(auth));
+
+  async function loadAll() {
+    try {
+      const snap = await getDocs(query(collection(db, 'question_archive')));
+      ALL_DOCS = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      console.log('loaded', ALL_DOCS.length, 'questions');
+      populateTenantFilter();
+      renderAll();
+    } catch (e) {
+      console.error(e);
+      $('cat-list').innerHTML = `<div class="empty">読込失敗: ${escapeHtml(e.message)}</div>`;
+    }
+  }
+
+  function populateTenantFilter() {
+    const tenants = [...new Set(ALL_DOCS.map(d => d.tenantId))].filter(Boolean).sort();
+    const sel = $('f-tenant');
+    sel.innerHTML = '<option value="">全テナント (' + tenants.length + ')</option>'
+      + tenants.map(t => `<option value="${escapeHtml(t)}">${escapeHtml(t.slice(0, 24))}</option>`).join('');
+  }
+
+  function getFiltered() {
+    const range = $('f-range').value;
+    const cat = $('f-cat').value;
+    const tenant = $('f-tenant').value;
+    const search = $('f-search').value.trim().toLowerCase();
+    const now = new Date();
+    const todayKey = `${now.getFullYear()}${pad(now.getMonth()+1)}${pad(now.getDate())}`;
+    const monthKey = `${now.getFullYear()}${pad(now.getMonth()+1)}`;
+    const lastMonth = new Date(now); lastMonth.setMonth(lastMonth.getMonth() - 1);
+    const lastMonthKey = `${lastMonth.getFullYear()}${pad(lastMonth.getMonth()+1)}`;
+    const cutoff7 = new Date(now); cutoff7.setDate(cutoff7.getDate() - 7);
+    const cutoff30 = new Date(now); cutoff30.setDate(cutoff30.getDate() - 30);
+    return ALL_DOCS.filter(d => {
+      if (cat && d.category !== cat) return false;
+      if (tenant && d.tenantId !== tenant) return false;
+      if (search && !((d.question || '').toLowerCase().includes(search))) return false;
+      if (range === 'thismonth' && d.yyyymm !== monthKey) return false;
+      if (range === 'lastmonth' && d.yyyymm !== lastMonthKey) return false;
+      if (range === '7d' || range === '30d') {
+        const ts = d.archivedAt?.toDate?.() || (d.archivedAt ? new Date(d.archivedAt) : null);
+        if (!ts) return false;
+        if (range === '7d' && ts < cutoff7) return false;
+        if (range === '30d' && ts < cutoff30) return false;
+      }
+      return true;
+    });
+  }
+
+  function renderAll() {
+    const docs = getFiltered();
+    const tenants = new Set(docs.map(d => d.tenantId).filter(Boolean));
+    const customers = new Set(docs.map(d => (d.tenantId || '') + '|' + (d.userId || '')).filter(k => k !== '|'));
+    $('hero-num').textContent = docs.length.toLocaleString();
+    $('hero-tenants').textContent = tenants.size;
+    $('hero-customers').textContent = customers.size;
+    $('filter-result').textContent = `${docs.length.toLocaleString()} 件`;
+    if (docs.length === 0) {
+      $('hero-sub').textContent = '該当データなし — フィルター緩めるか、 各FPに 顧客モーダルのQ&Aタブを 開いてもらう';
+      $('cat-list').innerHTML = '<div class="empty">データなし</div>';
+      $('top-tbody').innerHTML = '<tr><td colspan="4" class="empty">なし</td></tr>';
+      $('all-tbody').innerHTML = '<tr><td colspan="5" class="empty">なし</td></tr>';
+      $('hero-topcat').textContent = '—';
+      return;
+    }
+    // カテゴリ別集計
+    const catCount = {};
+    docs.forEach(d => { catCount[d.category || 'その他'] = (catCount[d.category || 'その他'] || 0) + 1; });
+    const sortedCats = Object.entries(catCount).sort((a, b) => b[1] - a[1]);
+    const maxCat = sortedCats[0]?.[1] || 1;
+    $('hero-topcat').textContent = sortedCats[0]?.[0] || '—';
+    $('hero-sub').textContent = `全テナント横断 · 全期間累計 ${docs.length.toLocaleString()}問`;
+    $('cat-total').textContent = `${docs.length.toLocaleString()} 件`;
+    $('cat-list').innerHTML = sortedCats.map(([name, count]) => {
+      const pct = ((count / docs.length) * 100).toFixed(1);
+      const w = (count / maxCat) * 100;
+      const slug = catSlug(name);
+      return `
+        <div class="cat-row">
+          <div class="cat-name"><span class="cat-chip ${slug}">${escapeHtml(name)}</span></div>
+          <div class="cat-bar-wrap"><div class="cat-bar ${slug}" style="width:${w}%"></div></div>
+          <div class="cat-count">${count}<span class="pct">${pct}%</span></div>
+        </div>`;
+    }).join('');
+
+    // 最頻出 (質問テキストの 30字 prefix で 同一視 → 集計)
+    const qCount = new Map();
+    docs.forEach(d => {
+      const key = (d.question || '').slice(0, 40).toLowerCase().replace(/[\s。、？?！!]/g, '');
+      if (!key) return;
+      if (!qCount.has(key)) qCount.set(key, { sample: d.question, category: d.category, count: 0 });
+      qCount.get(key).count++;
+    });
+    const top = [...qCount.values()].sort((a, b) => b.count - a.count).slice(0, 20);
+    $('top-tbody').innerHTML = top.length === 0 ? '<tr><td colspan="4" class="empty">なし</td></tr>' : top.map((q, i) => `
+      <tr>
+        <td class="num" style="color:var(--muted);">${pad(i + 1)}</td>
+        <td>${escapeHtml(q.sample.slice(0, 120))}</td>
+        <td><span class="cat-chip ${catSlug(q.category)}">${escapeHtml(q.category || '?')}</span></td>
+        <td class="num" style="font-weight:800;color:var(--gold-d);">${q.count}</td>
+      </tr>
+    `).join('');
+
+    // 全質問 一覧 (新しい順、最大200件)
+    const sorted = docs.slice().sort((a, b) => {
+      const ta = a.archivedAt?.toDate?.()?.getTime() || 0;
+      const tb = b.archivedAt?.toDate?.()?.getTime() || 0;
+      return tb - ta;
+    }).slice(0, 200);
+    $('all-count').textContent = `${sorted.length} / ${docs.length} 件 表示`;
+    $('all-tbody').innerHTML = sorted.map(d => {
+      const ts = d.archivedAt?.toDate?.() || null;
+      const date = ts ? `${ts.getFullYear().toString().slice(2)}/${pad(ts.getMonth()+1)}/${pad(ts.getDate())}` : '';
+      return `
+        <tr>
+          <td class="num" style="color:var(--muted);font-size:10.5px;">${date}</td>
+          <td>${escapeHtml((d.question || '').slice(0, 140))}</td>
+          <td><span class="cat-chip ${catSlug(d.category)}">${escapeHtml(d.category || '?')}</span></td>
+          <td style="font-family:var(--num);font-size:10.5px;color:var(--muted);">${escapeHtml((d.tenantId || '').slice(0, 16))}</td>
+          <td style="color:var(--ink-2);">${escapeHtml(d.customerName || '—')}</td>
+        </tr>`;
+    }).join('');
+  }
+
+  ['f-range', 'f-cat', 'f-tenant'].forEach(id => $(id).addEventListener('change', renderAll));
+  $('f-search').addEventListener('input', () => {
+    clearTimeout(window._sdeb);
+    window._sdeb = setTimeout(renderAll, 200);
+  });
+</script>
+</body>
+</html>
