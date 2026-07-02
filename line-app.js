@@ -8641,9 +8641,22 @@ ${family} ${era}層は「教育費ピーク (子18歳) と退職金準備が重�
         .map(r => {
           const rTs = r.bookingTs || r.ts || r.createdAt;
           const d = new Date(String(rTs).replace(' ', 'T'));
+          // 2026-07-02 persist-fix: bookingTs/ts/createdAt から日付を抽出できない場合、
+          //   「gas-<ISO>」等の埋め込み日付、それも無ければ今日を fallback として使う。
+          //   面談履歴タブの「日付未定」バケット行きを回避 (app.js:5087 と同パターン)。
+          const _pickIsoDay = (v) => {
+            if (!v) return '';
+            const m = String(v).match(/(\d{4}-\d{2}-\d{2})/);
+            return m ? m[1] : '';
+          };
+          const fallbackDate = r.date
+            || (isNaN(d.getTime()) ? '' : d.toISOString().slice(0, 10))
+            || _pickIsoDay(rTs)
+            || _pickIsoDay(r.createdAt)
+            || new Date().toISOString().slice(0, 10);
           return {
             ts: rTs,
-            date: r.date || (isNaN(d.getTime()) ? '' : d.toISOString().slice(0, 10)),
+            date: fallbackDate,
             time: isNaN(d.getTime()) ? '' : d.toISOString().slice(11, 16),
             name: (r.customerName || 'お客様') + (String(r.customerName || '').endsWith('様') ? '' : ' 様'),
             userId: r.userId || '',
