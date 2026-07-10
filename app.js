@@ -3544,19 +3544,20 @@
     setTimeout(_scrollLineChatBottom, 250);
     setTimeout(_scrollLineChatBottom, 800);
     document.getElementById('modal-close-btn').addEventListener('click', closeModal);
-    // ★ 2026-07-11 owner FB: サイドバー の 「この顧客を削除」 ボタン 表示 (顧客モーダル 開いてる 間 のみ)
+    // ★ 2026-07-11 owner FB v2: サイドバー の 「顧客 を 削除」 常時表示、 カルテ 開いてる 時 だけ active
     try {
       const sideDelBtn = document.getElementById('sidebar-customer-delete');
+      const sideDelLbl = document.getElementById('sidebar-customer-delete-label');
       if (sideDelBtn) {
-        sideDelBtn.style.display = 'flex';
-        // 既に登録 済 listener を 上書き しない よう flag
-        if (!sideDelBtn._boundOnce) {
-          sideDelBtn._boundOnce = true;
-          sideDelBtn.addEventListener('click', () => {
-            const modalBtn = document.getElementById('modal-delete-btn');
-            if (modalBtn) modalBtn.click();
-          });
-        }
+        sideDelBtn.dataset.state = 'active';
+        sideDelBtn.style.color = '#DC2626';
+        sideDelBtn.style.borderColor = '#FCA5A5';
+        sideDelBtn.style.background = '#FEF2F2';
+        sideDelBtn.style.cursor = 'pointer';
+        sideDelBtn.title = c.name + ' さん を 削除 (元 に 戻せません)';
+        const icon = sideDelBtn.querySelector('span:first-child');
+        if (icon) icon.style.opacity = '1';
+        if (sideDelLbl) sideDelLbl.textContent = c.name + ' を 削除';
       }
     } catch (_) {}
     // ★ 顧客削除ボタン
@@ -9002,10 +9003,21 @@ ${client.name}さん、ありがとうございます。
       if (fab) { fab.style.removeProperty('display'); fab.classList.remove('hidden'); }
       document.querySelectorAll('.mb-fab-hint, .mb-fab-badge, .mb-fab-pulse, .mb-panel').forEach(el => el.style.removeProperty('display'));
     } catch (_) {}
-    // ★ 2026-07-11: サイドバー の 顧客削除ボタン 非表示 に戻す
+    // ★ 2026-07-11 v2: サイドバー の 顧客削除ボタン は 常時表示、 閉じた ら idle (disabled) 状態 に戻す
     try {
       const sideDelBtn = document.getElementById('sidebar-customer-delete');
-      if (sideDelBtn) sideDelBtn.style.display = 'none';
+      const sideDelLbl = document.getElementById('sidebar-customer-delete-label');
+      if (sideDelBtn) {
+        sideDelBtn.dataset.state = 'idle';
+        sideDelBtn.style.color = '#94A3B8';
+        sideDelBtn.style.borderColor = '#E2E8F0';
+        sideDelBtn.style.background = '#fff';
+        sideDelBtn.style.cursor = 'not-allowed';
+        sideDelBtn.title = '顧客カルテ を 開くと 削除 が 有効 になります';
+        const icon = sideDelBtn.querySelector('span:first-child');
+        if (icon) icon.style.opacity = '.5';
+        if (sideDelLbl) sideDelLbl.textContent = '顧客 を 削除 (未選択)';
+      }
     } catch (_) {}
     // ★ 閉じたら復元 flag クリア
     try {
