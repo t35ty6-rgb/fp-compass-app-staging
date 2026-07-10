@@ -20,10 +20,10 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Noto+Sans+JP:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css?v=20260711C-sidebar-delete-always-visible">
-<link rel="stylesheet" href="styles-v2.css?v=20260711C-sidebar-delete-always-visible">
-<link rel="stylesheet" href="styles-v3.css?v=20260711C-sidebar-delete-always-visible">
-<link rel="stylesheet" href="styles-v8-workspace.css?v=20260711C-sidebar-delete-always-visible">
+<link rel="stylesheet" href="styles.css?v=20260711D-sidebar-delete-top-position">
+<link rel="stylesheet" href="styles-v2.css?v=20260711D-sidebar-delete-top-position">
+<link rel="stylesheet" href="styles-v3.css?v=20260711D-sidebar-delete-top-position">
+<link rel="stylesheet" href="styles-v8-workspace.css?v=20260711D-sidebar-delete-top-position">
 <!-- ★ 2026-06-26 perf: lucide(350KB) と chart.js(201KB) を defer 化 -->
 <!--   どちらも DOMContentLoaded 後ハイドレートで OK (lucide: setInterval scan / chart: tryRender polling) -->
 <script defer src="https://unpkg.com/lucide@0.469.0/dist/umd/lucide.min.js"></script>
@@ -776,6 +776,34 @@
       <span class="kbd">⌘K</span>
     </div>
 
+    <!-- 2026-07-11 v3 owner FB: 削除ボタン を サイドバー最上部 に 移動 (foot に あると 見逃されて た) -->
+    <button id="sidebar-customer-delete" data-state="idle" style="display:flex;background:#FEF7F7;color:#E11D48;border:1.5px dashed #FDA4AF;padding:11px 14px;border-radius:10px;font-size:13px;font-weight:800;cursor:not-allowed;font-family:inherit;margin:12px 12px 0 12px;text-align:left;align-items:center;gap:10px;width:calc(100% - 24px);transition:all .18s ease;box-shadow:none;" title="顧客カルテ を 開くと 削除 が 有効 になります">
+      <span style="font-size:16px;">🗑</span>
+      <span id="sidebar-customer-delete-label" style="flex:1;letter-spacing:0.02em;">削除 する 顧客 を 選ぶ</span>
+    </button>
+    <script>
+      // 2026-07-11 v3: サイドバー 顧客削除 click delegation
+      (function(){
+        const btn = document.getElementById('sidebar-customer-delete');
+        if (!btn || btn._boundOnce) return;
+        btn._boundOnce = true;
+        btn.addEventListener('click', (ev) => {
+          if (btn.dataset.state !== 'active') {
+            ev.preventDefault(); ev.stopPropagation();
+            const t = document.createElement('div');
+            t.textContent = '👤 先 に 顧客カルテ を 開いて ください';
+            t.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#0F172A;color:#fff;padding:10px 18px;border-radius:8px;font-size:13px;font-weight:700;z-index:99999;box-shadow:0 4px 12px rgba(0,0,0,.25);';
+            document.body.appendChild(t);
+            setTimeout(() => { t.style.opacity = '0'; t.style.transition = 'opacity .3s'; }, 1800);
+            setTimeout(() => t.remove(), 2200);
+            return;
+          }
+          const modalBtn = document.getElementById('modal-delete-btn');
+          if (modalBtn) modalBtn.click();
+        });
+      })();
+    </script>
+
     <!-- ★ サイドバー直下: 急遽 面談開始 (Zoom即発行 or 対面録音 を選べる) -->
     <button id="sidebar-quick-inperson" class="sidebar-quick-rec"
       title="急にお客様から相談入った時 → Zoom 即発行 or 対面録音 を 選んで 即開始">
@@ -861,34 +889,6 @@
     </div><!-- /sidebar-scroll -->
 
     <div class="sidebar-foot">
-      <!-- 2026-07-11 owner FB v2: 常時表示、 顧客カルテ 開いてる 時 だけ active。 閉じてる 時 は disabled + 「顧客カルテ を 開いて」 tooltip -->
-      <button id="sidebar-customer-delete" data-state="idle" style="display:flex;background:#fff;color:#94A3B8;border:1.5px solid #E2E8F0;padding:10px 12px;border-radius:8px;font-size:12.5px;font-weight:800;cursor:not-allowed;font-family:inherit;margin-bottom:8px;text-align:left;align-items:center;gap:8px;width:100%;transition:all .15s ease;" title="顧客カルテ を 開くと 削除 が 有効 になります">
-        <span style="font-size:15px;opacity:.5;">🗑</span>
-        <span id="sidebar-customer-delete-label" style="flex:1;">顧客 を 削除 (未選択)</span>
-      </button>
-      <script>
-        // 2026-07-11 v2: サイドバー 顧客削除 click delegation (idle 時 は toast, active 時 は modal-delete-btn に 転送)
-        (function(){
-          const btn = document.getElementById('sidebar-customer-delete');
-          if (!btn || btn._boundOnce) return;
-          btn._boundOnce = true;
-          btn.addEventListener('click', (ev) => {
-            if (btn.dataset.state !== 'active') {
-              ev.preventDefault(); ev.stopPropagation();
-              // 軽い hint toast (既存 toast あれば 流用、 無ければ inline)
-              const t = document.createElement('div');
-              t.textContent = '👤 先 に 顧客カルテ を 開いて ください';
-              t.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#0F172A;color:#fff;padding:10px 18px;border-radius:8px;font-size:13px;font-weight:700;z-index:99999;box-shadow:0 4px 12px rgba(0,0,0,.25);animation:fadein .18s ease';
-              document.body.appendChild(t);
-              setTimeout(() => { t.style.opacity = '0'; t.style.transition = 'opacity .3s'; }, 1800);
-              setTimeout(() => t.remove(), 2200);
-              return;
-            }
-            const modalBtn = document.getElementById('modal-delete-btn');
-            if (modalBtn) modalBtn.click();
-          });
-        })();
-      </script>
       <button class="real-mode-toggle" id="real-mode-btn" title="実モード ⇄ 本番モード">
         <i data-lucide="users-round"></i>
         <span class="real-mode-label" id="real-mode-label">本番モード (30名)</span>
@@ -1353,7 +1353,7 @@ window.fpReadyAfterAuth = function() {
     });
   })();
 
-  const ver = "20260711C";
+  const ver = "20260711D";
   // ★ 2026-06-26 perf: critical (画面初期表示に必須) と deferred (LINE/charts) を 分離
   // critical: 顧客台帳・ホーム描画に必須
   // deferred: LINE タブ (line-app.js 555KB) / dashboard charts (charts.js) → idle で 後ロード
@@ -2083,7 +2083,7 @@ window.fpReadyAfterAuth = function() {
 <script>
 (function(){
   // 最新の ver を 1 箇所に集約 (fpReadyAfterAuth 側と一致させる必要あり)
-  const FP_VERSION = "20260711C-sidebar-delete-always-visible";
+  const FP_VERSION = "20260711D-sidebar-delete-top-position";
   try { window.FP_VERSION = FP_VERSION; } catch(_) {}
   const loadTime = new Date();
   const hhmm = String(loadTime.getHours()).padStart(2,'0') + ':' + String(loadTime.getMinutes()).padStart(2,'0');

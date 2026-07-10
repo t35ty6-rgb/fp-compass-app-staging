@@ -3330,9 +3330,8 @@
               </style>
             </div>
 
-            <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;justify-content:flex-end;">
-              <button id="modal-delete-btn" style="background:transparent;color:#94A3B8;border:none;padding:6px 8px;font-size:11.5px;font-weight:600;cursor:pointer;font-family:inherit;text-decoration:underline;">この顧客を削除</button>
-            </div>
+            <!-- 2026-07-11 v3: modal 内 grey 「この顧客を削除」 削除。 削除 は 左サイドバー の 大きな 赤ボタン から (owner 明示指示) -->
+            <button id="modal-delete-btn" style="display:none;"></button>
           </div>` : `
           <div class="cd-flow cd-flow-empty">
             <div class="cd-flow-eyebrow"><span class="cd-flow-eyebrow-pill">AI推奨</span></div>
@@ -3352,7 +3351,7 @@
               <button class="modal-brief-btn" data-line-brief="${c.id}" style="background:linear-gradient(135deg,#10B981,#059669);color:#fff;border:none;padding:9px 16px;border-radius:7px;font-size:12.5px;font-weight:800;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:6px;letter-spacing:0.04em;box-shadow:0 4px 12px rgba(16,185,129,0.32);">✍ 伝えたいことから 下書き</button>
               <button id="modal-deliv-btn" style="background:linear-gradient(135deg,#5B5BF0,#6D6DEF);color:#fff;border:none;padding:9px 16px;border-radius:7px;font-size:12.5px;font-weight:800;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:6px;letter-spacing:0.04em;box-shadow:0 4px 12px rgba(91,91,240,0.32);">📎 資料パッケージを ダウンロード</button>
               <button class="cd-flow-edit ghost-btn" id="modal-edit-btn"><i data-lucide="pencil"></i><span>顧客情報を編集</span></button>
-              <button id="modal-delete-btn" style="background:#fff;color:#dc2626;border:1px solid #fecaca;padding:8px 14px;border-radius:7px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:6px;"><i data-lucide="trash-2" style="width:14px;height:14px;"></i><span>この顧客を削除</span></button>
+              <button id="modal-delete-btn" style="display:none;"></button>
             </div>
           </div>`}
 
@@ -3544,20 +3543,22 @@
     setTimeout(_scrollLineChatBottom, 250);
     setTimeout(_scrollLineChatBottom, 800);
     document.getElementById('modal-close-btn').addEventListener('click', closeModal);
-    // ★ 2026-07-11 owner FB v2: サイドバー の 「顧客 を 削除」 常時表示、 カルテ 開いてる 時 だけ active
+    // ★ 2026-07-11 v3 owner FB: サイドバー最上部 の 「顧客 を 削除」 active 化 (客名 挿入)
     try {
       const sideDelBtn = document.getElementById('sidebar-customer-delete');
       const sideDelLbl = document.getElementById('sidebar-customer-delete-label');
       if (sideDelBtn) {
         sideDelBtn.dataset.state = 'active';
-        sideDelBtn.style.color = '#DC2626';
-        sideDelBtn.style.borderColor = '#FCA5A5';
-        sideDelBtn.style.background = '#FEF2F2';
+        sideDelBtn.style.color = '#fff';
+        sideDelBtn.style.borderColor = '#B91C1C';
+        sideDelBtn.style.borderStyle = 'solid';
+        sideDelBtn.style.background = '#DC2626';
         sideDelBtn.style.cursor = 'pointer';
+        sideDelBtn.style.boxShadow = '0 4px 12px rgba(220,38,38,0.25)';
         sideDelBtn.title = c.name + ' さん を 削除 (元 に 戻せません)';
-        const icon = sideDelBtn.querySelector('span:first-child');
-        if (icon) icon.style.opacity = '1';
-        if (sideDelLbl) sideDelLbl.textContent = c.name + ' を 削除';
+        // truncate long names
+        const shortName = c.name.length > 12 ? c.name.slice(0, 11) + '…' : c.name;
+        if (sideDelLbl) sideDelLbl.textContent = shortName + ' を 削除';
       }
     } catch (_) {}
     // ★ 顧客削除ボタン
@@ -9003,20 +9004,20 @@ ${client.name}さん、ありがとうございます。
       if (fab) { fab.style.removeProperty('display'); fab.classList.remove('hidden'); }
       document.querySelectorAll('.mb-fab-hint, .mb-fab-badge, .mb-fab-pulse, .mb-panel').forEach(el => el.style.removeProperty('display'));
     } catch (_) {}
-    // ★ 2026-07-11 v2: サイドバー の 顧客削除ボタン は 常時表示、 閉じた ら idle (disabled) 状態 に戻す
+    // ★ 2026-07-11 v3: サイドバー最上部 の 削除ボタン idle 状態 に 戻す
     try {
       const sideDelBtn = document.getElementById('sidebar-customer-delete');
       const sideDelLbl = document.getElementById('sidebar-customer-delete-label');
       if (sideDelBtn) {
         sideDelBtn.dataset.state = 'idle';
-        sideDelBtn.style.color = '#94A3B8';
-        sideDelBtn.style.borderColor = '#E2E8F0';
-        sideDelBtn.style.background = '#fff';
+        sideDelBtn.style.color = '#E11D48';
+        sideDelBtn.style.borderColor = '#FDA4AF';
+        sideDelBtn.style.borderStyle = 'dashed';
+        sideDelBtn.style.background = '#FEF7F7';
         sideDelBtn.style.cursor = 'not-allowed';
+        sideDelBtn.style.boxShadow = 'none';
         sideDelBtn.title = '顧客カルテ を 開くと 削除 が 有効 になります';
-        const icon = sideDelBtn.querySelector('span:first-child');
-        if (icon) icon.style.opacity = '.5';
-        if (sideDelLbl) sideDelLbl.textContent = '顧客 を 削除 (未選択)';
+        if (sideDelLbl) sideDelLbl.textContent = '削除 する 顧客 を 選ぶ';
       }
     } catch (_) {}
     // ★ 閉じたら復元 flag クリア
