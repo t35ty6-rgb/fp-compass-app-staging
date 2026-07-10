@@ -9549,6 +9549,22 @@ ${client.name}さん、ありがとうございます。
   // 初期化
   // ============================
   document.addEventListener('DOMContentLoaded', () => {
+    // 2026-07-10 design-reviewer Critical#2: sidebar-scroll 下に 隠れタブ ある時 shadow mask を出す
+    try {
+      const sc = document.querySelector('.sidebar-scroll');
+      if (sc) {
+        const updateMask = () => {
+          const hasMore = sc.scrollTop < sc.scrollHeight - sc.clientHeight - 4;
+          sc.classList.toggle('has-more', hasMore);
+        };
+        sc.addEventListener('scroll', updateMask, { passive: true });
+        window.addEventListener('resize', updateMask);
+        updateMask();
+        // 初回 render 遅延分 も 対応
+        setTimeout(updateMask, 500);
+        setTimeout(updateMask, 1500);
+      }
+    } catch (_) {}
     // メタ
     document.getElementById('app-meta').textContent =
       `デモデータ ${clients.length}名 / 基準日 ${fmtDate(TODAY)}`;
