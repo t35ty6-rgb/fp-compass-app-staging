@@ -9549,42 +9549,7 @@ ${client.name}さん、ありがとうございます。
   // 初期化
   // ============================
   document.addEventListener('DOMContentLoaded', () => {
-    // 2026-07-10 design-reviewer Critical#2: sidebar-scroll 下に 隠れタブ ある時 shadow mask を出す
-    //   login gate が消えて sidebar が render される タイミングで 動くよう ResizeObserver + polling も併用
-    (function () {
-      let observer = null;
-      const bindMask = () => {
-        const sc = document.querySelector('.sidebar-scroll');
-        if (!sc) return false;
-        const updateMask = () => {
-          try {
-            const hasMore = sc.scrollTop < sc.scrollHeight - sc.clientHeight - 4;
-            sc.classList.toggle('has-more', hasMore);
-          } catch (_) {}
-        };
-        if (!sc._maskBound) {
-          sc._maskBound = true;
-          sc.addEventListener('scroll', updateMask, { passive: true });
-          window.addEventListener('resize', updateMask);
-          if (typeof ResizeObserver !== 'undefined') {
-            const ro = new ResizeObserver(updateMask);
-            ro.observe(sc);
-          }
-        }
-        updateMask();
-        return true;
-      };
-      // 初回 + 遅延 + login後 の再check
-      bindMask();
-      [200, 800, 2000, 4000, 8000].forEach(ms => setTimeout(bindMask, ms));
-      // login gate 消えたら sidebar-scroll が出現する → body 変化 監視
-      try {
-        observer = new MutationObserver(() => bindMask());
-        observer.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['style', 'class'] });
-        // 30秒後 に observer 停止 (メモリリーク防止)
-        setTimeout(() => { try { observer.disconnect(); } catch(_){} }, 30000);
-      } catch (_) {}
-    })();
+    // scroll mask 初期化 は DOMContentLoaded 外 に 移動 (app.js が遅延loadされるので DCL 既に発火済ケース対策)
     // メタ
     document.getElementById('app-meta').textContent =
       `デモデータ ${clients.length}名 / 基準日 ${fmtDate(TODAY)}`;
@@ -9730,4 +9695,38 @@ ${client.name}さん、ありがとうございます。
       }
     } catch (_) {}
   });
+})();
+
+// ═══════════════════════════════════════════════════════
+// 2026-07-10 design-reviewer Critical#2: sidebar-scroll shadow mask
+// DOMContentLoaded 外 (app.js は 遅延load される ので DCL 既発火 が普通)
+// ═══════════════════════════════════════════════════════
+(function () {
+  const bindMask = () => {
+    const sc = document.querySelector('.sidebar-scroll');
+    if (!sc) return false;
+    const updateMask = () => {
+      try {
+        const hasMore = sc.scrollTop < sc.scrollHeight - sc.clientHeight - 4;
+        sc.classList.toggle('has-more', hasMore);
+      } catch (_) {}
+    };
+    if (!sc._maskBound) {
+      sc._maskBound = true;
+      sc.addEventListener('scroll', updateMask, { passive: true });
+      window.addEventListener('resize', updateMask);
+      if (typeof ResizeObserver !== 'undefined') {
+        try { new ResizeObserver(updateMask).observe(sc); } catch (_) {}
+      }
+    }
+    updateMask();
+    return true;
+  };
+  bindMask();
+  [100, 500, 1500, 3000, 6000, 10000].forEach(ms => setTimeout(bindMask, ms));
+  try {
+    const obs = new MutationObserver(() => bindMask());
+    obs.observe(document.documentElement, { childList: true, subtree: true, attributes: true });
+    setTimeout(() => { try { obs.disconnect(); } catch (_) {} }, 30000);
+  } catch (_) {}
 })();
