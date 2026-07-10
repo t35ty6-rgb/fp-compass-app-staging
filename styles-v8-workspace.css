@@ -7493,6 +7493,8 @@ body.mobile-nav-open #mobile-hamburger .mh-bar:nth-child(3) { transform: transla
 
 /* m-only 要素 は PC では隠す */
 .m-only { display: none; }
+/* 2026-07-10 fix: #mobile-fab-new-client は button default display=inline-block で PC でも 39px 占有 → shell を 押し下げてた → PC で 完全 hide */
+#mobile-fab-new-client { display: none; }
 
 /* ───── < 768px = モバイル ───── */
 @media (max-width: 768px) {
