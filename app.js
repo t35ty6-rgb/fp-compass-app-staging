@@ -9701,9 +9701,12 @@ ${client.name}さん、ありがとうございます。
 // 2026-07-10 design-reviewer Critical#2: sidebar-scroll shadow mask
 // DOMContentLoaded 外 (app.js は 遅延load される ので DCL 既発火 が普通)
 // ═══════════════════════════════════════════════════════
+window._fpMaskCode = 'loaded';
 (function () {
+  window._fpMaskCode = 'IIFE-entered';
   const bindMask = () => {
     const sc = document.querySelector('.sidebar-scroll');
+    window._fpMaskLastCheck = { hasSC: !!sc, at: Date.now() };
     if (!sc) return false;
     const updateMask = () => {
       try {
