@@ -9550,21 +9550,41 @@ ${client.name}さん、ありがとうございます。
   // ============================
   document.addEventListener('DOMContentLoaded', () => {
     // 2026-07-10 design-reviewer Critical#2: sidebar-scroll 下に 隠れタブ ある時 shadow mask を出す
-    try {
-      const sc = document.querySelector('.sidebar-scroll');
-      if (sc) {
+    //   login gate が消えて sidebar が render される タイミングで 動くよう ResizeObserver + polling も併用
+    (function () {
+      let observer = null;
+      const bindMask = () => {
+        const sc = document.querySelector('.sidebar-scroll');
+        if (!sc) return false;
         const updateMask = () => {
-          const hasMore = sc.scrollTop < sc.scrollHeight - sc.clientHeight - 4;
-          sc.classList.toggle('has-more', hasMore);
+          try {
+            const hasMore = sc.scrollTop < sc.scrollHeight - sc.clientHeight - 4;
+            sc.classList.toggle('has-more', hasMore);
+          } catch (_) {}
         };
-        sc.addEventListener('scroll', updateMask, { passive: true });
-        window.addEventListener('resize', updateMask);
+        if (!sc._maskBound) {
+          sc._maskBound = true;
+          sc.addEventListener('scroll', updateMask, { passive: true });
+          window.addEventListener('resize', updateMask);
+          if (typeof ResizeObserver !== 'undefined') {
+            const ro = new ResizeObserver(updateMask);
+            ro.observe(sc);
+          }
+        }
         updateMask();
-        // 初回 render 遅延分 も 対応
-        setTimeout(updateMask, 500);
-        setTimeout(updateMask, 1500);
-      }
-    } catch (_) {}
+        return true;
+      };
+      // 初回 + 遅延 + login後 の再check
+      bindMask();
+      [200, 800, 2000, 4000, 8000].forEach(ms => setTimeout(bindMask, ms));
+      // login gate 消えたら sidebar-scroll が出現する → body 変化 監視
+      try {
+        observer = new MutationObserver(() => bindMask());
+        observer.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['style', 'class'] });
+        // 30秒後 に observer 停止 (メモリリーク防止)
+        setTimeout(() => { try { observer.disconnect(); } catch(_){} }, 30000);
+      } catch (_) {}
+    })();
     // メタ
     document.getElementById('app-meta').textContent =
       `デモデータ ${clients.length}名 / 基準日 ${fmtDate(TODAY)}`;

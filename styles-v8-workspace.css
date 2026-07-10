@@ -292,11 +292,20 @@ body, table, .kpi-value, .num, .funnel-value, .task-count,
   .sidebar-quick-rec-pill { display: none; }
   .sidebar-quick-rec { padding: 10px 12px; gap: 8px; }
   .sidebar-quick-rec-label { font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
-  /* 2026-07-10 design-reviewer Critical#1: 11タブ が 232px sidebar に収まる ように 高さ 圧縮 (38pxx11=418px, scroll zone 429px 内に収まる) */
-  .sidebar-nav .tab { padding: 8px 10px; font-size: 12.5px; }
-  .sidebar-label { margin-top: 8px; margin-bottom: 6px; font-size: 10.5px; }
-  .sidebar-group { margin-bottom: 10px; }
-  .sidebar-scroll { gap: 8px; }
+  /* 2026-07-10 design-reviewer Critical#1: 11タブ が 232px sidebar に収まる ように 高さ 圧縮
+     base rule に !important 付いてる ので override も !important 必要 */
+  .sidebar-nav .tab {
+    padding: 6px 10px !important;
+    font-size: 12.5px !important;
+    min-height: 34px !important;
+    gap: 10px !important;
+  }
+  .sidebar-nav .tab i[data-lucide], .sidebar-nav .tab svg.lucide {
+    width: 15px !important; height: 15px !important;
+  }
+  .sidebar-label { margin-top: 6px; margin-bottom: 4px; font-size: 10px; padding: 4px 12px 4px; }
+  .sidebar-group { margin-bottom: 8px; }
+  .sidebar-scroll { gap: 6px; }
 }
 .sidebar-search:focus-within {
   border-color: var(--accent);
