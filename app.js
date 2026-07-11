@@ -3190,6 +3190,16 @@
             <div class="cd-section-label">メモ</div>
             <div class="cd-note">${escapeHtml(c.note)}</div>
           </div>` : ''}
+
+          <!-- 2026-07-11 v4 owner FB: 削除ボタン は 顧客モーダル 左タブ 一番下 (この画面 = この客 の 削除 と 文脈 明瞭) -->
+          <div class="cd-left-delete-zone" style="margin-top:auto;padding-top:24px;border-top:1px solid rgba(148,163,184,0.22);">
+            <div style="font-size:10.5px;font-weight:700;color:#94A3B8;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:8px;">danger zone</div>
+            <button id="cd-left-delete-btn" data-cid="${escapeHtml(c.id)}" style="width:100%;display:flex;align-items:center;justify-content:center;gap:8px;background:#fff;color:#DC2626;border:1.5px solid #FCA5A5;padding:11px 14px;border-radius:10px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;letter-spacing:0.02em;transition:background .15s,border-color .15s,box-shadow .15s;">
+              <span style="font-size:15px;">🗑</span>
+              <span>${escapeHtml(c.name)} さん を 削除</span>
+            </button>
+            <div style="font-size:11px;color:#94A3B8;margin-top:6px;line-height:1.5;">この客 の LINE / 議事録 / 予約 / 資料 が すべて 消えます。 元 に 戻せません。</div>
+          </div>
         </aside>
 
         <!-- ============= RIGHT: Activity column ============= -->
@@ -3543,22 +3553,25 @@
     setTimeout(_scrollLineChatBottom, 250);
     setTimeout(_scrollLineChatBottom, 800);
     document.getElementById('modal-close-btn').addEventListener('click', closeModal);
-    // ★ 2026-07-11 v3 owner FB: サイドバー最上部 の 「顧客 を 削除」 active 化 (客名 挿入)
+    // ★ 2026-07-11 v4: cd-left 内 の 削除ボタン → modal-delete-btn に forward
     try {
-      const sideDelBtn = document.getElementById('sidebar-customer-delete');
-      const sideDelLbl = document.getElementById('sidebar-customer-delete-label');
-      if (sideDelBtn) {
-        sideDelBtn.dataset.state = 'active';
-        sideDelBtn.style.color = '#fff';
-        sideDelBtn.style.borderColor = '#B91C1C';
-        sideDelBtn.style.borderStyle = 'solid';
-        sideDelBtn.style.background = '#DC2626';
-        sideDelBtn.style.cursor = 'pointer';
-        sideDelBtn.style.boxShadow = '0 4px 12px rgba(220,38,38,0.25)';
-        sideDelBtn.title = c.name + ' さん を 削除 (元 に 戻せません)';
-        // truncate long names
-        const shortName = c.name.length > 12 ? c.name.slice(0, 11) + '…' : c.name;
-        if (sideDelLbl) sideDelLbl.textContent = shortName + ' を 削除';
+      const cdDelBtn = document.getElementById('cd-left-delete-btn');
+      if (cdDelBtn && !cdDelBtn._boundOnce) {
+        cdDelBtn._boundOnce = true;
+        cdDelBtn.addEventListener('click', () => {
+          const modalBtn = document.getElementById('modal-delete-btn');
+          if (modalBtn) modalBtn.click();
+        });
+        cdDelBtn.addEventListener('mouseenter', () => {
+          cdDelBtn.style.background = '#FEF2F2';
+          cdDelBtn.style.borderColor = '#F87171';
+          cdDelBtn.style.boxShadow = '0 4px 12px rgba(220,38,38,0.15)';
+        });
+        cdDelBtn.addEventListener('mouseleave', () => {
+          cdDelBtn.style.background = '#fff';
+          cdDelBtn.style.borderColor = '#FCA5A5';
+          cdDelBtn.style.boxShadow = 'none';
+        });
       }
     } catch (_) {}
     // ★ 顧客削除ボタン
@@ -9004,22 +9017,7 @@ ${client.name}さん、ありがとうございます。
       if (fab) { fab.style.removeProperty('display'); fab.classList.remove('hidden'); }
       document.querySelectorAll('.mb-fab-hint, .mb-fab-badge, .mb-fab-pulse, .mb-panel').forEach(el => el.style.removeProperty('display'));
     } catch (_) {}
-    // ★ 2026-07-11 v3: サイドバー最上部 の 削除ボタン idle 状態 に 戻す
-    try {
-      const sideDelBtn = document.getElementById('sidebar-customer-delete');
-      const sideDelLbl = document.getElementById('sidebar-customer-delete-label');
-      if (sideDelBtn) {
-        sideDelBtn.dataset.state = 'idle';
-        sideDelBtn.style.color = '#E11D48';
-        sideDelBtn.style.borderColor = '#FDA4AF';
-        sideDelBtn.style.borderStyle = 'dashed';
-        sideDelBtn.style.background = '#FEF7F7';
-        sideDelBtn.style.cursor = 'not-allowed';
-        sideDelBtn.style.boxShadow = 'none';
-        sideDelBtn.title = '顧客カルテ を 開くと 削除 が 有効 になります';
-        if (sideDelLbl) sideDelLbl.textContent = '削除 する 顧客 を 選ぶ';
-      }
-    } catch (_) {}
+    // (v4: cd-left 内 削除ボタン は 顧客モーダル と 一緒 に destroy される ので cleanup 不要)
     // ★ 閉じたら復元 flag クリア
     try {
       localStorage.removeItem('fp-last-open-client');
