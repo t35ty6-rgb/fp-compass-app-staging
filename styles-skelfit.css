@@ -812,3 +812,231 @@ body {
 #fp-gate-help { color: #5f6a86 !important; border-top-color: #e4e7ee !important; }
 #fp-gate-help a { color: #00844a !important; font-weight: 700 !important; }
 
+/* ============================================================
+   Phase 3 — 「トップ 以外 も 変えて」 owner FB 対応
+   dashboard 下段 の workflow / chart-card / section-eyebrow / hero-eyebrow / TODAY hero を 全部 SkelFit tokens に
+   ============================================================ */
+
+/* 「今日 の 進め方」 workflow-step 系 (元 Manrope + indigo → SkelFit ink + vital) */
+.workflow-step {
+  background: #fff !important;
+  border: 1px solid #e4e7ee !important;
+  border-radius: 12px !important;
+  box-shadow: none !important;
+  transition: border-color 120ms, transform 120ms !important;
+}
+.workflow-step:hover { border-color: #3a4560 !important; transform: translateY(-1px); }
+.workflow-step-active {
+  background: #f5f7fa !important;
+  border: 1px solid #00c96a !important;
+  box-shadow: 0 0 0 3px rgba(0,201,106,0.10) !important;
+}
+.workflow-step-num {
+  background: #f5f7fa !important;
+  border: 1px solid #e4e7ee !important;
+  color: #5f6a86 !important;
+  font-family: 'JetBrains Mono', monospace !important;
+  font-weight: 800 !important;
+}
+.workflow-step-active .workflow-step-num {
+  background: #cff2df !important;
+  color: #00844a !important;
+  border-color: #00c96a !important;
+}
+.workflow-step-icon {
+  color: #00844a !important;
+}
+.workflow-step-title {
+  color: #0f1729 !important;
+  font-family: "Noto Sans JP", sans-serif !important;
+  font-weight: 800 !important;
+  letter-spacing: -0.01em !important;
+}
+.workflow-step-desc {
+  color: #3f4868 !important;
+  font-family: "Noto Sans JP", sans-serif !important;
+}
+.workflow-step-status {
+  background: #cff2df !important;
+  color: #00844a !important;
+  border-radius: 999px !important;
+  font-family: 'JetBrains Mono', monospace !important;
+  font-size: 10.5px !important;
+  font-weight: 700 !important;
+  padding: 3px 10px !important;
+  border: none !important;
+}
+
+/* 「TODAY · 最優先 アクション」 hero eyebrow */
+.hero-eyebrow, .section-eyebrow-pill, .m-today-eyebrow {
+  background: #cff2df !important;
+  color: #00844a !important;
+  border: none !important;
+  border-radius: 999px !important;
+  font-family: 'JetBrains Mono', monospace !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  padding: 3px 10px !important;
+  letter-spacing: 0.04em !important;
+  text-transform: none !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  width: auto !important;
+}
+
+/* 「今月 の 数字」 chart-card 系 */
+.chart-card {
+  background: #fff !important;
+  border: 1px solid #e4e7ee !important;
+  border-radius: 12px !important;
+  box-shadow: none !important;
+}
+.chart-card:hover { border-color: #3a4560 !important; box-shadow: 0 1px 3px rgba(15,23,41,0.04) !important; }
+.chart-card-head { color: #0f1729 !important; }
+.chart-card-title {
+  color: #0f1729 !important;
+  font-family: "Noto Sans JP", sans-serif !important;
+  font-weight: 800 !important;
+  letter-spacing: -0.01em !important;
+}
+.chart-card-sub {
+  color: #5f6a86 !important;
+  font-family: "Noto Sans JP", sans-serif !important;
+}
+.chart-card-head i[data-lucide], .chart-card-head svg.lucide { color: #00844a !important; }
+
+/* section 見出し 統一 (「今日 の 進め方」 の 「今日 話すべき方」 等) */
+.section-hero, .section-hero-title, .section-title, .sec-head h2 {
+  color: #0f1729 !important;
+  font-family: "Noto Sans JP", sans-serif !important;
+  font-weight: 800 !important;
+  letter-spacing: -0.01em !important;
+}
+.section-hero-title { font-size: 20px !important; }
+.section-title { font-size: 15.5px !important; }
+.section-hero-lead, .section-title + p, .section-sub {
+  color: #3f4868 !important;
+  font-family: "Noto Sans JP", sans-serif !important;
+}
+
+/* Client card / lead-hub 系 (「今日 話すべき方」 の client card) */
+.client-card, .lead-card, .cd-card, .lead-hub-card {
+  background: #fff !important;
+  border: 1px solid #e4e7ee !important;
+  border-radius: 12px !important;
+  box-shadow: none !important;
+  color: #0f1729 !important;
+}
+.client-card:hover, .lead-card:hover { border-color: #3a4560 !important; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(15,23,41,0.06) !important; }
+.client-card-name, .lead-card-name, [class*="client-name"] {
+  color: #0f1729 !important;
+  font-family: "Noto Sans JP", sans-serif !important;
+  font-weight: 800 !important;
+}
+.client-card-sub, .lead-card-sub, .client-meta {
+  color: #5f6a86 !important;
+  font-family: "Noto Sans JP", sans-serif !important;
+}
+
+/* Table (clients table 系) 統一 */
+table.clients {
+  border-collapse: separate !important;
+  border-spacing: 0 !important;
+  background: #fff !important;
+  border-radius: 12px !important;
+  overflow: hidden;
+  border: 1px solid #e4e7ee !important;
+}
+table.clients th {
+  background: #f5f7fa !important;
+  color: #5f6a86 !important;
+  font-family: "Noto Sans JP", sans-serif !important;
+  font-weight: 700 !important;
+  font-size: 11px !important;
+  letter-spacing: 0.04em !important;
+  text-transform: uppercase !important;
+  border-bottom: 1px solid #e4e7ee !important;
+}
+table.clients td {
+  border-bottom: 1px solid #eef0f5 !important;
+  background: #fff !important;
+  color: #1e2740 !important;
+  font-family: "Noto Sans JP", sans-serif !important;
+}
+table.clients tr:hover td { background: #f5f7fa !important; }
+table.clients tr:last-child td { border-bottom: none !important; }
+
+/* KPI mini stats (今週フォロー / 30日以内のイベント / 未読LINE) */
+.mega-hero-stat {
+  background: #f5f7fa !important;
+  border: 1px solid #e4e7ee !important;
+  border-radius: 8px !important;
+}
+.mega-hero-stat-label {
+  color: #5f6a86 !important;
+  font-family: "Noto Sans JP", sans-serif !important;
+  font-size: 10.5px !important;
+  letter-spacing: 0.04em !important;
+  text-transform: uppercase !important;
+  font-weight: 700 !important;
+}
+.mega-hero-stat-value {
+  color: #0f1729 !important;
+  font-family: 'Inter', sans-serif !important;
+  font-weight: 900 !important;
+  font-variant-numeric: tabular-nums !important;
+  letter-spacing: -0.02em !important;
+}
+
+/* line-hub / broadcast card 系 */
+.line-hub-card, .broadcast-card, [class*="line-card"] {
+  background: #fff !important;
+  border: 1px solid #e4e7ee !important;
+  border-radius: 12px !important;
+  box-shadow: none !important;
+}
+
+/* Meeting card 内 の badge 統一 */
+.fp-meeting-card-actions button {
+  border-radius: 8px !important;
+  font-family: "Noto Sans JP", sans-serif !important;
+  font-weight: 700 !important;
+}
+
+/* Sidebar footer plan / upgrade */
+.upgrade-mini {
+  background: #f5f7fa !important;
+  border: 1px solid #e4e7ee !important;
+  border-radius: 8px !important;
+  color: #0f1729 !important;
+  font-family: "Noto Sans JP", sans-serif !important;
+}
+.upgrade-mini:hover { background: #eef0f5 !important; }
+.upgrade-mini-title { color: #0f1729 !important; font-family: "Noto Sans JP", sans-serif !important; font-weight: 700 !important; }
+.upgrade-mini-bar { background: #e4e7ee !important; }
+.upgrade-mini-bar-fill { background: #00c96a !important; }
+.real-mode-toggle {
+  background: transparent !important;
+  color: #5f6a86 !important;
+  border: 1px solid #e4e7ee !important;
+  border-radius: 8px !important;
+  font-family: "Noto Sans JP", sans-serif !important;
+}
+
+/* Emoji + アイコン の 装飾 統一 (avatar/user-chip 内) */
+.user-avatar, .user-avatar-wrap {
+  background: #0f1729 !important;
+  color: #fff !important;
+}
+
+/* 全 Manrope → Noto Sans JP + Inter 強制 (STG only の 見た目 統一) */
+[style*="Manrope"], [class*="manrope"] {
+  font-family: "Noto Sans JP", "Inter", -apple-system, sans-serif !important;
+}
+h1, h2, h3, h4, h5, h6, .title, [class*="title"], [class*="heading"] {
+  font-family: "Noto Sans JP", sans-serif !important;
+  letter-spacing: -0.01em !important;
+}
+
+
