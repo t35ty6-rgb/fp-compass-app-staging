@@ -1039,4 +1039,187 @@ h1, h2, h3, h4, h5, h6, .title, [class*="title"], [class*="heading"] {
   letter-spacing: -0.01em !important;
 }
 
+/* ============================================================
+   Phase 4 — 「ライフイベント / 新規顧客 / 配信」 等 の 中身 も 統一
+   inline style で 色 焼き付いてる 箇所 を attribute selector で 上書き
+   ============================================================ */
+
+/* 「配信タブ」 の 青系 バナー (linear-gradient(#EFF6FF, #F5F3FF)) → SkelFit neutral */
+[style*="linear-gradient(135deg,#EFF6FF"],
+[style*="linear-gradient(135deg,#F0FDF4"],
+[style*="linear-gradient(135deg,#FEF3C7"],
+[style*="linear-gradient(135deg,#FEE2E2"],
+[style*="linear-gradient(135deg,#FDF4FF"],
+[style*="linear-gradient(135deg,#EFF6FF,"],
+[style*="linear-gradient(135deg, #EFF6FF"] {
+  background: #f5f7fa !important;
+  background-image: none !important;
+  border-color: #e4e7ee !important;
+}
+
+/* 「BROADCAST」 「FOLLOWUP」 badge 系 (#1D4ED8, #7C3AED 系 dark blue/purple) を SkelFit ink に */
+[style*="background:#1D4ED8"],
+[style*="background: #1D4ED8"],
+[style*="background:#7C3AED"],
+[style*="background: #7C3AED"],
+[style*="background:#5B21B6"],
+[style*="background: #5B21B6"] {
+  background: #0f1729 !important;
+  background-image: none !important;
+  color: #fff !important;
+}
+
+/* 「配信タブ」 の 現行 tab button (data-dist-subtab) 統一 */
+button[data-dist-subtab] {
+  font-family: "Noto Sans JP", sans-serif !important;
+  border-radius: 8px !important;
+  min-height: 44px !important;
+  transition: background 120ms, border-color 120ms !important;
+}
+
+/* 全 inline color: (青系, 緑系, 赤系) の 色数 統一 */
+[style*="color:#1D4ED8"], [style*="color: #1D4ED8"],
+[style*="color:#2563EB"], [style*="color: #2563EB"] {
+  color: #0f1729 !important;
+}
+[style*="color:#059669"], [style*="color: #059669"] {
+  color: #00844a !important;
+}
+
+/* 「新規顧客登録」 modal 系 (fp-form / form-content) 統一 */
+#form-content, .form-container, [data-form-view] {
+  background: #fff !important;
+  border-radius: 12px !important;
+  box-shadow: 0 12px 32px rgba(15,23,41,0.10) !important;
+}
+#form-content h2, .form-container h2 {
+  color: #0f1729 !important;
+  font-family: "Noto Sans JP", sans-serif !important;
+  font-weight: 800 !important;
+  letter-spacing: -0.01em !important;
+}
+#form-content input, #form-content select, #form-content textarea,
+.form-container input, .form-container select, .form-container textarea {
+  background: #fff !important;
+  border: 1.5px solid #e4e7ee !important;
+  border-radius: 8px !important;
+  color: #0f1729 !important;
+  font-size: 16px !important;
+  font-family: "Noto Sans JP", sans-serif !important;
+}
+#form-content input:focus, #form-content select:focus, #form-content textarea:focus {
+  border-color: #00c96a !important;
+  box-shadow: 0 0 0 3px rgba(0,201,106,0.20) !important;
+  outline: none !important;
+}
+#form-content label, .form-container label {
+  color: #1e2740 !important;
+  font-family: "Noto Sans JP", sans-serif !important;
+  font-weight: 700 !important;
+  font-size: 12.5px !important;
+}
+#form-content .field-hint, #form-content [class*="hint"] {
+  color: #5f6a86 !important;
+}
+
+/* 「ライフイベント」 tab 内 の event card 統一 */
+[class*="event-card"], [class*="life-event"], .event-item {
+  background: #fff !important;
+  border: 1px solid #e4e7ee !important;
+  border-radius: 12px !important;
+  box-shadow: none !important;
+  color: #0f1729 !important;
+}
+[class*="event-card"]:hover, [class*="life-event"]:hover, .event-item:hover {
+  border-color: #3a4560 !important;
+}
+
+/* 「配信」 dashboard 内 の tile / kpi */
+[class*="dist-tile"], [class*="dist-card"], [class*="broadcast-tile"],
+[class*="segment-card"], [class*="template-card"], [class*="schedule-card"] {
+  background: #fff !important;
+  border: 1px solid #e4e7ee !important;
+  border-radius: 12px !important;
+  box-shadow: none !important;
+  color: #0f1729 !important;
+}
+
+/* 「配信タブ」 の pill/badge (BROADCAST/CAMPAIGN/OFFICIAL 等 の 派手 pill) 統一 */
+[style*="letter-spacing:0.12em"],
+[style*="letter-spacing: 0.12em"] {
+  font-family: 'JetBrains Mono', monospace !important;
+  letter-spacing: 0.06em !important;
+  border-radius: 4px !important;
+  padding: 2px 8px !important;
+  font-size: 10.5px !important;
+  font-weight: 700 !important;
+}
+
+/* 誕生日 / 年末 tab 内 の アクセント accent 色 (#c1272d, #b8893d, #1b2845, #2d7d4e) → SkelFit ink 統一 */
+[style*="color:#c1272d"], [style*="color: #c1272d"],
+[style*="border-color:#c1272d"], [style*="border-color: #c1272d"] {
+  color: #b45309 !important;
+  border-color: #b45309 !important;
+}
+[style*="color:#b8893d"], [style*="color: #b8893d"],
+[style*="border-color:#b8893d"], [style*="border-color: #b8893d"] {
+  color: #00844a !important;
+  border-color: #00844a !important;
+}
+[style*="color:#1b2845"], [style*="color: #1b2845"] {
+  color: #0f1729 !important;
+}
+[style*="color:#2d7d4e"], [style*="color: #2d7d4e"] {
+  color: #00844a !important;
+}
+
+/* Segment / tag 定義 card 統一 */
+[class*="seg-card"], [class*="segment"], [class*="tag-card"] {
+  background: #fff !important;
+  border: 1px solid #e4e7ee !important;
+  border-radius: 12px !important;
+  color: #0f1729 !important;
+  box-shadow: none !important;
+}
+
+/* line-hub / leadHub の カード 系 */
+[data-line-view] .card, [data-line-view] [class*="hub-card"],
+[data-line-view] > div[style*="background:#fff"],
+[data-line-view] > div[style*="background: #fff"] {
+  border-radius: 12px !important;
+  border: 1px solid #e4e7ee !important;
+  box-shadow: none !important;
+}
+
+/* 全 button/anchor で font 統一 (line-app.js は 元 の inline style で Noto Sans JP 指定 あり だが 一部 混在) */
+[data-line-view] button, [data-line-view] a {
+  font-family: "Noto Sans JP", sans-serif !important;
+}
+[data-line-view] h1, [data-line-view] h2, [data-line-view] h3, [data-line-view] h4 {
+  font-family: "Noto Sans JP", sans-serif !important;
+  letter-spacing: -0.01em !important;
+  color: #0f1729 !important;
+}
+
+/* 「予約・アンケート・議事録」 等 の チャート dot indicator 統一 (色 見分け 系) */
+[style*="background:#EEF1FE"], [style*="background: #EEF1FE"] {
+  background: #f5f7fa !important;
+}
+
+/* section-hero-title (「今日 話すべき方」 「今週 の 数字」 大見出し) SkelFit tone */
+.section-hero-title, .section-hero h2 {
+  color: #0f1729 !important;
+  font-family: "Noto Sans JP", sans-serif !important;
+  font-weight: 800 !important;
+  letter-spacing: -0.02em !important;
+  font-size: 22px !important;
+}
+.section-hero-lead {
+  color: #3f4868 !important;
+  font-family: "Noto Sans JP", sans-serif !important;
+  font-size: 13px !important;
+  line-height: 1.75 !important;
+}
+
+
 
