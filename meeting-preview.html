@@ -183,15 +183,18 @@
   .fp-btn:hover { background: #3F3F46; transform: translateY(-1px); }
 
   /* ============================================================
-     PALE COLOR OVERRIDE (preview page 限定 / editorial ink 型)
-     styles-skelfit.css の pastel section header + item chip 背景 を 全 kill、
-     色は 「小さな dot + label」 だけ で 意味担保。 面 は 白 + hairline。
+     BOLD SATURATED OVERRIDE (preview page 限定)
+     styles-skelfit.css の 淡パステル 塗り を kill → 濃色solid pill + 白文字
+     色の 意味分類 は 残す ( vital=緑 / attn=橙 / critical=赤 / trust=indigo / mono=slate )、
+     ただし 淡 じゃなく 飽和 で 主張する
      ============================================================ */
-  .fp-summary-structured .fp-sum-section-h {
-    background: transparent !important;
-    border-bottom: 1px solid #ECECEA !important;
-    padding-bottom: 10px !important;
-  }
+  --tone-vital:    #047647;   /* 濃緑 (positive) */
+  --tone-attn:     #B5530F;   /* 濃橙 (warn) */
+  --tone-critical: #DC2B2B;   /* 濃赤 (critical) */
+  --tone-trust:    #3F3FCE;   /* 濃indigo (trust) */
+  --tone-mono:     #0A0A0A;   /* 濃ink */
+
+  /* section header は 白面 + hairline (面塗りは NG)、 title を solid pill 化 */
   .fp-summary-structured .fp-sum-section-h,
   .fp-summary-structured .fp-sum-tone-vital .fp-sum-section-h,
   .fp-summary-structured .fp-sum-tone-attn .fp-sum-section-h,
@@ -200,9 +203,16 @@
   .fp-summary-structured .fp-sum-tone-mono .fp-sum-section-h,
   .fp-summary-structured .fp-sum-tone-ink .fp-sum-section-h {
     background: transparent !important;
-    border-bottom-color: #ECECEA !important;
+    border-bottom: 1px solid #ECECEA !important;
+    padding: 12px 14px 10px !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
   }
-  /* section title は ink 統一、 tone は dot だけ で 表現 */
+  /* dot 廃止 (pill 側で色主張するので) */
+  .fp-summary-structured .fp-sum-section-dot { display: none !important; }
+
+  /* section title を 塗り pill 化 — 飽和色 + 白文字 + 小サイズ */
   .fp-summary-structured .fp-sum-section-title,
   .fp-summary-structured .fp-sum-tone-vital .fp-sum-section-title,
   .fp-summary-structured .fp-sum-tone-attn .fp-sum-section-title,
@@ -210,32 +220,35 @@
   .fp-summary-structured .fp-sum-tone-trust .fp-sum-section-title,
   .fp-summary-structured .fp-sum-tone-mono .fp-sum-section-title,
   .fp-summary-structured .fp-sum-tone-ink .fp-sum-section-title {
-    color: #0A0A0A !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    padding: 4px 11px !important;
+    border-radius: 6px !important;
+    color: #FFFFFF !important;
+    font-size: 12.5px !important;
     font-weight: 700 !important;
-  }
-  /* ink 統一 — section を 意味別カラー で 分類 しない (owner NG)。 dot も 全部 ink */
-  .fp-summary-structured .fp-sum-section-dot,
-  .fp-summary-structured .fp-sum-tone-vital .fp-sum-section-dot,
-  .fp-summary-structured .fp-sum-tone-attn .fp-sum-section-dot,
-  .fp-summary-structured .fp-sum-tone-critical .fp-sum-section-dot,
-  .fp-summary-structured .fp-sum-tone-trust .fp-sum-section-dot,
-  .fp-summary-structured .fp-sum-tone-mono .fp-sum-section-dot,
-  .fp-summary-structured .fp-sum-tone-ink .fp-sum-section-dot {
+    letter-spacing: 0.01em !important;
     background: #0A0A0A !important;
   }
-  /* numbered item chip (1/2/3/4) も ink 統一 (トーン別 saturated 色 廃止) */
-  .fp-summary-structured .fp-sum-item-num,
-  .fp-summary-structured .fp-sum-item.fp-sum-tone-vital .fp-sum-item-num,
-  .fp-summary-structured .fp-sum-item.fp-sum-tone-attn .fp-sum-item-num,
-  .fp-summary-structured .fp-sum-item.fp-sum-tone-critical .fp-sum-item-num,
-  .fp-summary-structured .fp-sum-item.fp-sum-tone-trust .fp-sum-item-num,
-  .fp-summary-structured .fp-sum-item.fp-sum-tone-mono .fp-sum-item-num,
-  .fp-summary-structured .fp-sum-item.fp-sum-tone-ink .fp-sum-item-num {
+  .fp-summary-structured .fp-sum-tone-vital .fp-sum-section-title    { background: #047647 !important; }
+  .fp-summary-structured .fp-sum-tone-attn .fp-sum-section-title     { background: #B5530F !important; }
+  .fp-summary-structured .fp-sum-tone-critical .fp-sum-section-title { background: #DC2B2B !important; }
+  .fp-summary-structured .fp-sum-tone-trust .fp-sum-section-title    { background: #3F3FCE !important; }
+  .fp-summary-structured .fp-sum-tone-mono .fp-sum-section-title,
+  .fp-summary-structured .fp-sum-tone-ink .fp-sum-section-title      { background: #0A0A0A !important; }
+
+  /* item numbered chip — 濃色 solid + 白文字 (トーン別で保持) */
+  .fp-summary-structured .fp-sum-item-num {
     background: #0A0A0A !important;
     color: #FFFFFF !important;
+    font-weight: 800 !important;
   }
+  .fp-summary-structured .fp-sum-item.fp-sum-tone-vital .fp-sum-item-num    { background: #047647 !important; }
+  .fp-summary-structured .fp-sum-item.fp-sum-tone-attn .fp-sum-item-num     { background: #B5530F !important; }
+  .fp-summary-structured .fp-sum-item.fp-sum-tone-critical .fp-sum-item-num { background: #DC2B2B !important; }
+  .fp-summary-structured .fp-sum-item.fp-sum-tone-trust .fp-sum-item-num    { background: #3F3FCE !important; }
 
-  /* section body は 白ベース + hairline で 十分 (元パステル箱を消す) */
+  /* section 全体 は 白面 + hairline (パステル塗り消滅) */
   .fp-summary-structured .fp-sum-section {
     background: #FFFFFF !important;
     border: 1px solid #ECECEA !important;
@@ -246,7 +259,7 @@
     background: #FFFFFF !important;
   }
 
-  /* warning / empty / concerns 系 も ink 統一 (左 border の 色分類 廃止) */
+  /* warning / empty / concerns 系 は 左3px の 濃 solid bar + トーン継続 */
   .fp-summary-structured .fp-sum-empty,
   .fp-summary-structured .fp-sum-warning,
   .fp-summary-structured .fp-sum-concerns {
@@ -257,13 +270,17 @@
     padding: 10px 14px !important;
     border-radius: 8px !important;
   }
-  /* warn icon (! の 丸背景) も ink 統一 */
-  .fp-summary-structured .fp-sum-warn-icon,
-  .fp-summary-structured .fp-sum-warn-attn .fp-sum-warn-icon,
-  .fp-summary-structured .fp-sum-warn-critical .fp-sum-warn-icon {
+  .fp-summary-structured .fp-sum-warn-attn  { border-left-color: #B5530F !important; }
+  .fp-summary-structured .fp-sum-warn-critical { border-left-color: #DC2B2B !important; }
+
+  /* warn icon (! 丸) は 濃色 solid で 残す (トーン別 saturated 版) */
+  .fp-summary-structured .fp-sum-warn-icon {
     background: #0A0A0A !important;
     color: #FFFFFF !important;
+    font-weight: 800 !important;
   }
+  .fp-summary-structured .fp-sum-warn-attn .fp-sum-warn-icon    { background: #B5530F !important; }
+  .fp-summary-structured .fp-sum-warn-critical .fp-sum-warn-icon { background: #DC2B2B !important; }
 
   @media (max-width: 640px) {
     .preview-topbar { padding: 12px 18px; flex-wrap: wrap; gap: 10px; }
