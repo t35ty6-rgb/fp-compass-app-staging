@@ -77,12 +77,12 @@
     display: inline-flex; align-items: center; gap: 8px;
     font-family: 'Manrope', 'Noto Sans JP', sans-serif;
     font-size: 11px; font-weight: 700;
-    color: #5B5BF0;
+    color: #0A0A0A;
     letter-spacing: 0.14em;
     margin-bottom: 14px;
   }
   .page-head .kicker::before {
-    content: ''; width: 20px; height: 1.5px; background: #5B5BF0;
+    content: ''; width: 20px; height: 1.5px; background: #0A0A0A;
   }
   h1 {
     font-family: 'Manrope', 'Noto Sans JP', sans-serif;
@@ -213,13 +213,27 @@
     color: #0A0A0A !important;
     font-weight: 700 !important;
   }
-  /* section dot は 面積小さいので saturated OK (色で分類を伝える最後の手段) */
-  .fp-summary-structured .fp-sum-tone-vital .fp-sum-section-dot { background: #047647 !important; }
-  .fp-summary-structured .fp-sum-tone-attn .fp-sum-section-dot { background: #B5530F !important; }
-  .fp-summary-structured .fp-sum-tone-critical .fp-sum-section-dot { background: #DC2B2B !important; }
-  .fp-summary-structured .fp-sum-tone-trust .fp-sum-section-dot { background: #5B5BF0 !important; }
-  .fp-summary-structured .fp-sum-tone-mono .fp-sum-section-dot { background: #6B6B6B !important; }
-  .fp-summary-structured .fp-sum-tone-ink .fp-sum-section-dot { background: #0A0A0A !important; }
+  /* ink 統一 — section を 意味別カラー で 分類 しない (owner NG)。 dot も 全部 ink */
+  .fp-summary-structured .fp-sum-section-dot,
+  .fp-summary-structured .fp-sum-tone-vital .fp-sum-section-dot,
+  .fp-summary-structured .fp-sum-tone-attn .fp-sum-section-dot,
+  .fp-summary-structured .fp-sum-tone-critical .fp-sum-section-dot,
+  .fp-summary-structured .fp-sum-tone-trust .fp-sum-section-dot,
+  .fp-summary-structured .fp-sum-tone-mono .fp-sum-section-dot,
+  .fp-summary-structured .fp-sum-tone-ink .fp-sum-section-dot {
+    background: #0A0A0A !important;
+  }
+  /* numbered item chip (1/2/3/4) も ink 統一 (トーン別 saturated 色 廃止) */
+  .fp-summary-structured .fp-sum-item-num,
+  .fp-summary-structured .fp-sum-item.fp-sum-tone-vital .fp-sum-item-num,
+  .fp-summary-structured .fp-sum-item.fp-sum-tone-attn .fp-sum-item-num,
+  .fp-summary-structured .fp-sum-item.fp-sum-tone-critical .fp-sum-item-num,
+  .fp-summary-structured .fp-sum-item.fp-sum-tone-trust .fp-sum-item-num,
+  .fp-summary-structured .fp-sum-item.fp-sum-tone-mono .fp-sum-item-num,
+  .fp-summary-structured .fp-sum-item.fp-sum-tone-ink .fp-sum-item-num {
+    background: #0A0A0A !important;
+    color: #FFFFFF !important;
+  }
 
   /* section body は 白ベース + hairline で 十分 (元パステル箱を消す) */
   .fp-summary-structured .fp-sum-section {
@@ -232,20 +246,17 @@
     background: #FFFFFF !important;
   }
 
-  /* warning / empty / concerns 系の pale 黄・赤 chip も 締める (icon + 濃色label のみ) */
+  /* warning / empty / concerns 系 も ink 統一 (左 border の 色分類 廃止) */
   .fp-summary-structured .fp-sum-empty,
   .fp-summary-structured .fp-sum-warning,
   .fp-summary-structured .fp-sum-concerns {
     background: transparent !important;
     border: 1px solid #ECECEA !important;
-    border-left: 3px solid var(--warn-bar, #B5530F) !important;
+    border-left: 3px solid #0A0A0A !important;
     color: #0A0A0A !important;
     padding: 10px 14px !important;
     border-radius: 8px !important;
   }
-  .fp-summary-structured .fp-sum-warning { --warn-bar: #B5530F; }
-  .fp-summary-structured .fp-sum-concerns { --warn-bar: #DC2B2B; }
-  .fp-summary-structured .fp-sum-empty { --warn-bar: #6B6B6B; }
 
   @media (max-width: 640px) {
     .preview-topbar { padding: 12px 18px; flex-wrap: wrap; gap: 10px; }
