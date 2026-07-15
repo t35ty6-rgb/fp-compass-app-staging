@@ -41,7 +41,25 @@
     「ボックス + デザイン + LINE風 chat」 の 全部 反映。 以下 が 実際 の 顧客カルテ 議事録タブ で 表示 される 見た目 です。
   </p>
 
-  <div class="demo-label">CASE 1 — LINE風 chat + 構造化 summary (代表的 な 議事録)</div>
+  <div class="demo-label">CASE 0 — owner が 見せた 実 Claude summary (v7 polish 版)</div>
+
+  <div class="fp-meeting-card">
+    <div class="fp-meeting-card-head">
+      <div>
+        <div class="fp-meeting-card-eyebrow" style="font-size:13px;font-weight:900;color:#1B3A5C;">📹 Zoom 1回目</div>
+        <div class="fp-meeting-card-date" style="font-size:14px;font-weight:700;margin-top:2px;">2026/07/10 14:00 面談 · 福井県大野市 経営者</div>
+      </div>
+    </div>
+    <div class="fp-meeting-block">
+      <div class="fp-meeting-block-label"><span>AI 議事録 (Claude)</span></div>
+      <div id="fp-preview-case0" class="fp-meeting-body fp-summary-structured">
+        <!-- JS で renderStructuredSummary を呼んで inject -->
+        <div class="fp-sum-empty">loading…</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="demo-label">CASE 1 — LINE風 chat + 構造化 summary (別 case)</div>
 
   <!-- Meeting card: full sample -->
   <div class="fp-meeting-card">
@@ -162,5 +180,78 @@
   </div>
 
 </div>
+<script src="./app.js"></script>
+<script>
+  // owner が 見せた 実 議事録 サンプル
+  const OWNER_SAMPLE = `⚠ 音質warning: Whisper 幻覚 (動画系 文言混入)
+(下記は AI が 部分情報から 最善 で抽出した内容)
+
+⚠ 議事録 一部 項目 が空 (next_meeting_kpis, predicted_next_questions)。 LLM 出力 不安定な 可能性、 内容 確認 推奨。
+
+⚠ 議事録 必須項目 欠落 (key_concerns)。 再生成 を 推奨。
+
+## 顧客プロフィール
+本日の面談相手は、福井県大野市を拠点とする複数事業を展開する経営者。紹介者「コンさん」経由での初回相談。建築・デザイン、印刷・看板事業、宿泊施設運営、ふるさと納税事業など多角経営を行っており、地域活性化・町おこしに強い関心を持つ。
+
+## 課題・関心事
+1. **宿泊施設の稼働率向上**：くずりゅう温泉宿泊施設の月間指定管理料が200万円弱であり、6月・12月の閑散期対策が急務。ボイラー修繕費等の維持費負担が重い。
+2. **新規事業の収益化**：ふるさと納税プラットフォーム構築、クラウドファンディング活用による体験型プログラム企画など複数の事業化案があるが、マーケティング・集客戦略が不明確。
+3. **地域ブランド構築**：大野市の里芋、ジビエなど地域資源を活かした商品開発・販売の仕掛けが課題。既存の商工会主導プロジェクトでは利益ベース思考が欠落していると感じている。
+4. **組織体制・事業承継**：個人事業主から法人化への移行、複数事業の統合管理、将来的な事業承継について相談意欲あり。
+
+## 提案内容
+面談では以下の事業化案が具体的に議論された：
+
+①**体験型宿泊プログラム（クラウドファンディング活用）**
+- 四季ごと（春・夏・秋・冬）に異なるテーマプログラムを設計
+- 年4回の定期来館者を確保する仕組み
+- 例：春は田植え体験、夏は水遊び、冬はジビエ（しし鍋）体験
+- クラウドファンディングプラットフォーム：キャンプファイヤー推奨（宿泊・体験型に強い）
+- 先払い方式で資金調達と集客を同時実現
+
+②**ふるさと納税事業の大野市独立化**
+- 現在：福井県内の中央企業（オレンジボックス等）が一括管理
+- 目標：大野市独立の専門企業化
+- 販売チャネル：楽天、Amazon、SATOFURU等複数プラットフォーム展開
+- 主力商品：里芋（奥様の実家が栽培）、地域特産品
+
+③**シェアスペース・コミュニティ機能**
+- 月1〜2回、シェフ招聘による食事会開催
+- 起業家・経営者向けの相談・情報交換の場
+- 若者向けキャリア相談機能（福井若者情報発信局との連携検討）
+
+④**先進事例の学習**
+- 島根県湯本津温泉村（人口200人→日中来訪者200人）の再生事例
+- JR協力による駅舎フロント化プロジェクト（街全体をホテルに見立てる）
+- 大野市への応用可能性を検討
+
+## 議論した数字・試算
+- 指定管理料：月200万円弱（くずりゅう温泉）
+- 先進事例の集客規模：人口200人の村が日中200人来訪に成長
+- クラウドファンディング成功事例：数千万円規模の売上達成
+- 焼き芋カプセル商品開発：クラファン支援500万円集約（参考事例）
+
+## 次回までのアクション
+- 体験型プログラムの具体設計（四季別テーマ・価格設定・実施スケジュール）
+- ふるさと納税事業の独立化に向けた競合調査・パートナー候補の洗い出し
+- クラウドファンディング活用の法的・税務的検討
+- 事業体制（個人事業主 vs 法人化）の整理
+
+## 合意事項・次回方針
+- 複数事業の統合的なビジネスモデル構築が必要
+- 地域資源（里芋、ジビエ、建築、人材）の有機的な結合が競争力源泉
+- 短期（6月・12月閑散期対策）と中期（事業多角化）の両立戦略を立案
+- 次回面談では、体験型プログラムの試行版（1プログラム）の企画書を持参予定`;
+
+  // Wait for app.js to define renderStructuredSummary
+  function tryRender() {
+    if (typeof window.renderStructuredSummary === 'function') {
+      document.getElementById('fp-preview-case0').innerHTML = window.renderStructuredSummary(OWNER_SAMPLE);
+    } else {
+      setTimeout(tryRender, 100);
+    }
+  }
+  tryRender();
+</script>
 </body>
 </html>

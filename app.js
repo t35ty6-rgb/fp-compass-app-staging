@@ -9766,101 +9766,170 @@ ${client.name}さん、ありがとうございます。
     return /^#[0-9a-fA-F]{3,8}$/.test(c) ? c : '#888';
   }
 
-  // 2026-07-16 v6: Claude 議事録 の markdown-like 構造 を SkelFit 視覚セクション に変換
-  //   parse rule:
-  //     - "##" or "###" 行 → セクション見出し (h4)
-  //     - "**xxx**" or "【xxx】" → 強調ラベル
-  //     - "- " or "・" or "•" or "*" 始まる 行 → bullet list
-  //     - "1. " or "1) " 始まる 行 → ordered list
-  //     - 空行区切り → 段落
-  //     - 「決定」「TODO」「次回」「懸念」 等の キーワード → colored accent
+  // 2026-07-16 v7 polish: markdown 感 を消す。 各 ## を 独立 card 化、
+  //   ⚠ warnings は 冒頭 alert、 ①②③④ / 1. **xxx**：yyy は 番号 bubble + 見出し、
+  //   数値 (¥/万/％/月/年) は mono chip、 label：value は row。 5秒 で スキャン できる 密度に。
   window.renderStructuredSummary = function renderStructuredSummary(text) {
     const raw = String(text || '').trim();
     if (!raw) return '<div class="fp-sum-empty">議事録 未生成 — 「編集」 から手動追記 可</div>';
 
-    // No structure detected → render as clean paragraphs
-    const hasStructure = /(?:^#{1,3}\s|【.+?】|\*\*.+?\*\*|^[-・•\*]\s|^\d+[.\)]\s)/m.test(raw);
+    // 構造 検出 (## / **/ 番号)
+    const hasStructure = /(?:^#{1,3}\s|【.+?】|\*\*.+?\*\*|^[-・•\*]\s|^\d+[.\)]\s|^⚠)/m.test(raw);
     if (!hasStructure) {
       const paragraphs = raw.split(/\n{2,}/).map(p => p.trim()).filter(Boolean);
-      if (paragraphs.length <= 1) {
-        return `<div class="fp-sum-body">${escapeHtml(raw).replace(/\n/g, '<br>')}</div>`;
-      }
+      if (paragraphs.length <= 1) return `<div class="fp-sum-body">${escapeHtml(raw).replace(/\n/g, '<br>')}</div>`;
       return paragraphs.map(p => `<p class="fp-sum-p">${escapeHtml(p).replace(/\n/g, '<br>')}</p>`).join('');
     }
 
-    // Section-aware parse
-    const lines = raw.split(/\n/);
-    let html = '';
-    let inList = false;
-    let listType = 'ul';
-    const closeList = () => { if (inList) { html += `</${listType}>`; inList = false; } };
+    // tone 判定 (見出し / ラベル 用)
     const toneOf = (label) => {
-      const s = label.toLowerCase();
-      if (/決定|合意|確認|結論/.test(label)) return 'vital';   // green
-      if (/todo|次回|課題|宿題|action|やること/i.test(label + s)) return 'attn'; // amber
-      if (/懸念|リスク|不安|注意|要検討/.test(label)) return 'critical'; // pink
-      if (/質問|関心|興味|希望/.test(label)) return 'trust';   // blue
-      return 'ink';                                              // default
-    };
-    const inlineBold = (s) => {
-      // **xxx** or 【xxx】 → strong
-      return escapeHtml(s)
-        .replace(/\*\*([^*]+)\*\*/g, '<strong class="fp-sum-strong">$1</strong>')
-        .replace(/【([^】]+)】/g, '<strong class="fp-sum-strong">【$1】</strong>');
+      if (/決定|合意|確認|結論|完了/.test(label)) return 'vital';
+      if (/TODO|todo|次回|課題|宿題|action|やること|アクション/i.test(label)) return 'attn';
+      if (/懸念|リスク|不安|注意|要検討|警告/.test(label)) return 'critical';
+      if (/質問|関心|興味|希望|プロフィール|人物/.test(label)) return 'trust';
+      if (/数字|試算|金額|コスト|見積|価格/.test(label)) return 'mono';
+      if (/提案|検討|方針|戦略/.test(label)) return 'vital';
+      return 'ink';
     };
 
+    // 数値強調 (¥xxx万 / xxx円 / xx% / xx月 / xx年後 等)
+    const NUM_RE = /((?:¥|￥)?\s*[\d,]+(?:\.\d+)?\s*(?:億|万|千|億円|万円|千円|円|％|%|ヶ月|カ月|か月|年間|年後|年|ヶ月|時間|分|人|件|回|名|社|棟|台|坪))/g;
+    const emphasizeNumbers = (safeHtml) => safeHtml.replace(NUM_RE, '<span class="fp-sum-num">$1</span>');
+
+    // インライン 強調 (** 太字, 【】 label)
+    const inline = (s) => {
+      const safe = escapeHtml(s)
+        .replace(/\*\*([^*]+)\*\*/g, '<strong class="fp-sum-strong">$1</strong>')
+        .replace(/【([^】]+)】/g, '<strong class="fp-sum-strong">【$1】</strong>');
+      return emphasizeNumbers(safe);
+    };
+
+    const lines = raw.split(/\n/);
+    let out = '';
+    let warnings = [];
+    let sectionOpen = false;
+    let sectionTone = 'ink';
+    let inList = false;
+    let listType = 'ul';
+
+    const closeList = () => { if (inList) { out += `</${listType}>`; inList = false; } };
+    const closeSection = () => {
+      closeList();
+      if (sectionOpen) { out += '</div></section>'; sectionOpen = false; }
+    };
+    const openSection = (heading, tone) => {
+      closeSection();
+      sectionOpen = true;
+      sectionTone = tone;
+      // heading は バブル + タイトル (アイコン なし で 質実 に)
+      out += `<section class="fp-sum-section fp-sum-tone-${tone}">`;
+      out += `<header class="fp-sum-section-h"><span class="fp-sum-section-dot"></span><h4 class="fp-sum-section-title">${escapeHtml(heading)}</h4></header>`;
+      out += `<div class="fp-sum-section-body">`;
+    };
+
+    // Warnings は 冒頭 に 集めて alert box として レンダ
+    for (let i = 0; i < lines.length; i++) {
+      const t = lines[i].trim();
+      if (!t) continue;
+      const w = t.match(/^⚠\s*(.+)$/);
+      if (w && !sectionOpen && !/^#/.test(t)) {
+        warnings.push(w[1].trim());
+        lines[i] = '';   // consume
+      } else if (/^#/.test(t)) {
+        break; // stop at first ## (warnings are only prefix)
+      }
+    }
+    if (warnings.length > 0) {
+      out += '<div class="fp-sum-warnings">';
+      warnings.forEach(w => {
+        const tone = /(欠落|必須|再生成)/.test(w) ? 'critical' : 'attn';
+        out += `<div class="fp-sum-warning fp-sum-warn-${tone}"><span class="fp-sum-warn-icon">!</span><span class="fp-sum-warn-text">${inline(w)}</span></div>`;
+      });
+      out += '</div>';
+    }
+
+    // メイン parse
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i];
       const trimmed = line.trim();
       if (!trimmed) { closeList(); continue; }
 
-      // Heading
+      // ## Heading → 新 section card
       const h = trimmed.match(/^(#{1,3})\s*(.+)$/);
       if (h) {
-        closeList();
-        const text = h[2].replace(/^\*+|\*+$/g, '').trim();
-        const tone = toneOf(text);
-        html += `<h4 class="fp-sum-h4 fp-sum-tone-${tone}"><span class="fp-sum-dot"></span>${escapeHtml(text)}</h4>`;
+        const heading = h[2].replace(/^\*+|\*+$/g, '').trim();
+        openSection(heading, toneOf(heading));
         continue;
       }
 
-      // Standalone bold label like "**xxx**" or "【xxx】" on its own line
+      // Auto-open section if 直接 content start (no ## before)
+      if (!sectionOpen) {
+        // profile 系 セクション を仮定
+        openSection('サマリー', 'ink');
+      }
+
+      // "1. **xxx**：yyy" or "①**xxx**：yyy" like — 番号 + label + description
+      const numbered = trimmed.match(/^(?:(\d+)[.\)、]|([①②③④⑤⑥⑦⑧⑨⑩]))\s*(?:\*\*([^*]+)\*\*|【([^】]+)】)(?:\s*[:：]\s*(.+))?$/);
+      if (numbered) {
+        closeList();
+        const num = numbered[1] || numbered[2];
+        const label = numbered[3] || numbered[4];
+        const rest = numbered[5] || '';
+        const tone = toneOf(label);
+        out += `<div class="fp-sum-item fp-sum-tone-${tone}">`;
+        out += `<div class="fp-sum-item-num">${escapeHtml(num)}</div>`;
+        out += `<div class="fp-sum-item-body">`;
+        out += `<div class="fp-sum-item-title">${inline(label)}</div>`;
+        if (rest) out += `<div class="fp-sum-item-desc">${inline(rest)}</div>`;
+        out += `</div></div>`;
+        continue;
+      }
+
+      // Standalone bold label (**xxx** or 【xxx】) — sub-heading
       const boldOnly = trimmed.match(/^(?:\*\*([^*]+)\*\*|【([^】]+)】)\s*[:：]?\s*(.*)$/);
       if (boldOnly && (boldOnly[1] || boldOnly[2])) {
         closeList();
         const label = boldOnly[1] || boldOnly[2];
         const rest = boldOnly[3] || '';
-        const tone = toneOf(label);
         if (rest) {
-          html += `<div class="fp-sum-row fp-sum-tone-${tone}"><span class="fp-sum-label">${escapeHtml(label)}</span><span class="fp-sum-value">${inlineBold(rest)}</span></div>`;
+          out += `<div class="fp-sum-row"><span class="fp-sum-label">${escapeHtml(label)}</span><span class="fp-sum-value">${inline(rest)}</span></div>`;
         } else {
-          html += `<h5 class="fp-sum-h5 fp-sum-tone-${tone}">${escapeHtml(label)}</h5>`;
+          out += `<h5 class="fp-sum-h5">${escapeHtml(label)}</h5>`;
         }
         continue;
       }
 
-      // Ordered list
+      // "label：value" or "label: value" — auto row (no bold requirement)
+      // 「先進事例の集客規模：人口200人の村が...」 pattern
+      const kv = trimmed.match(/^([^:：]{2,32})[：:]\s*(.+)$/);
+      if (kv && !/^\d+[.\)]/.test(trimmed) && !/^[-・•]/.test(trimmed)) {
+        closeList();
+        out += `<div class="fp-sum-row"><span class="fp-sum-label">${escapeHtml(kv[1].trim())}</span><span class="fp-sum-value">${inline(kv[2])}</span></div>`;
+        continue;
+      }
+
+      // Ordered list (plain number without bold)
       const ol = trimmed.match(/^(\d+)[.\)]\s+(.+)$/);
       if (ol) {
-        if (!inList || listType !== 'ol') { closeList(); html += '<ol class="fp-sum-list fp-sum-ol">'; inList = true; listType = 'ol'; }
-        html += `<li>${inlineBold(ol[2])}</li>`;
+        if (!inList || listType !== 'ol') { closeList(); out += '<ol class="fp-sum-list fp-sum-ol">'; inList = true; listType = 'ol'; }
+        out += `<li>${inline(ol[2])}</li>`;
         continue;
       }
 
       // Unordered list
       const ul = trimmed.match(/^[-・•\*]\s+(.+)$/);
       if (ul) {
-        if (!inList || listType !== 'ul') { closeList(); html += '<ul class="fp-sum-list fp-sum-ul">'; inList = true; listType = 'ul'; }
-        html += `<li>${inlineBold(ul[1])}</li>`;
+        if (!inList || listType !== 'ul') { closeList(); out += '<ul class="fp-sum-list fp-sum-ul">'; inList = true; listType = 'ul'; }
+        out += `<li>${inline(ul[1])}</li>`;
         continue;
       }
 
       // Plain paragraph
       closeList();
-      html += `<p class="fp-sum-p">${inlineBold(trimmed)}</p>`;
+      out += `<p class="fp-sum-p">${inline(trimmed)}</p>`;
     }
-    closeList();
-    return html;
+    closeSection();
+    return out;
   };
 
   // ============================
