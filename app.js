@@ -691,24 +691,34 @@
       const c = t.client;
       const p = t.topAction.priority;
       const initial = (c.name || '?').replace(/\s+/g, '').slice(0, 1);
-      const days = Math.max(0, Math.floor((todayDate - new Date(c.lastContact)) / 86400000));
+      // ★ 2026-07-15 distill: NaN/null 対策 (lastContact 未登録 で NaN日前 render される事故 fix)
+      const rawDays = Math.floor((todayDate - new Date(c.lastContact)) / 86400000);
+      const days = Number.isFinite(rawDays) && rawDays >= 0 ? rawDays : null;
       const age = window.LifeEvents.currentAge(c);
+      const ageStr = (age == null || !Number.isFinite(age)) ? null : age + '歳';
+      const aumStr = (typeof c.aum === 'number' && Number.isFinite(c.aum) && c.aum > 0) ? 'AUM ' + fmtMoneyAum(c.aum) : null;
+      const occStr = c.occupation ? escapeHtml(c.occupation) : null;
+      const metaLine = [ageStr, occStr, aumStr].filter(Boolean).join(' · ');
 
-      // Find next upcoming event
+      // Find next upcoming event, filter far-future noise (2年超は行動性なし)
       const evs = window.LifeEvents.generate(c);
-      const futureEv = evs.find(ev => new Date(ev.date) >= todayDate);
+      const futureEv = evs.find(ev => {
+        const d = new Date(ev.date);
+        if (d < todayDate) return false;
+        const daysAhead = (d - todayDate) / 86400000;
+        return daysAhead <= 730; // 2年以内 のみ
+      });
       const nextEvent = futureEv ? {
         title: futureEv.title || futureEv.kind || futureEv.name || 'イベント',
         rel: window.LifeEvents.formatRelative(new Date(futureEv.date))
       } : null;
 
-      const priorityLabelText = priorityLabel(p);
-      const priorityCls = priorityClass(p);
-
       const kpis = getClientKpis(c);
+      // 「定期フォロー」 default badge は 全カード共通で 情報価値ゼロ → kpis 空なら 何も出さない
       const kpiBadgeHtml = kpis.map(k => `<span class="senior-kpi-badge senior-kpi-${k.tone}"><i data-lucide="target"></i>${escapeHtml(k.label)}</span>`).join('');
 
       const isTop = rank === 0;
+      const contactStr = days == null ? '未接触' : (days + '日前');
 
       return `
         <div class="senior-card ${isTop ? 'senior-card-top' : ''}" data-client-id="${c.id}">
@@ -717,9 +727,8 @@
             <div class="senior-card-avatar">${initial}</div>
             <div class="senior-card-id">
               <div class="senior-card-name">${escapeHtml(c.name)} <span class="senior-card-honor">様</span></div>
-              <div class="senior-card-sub">${age}歳 ・ ${escapeHtml(c.occupation || '—')} ・ AUM ${fmtMoneyAum(c.aum)}</div>
+              <div class="senior-card-sub">${metaLine || '—'}</div>
               ${(function(){
-                // ★ オーナーfb (v AR): ホームの今日のお客様カードでも タグを 表示
                 const master = (typeof getTagsMaster === 'function') ? getTagsMaster() : [];
                 const ids = (typeof getClientTags === 'function') ? getClientTags(c.id) : [];
                 if (!ids.length) return '';
@@ -727,19 +736,14 @@
                 return `<div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:6px;">${tags.map(t => { const col = validColor(t.color); return `<span style="background:${col}1A;color:${col};border:1px solid ${col}55;padding:1px 8px;border-radius:8px;font-size:10px;font-weight:700;line-height:1.6;">${escapeHtml(t.label)}</span>`; }).join('')}</div>`;
               })()}
             </div>
+            ${kpiBadgeHtml ? `<div class="senior-card-status-badges">${kpiBadgeHtml}</div>` : ''}
           </div>
 
-          <div class="senior-card-kpi">
-            <div class="senior-kpi-label">この方に必要なフォロー</div>
-            <div class="senior-kpi-badges">${kpiBadgeHtml || '<span class="senior-kpi-badge senior-kpi-info"><i data-lucide="info"></i>定期フォロー</span>'}</div>
-          </div>
-
-          <div class="senior-card-action">
-            <div class="senior-action-label">やる事</div>
-            <div class="senior-action-text">${escapeHtml(t.topAction.action)}</div>
-            <div class="senior-action-reason">${escapeHtml(t.topAction.reason)}</div>
-            ${nextEvent ? `<div class="senior-action-event">📅 次のイベント: <strong>${escapeHtml(nextEvent.title)}</strong> (${escapeHtml(nextEvent.rel)})</div>` : ''}
-            <div class="senior-action-contact">⏰ 最終接触: <strong>${days == null ? '未記録' : days + '日前'}</strong></div>
+          <div class="senior-card-action senior-action-compact">
+            <span class="senior-action-title">${escapeHtml(t.topAction.action)}</span>
+            <span class="senior-action-sep">·</span>
+            <span class="senior-action-contact">${contactStr}</span>
+            ${nextEvent ? `<span class="senior-action-sep">·</span><span class="senior-action-event">📅 ${escapeHtml(nextEvent.title)} <span class="rel">(${escapeHtml(nextEvent.rel)})</span></span>` : ''}
           </div>
 
           ${(function(){
@@ -760,9 +764,8 @@
               quickMsg = `${c.name}さん、こんにちは！\nいつもありがとうございます。\n何かお役に立てることがあればお気軽にご連絡ください😊\n— ${fpHandleName}`;
             }
             return `
-          <div class="senior-card-quick-msg" style="background:#F0FDF4;border:1px solid #BBF7D0;border-radius:9px;padding:11px 14px;margin:12px 0 14px;">
-            <div style="font-size:10px;font-weight:900;color:#065F46;letter-spacing:0.08em;margin-bottom:5px;">💬 すぐ送れる文案</div>
-            <div style="font-size:12px;color:#0F172A;line-height:1.7;white-space:pre-wrap;">${escapeHtml(quickMsg)}</div>
+          <div class="senior-card-quick-msg">
+            <div class="senior-quick-msg-preview">${escapeHtml(quickMsg)}</div>
           </div>`;
           })()}
           <div class="senior-card-buttons">
