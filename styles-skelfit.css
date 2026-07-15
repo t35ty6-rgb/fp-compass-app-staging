@@ -3437,43 +3437,125 @@ p, li, .prose {
 .sk-attention-banner strong { font-weight: 800; }
 .sk-attention-banner a { color: var(--sk-attn-hi); text-decoration: underline; text-underline-offset: 3px; }
 
-/* ===== status pill 全面刷新 ===== */
-.status-pill {
+/* ===== status pill 全面刷新 (Phase 7.1: border 二重問題 fix) =====
+   旧 v2/v8 の 複数 rule と Phase 7 の border が 干渉して 外側 に semi-transparent
+   ring が見える 現象 の 根絶。 solid variant は border=none、 soft variant は
+   1px 実線 のみ (透明色 使わない)。 dot は background に 合わせて 明度調整。
+*/
+.status-pill,
+[class*="status-pill"] {
   display: inline-flex !important;
   align-items: center !important;
-  gap: 5px !important;
-  font-family: "Noto Sans JP", sans-serif !important;
+  justify-content: center !important;
+  gap: 6px !important;
+  font-family: "Noto Sans JP", "Inter", sans-serif !important;
   font-size: 11px !important;
   font-weight: 700 !important;
   letter-spacing: 0.02em !important;
-  padding: 3px 10px !important;
+  text-transform: none !important;
+  padding: 4px 11px !important;
   border-radius: var(--sk-r-full) !important;
-  line-height: 1.5 !important;
-  border: 1px solid transparent !important;
+  line-height: 1.4 !important;
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  background-clip: padding-box !important;
+  vertical-align: middle !important;
+  white-space: nowrap !important;
+  min-height: 22px !important;
+  box-sizing: border-box !important;
 }
+
+/* ---- dot indicator (::before) の 見え方 を SkelFit 化 ---- */
+.status-pill::before, [class*="status-pill"]::before {
+  content: '' !important;
+  display: inline-block !important;
+  width: 6px !important;
+  height: 6px !important;
+  border-radius: 50% !important;
+  background: currentColor !important;
+  opacity: 0.75 !important;
+  margin-right: 0 !important;   /* gap:6px で 間隔 は 統一 */
+  flex-shrink: 0 !important;
+}
+
+/* ---- solid variant (9状態、 全 defensive property 明示で 旧 CSS の border/shadow を 完全排除) ---- */
 .status-pill.active,
 .status-pill.new,
 .status-pill.important,
 .status-pill.pending,
 .status-pill.dormant,
-.status-pill.info {
-  color: #FFF !important;
+.status-pill.info,
+.status-pill.critical,
+.status-pill.warn,
+.status-pill.done,
+.status-pill.complete,
+.status-pill.recording {
+  color: #FFFFFF !important;
+  border: none !important;
+  box-shadow: none !important;
+  outline: none !important;
+  background-image: none !important;   /* gradient 系 旧 rule 排除 */
+  text-shadow: none !important;
 }
-.status-pill.active   { background: var(--sk-vital-primary) !important; border-color: rgba(0,132,74,0.35) !important; }
-.status-pill.new      { background: var(--sk-attn) !important; border-color: rgba(180,83,9,0.35) !important; }
-.status-pill.important{ background: var(--sk-ink-deep) !important; border-color: rgba(11,18,32,0.5) !important; }
-.status-pill.pending  { background: var(--sk-trust) !important; border-color: rgba(30,64,175,0.35) !important; }
-.status-pill.dormant  { background: var(--sk-slate-2) !important; border-color: rgba(51,65,85,0.35) !important; }
-.status-pill.info     { background: var(--sk-trust) !important; border-color: rgba(30,64,175,0.35) !important; }
-.status-pill.critical { background: var(--sk-critical) !important; border-color: rgba(190,24,93,0.4) !important; color: #FFF !important; }
+.status-pill.active,
+.status-pill.done,
+.status-pill.complete   { background: var(--sk-vital-primary) !important; background-color: var(--sk-vital-primary) !important; }
+.status-pill.new        { background: var(--sk-attn) !important; background-color: var(--sk-attn) !important; }
+.status-pill.important  { background: var(--sk-ink-deep) !important; background-color: var(--sk-ink-deep) !important; }
+.status-pill.warn       { background: var(--sk-attn-hi) !important; background-color: var(--sk-attn-hi) !important; }
+.status-pill.pending    { background: var(--sk-trust) !important; background-color: var(--sk-trust) !important; }
+.status-pill.dormant    { background: var(--sk-slate-2) !important; background-color: var(--sk-slate-2) !important; }
+.status-pill.info       { background: var(--sk-trust) !important; background-color: var(--sk-trust) !important; }
+.status-pill.critical   { background: var(--sk-critical) !important; background-color: var(--sk-critical) !important; }
+.status-pill.recording  { background: var(--sk-critical) !important; background-color: var(--sk-critical) !important; }
 
-/* light variant (背景 tint、 濃 text) — 「大量に並ぶ list」 で色疲れ回避 */
-.status-pill.soft.active   { background: rgba(0,132,74,0.10) !important; color: var(--sk-vital-primary) !important; border-color: rgba(0,132,74,0.22) !important; }
-.status-pill.soft.new      { background: var(--sk-attn-soft) !important; color: var(--sk-attn-hi) !important; border-color: var(--sk-attn-ring) !important; }
-.status-pill.soft.important{ background: rgba(11,18,32,0.06) !important; color: var(--sk-ink-deep) !important; border-color: rgba(11,18,32,0.15) !important; }
-.status-pill.soft.pending  { background: var(--sk-trust-soft) !important; color: var(--sk-trust-hi) !important; border-color: var(--sk-trust-ring) !important; }
-.status-pill.soft.dormant  { background: rgba(51,65,85,0.06) !important; color: var(--sk-slate-2) !important; border-color: rgba(51,65,85,0.15) !important; }
-.status-pill.soft.critical { background: rgba(190,24,93,0.08) !important; color: var(--sk-critical) !important; border-color: rgba(190,24,93,0.22) !important; }
+/* ---- soft variant (背景 tint + 濃 text、 border は 実線 1px で 干渉ゼロ) ---- */
+.status-pill.soft {
+  border: 1px solid var(--sk-hairline) !important;
+  background: var(--sk-panel) !important;
+  color: var(--sk-slate) !important;
+}
+.status-pill.soft.active,
+.status-pill.soft.done,
+.status-pill.soft.complete {
+  background: #E7F7EE !important;
+  color: var(--sk-vital-primary) !important;
+  border-color: #B6E4CB !important;
+}
+.status-pill.soft.new {
+  background: var(--sk-attn-soft) !important;
+  color: var(--sk-attn-hi) !important;
+  border-color: #F5D6A1 !important;
+}
+.status-pill.soft.important {
+  background: #EEF0F5 !important;
+  color: var(--sk-ink-deep) !important;
+  border-color: #D4D8E0 !important;
+}
+.status-pill.soft.pending,
+.status-pill.soft.info {
+  background: var(--sk-trust-soft) !important;
+  color: var(--sk-trust-hi) !important;
+  border-color: #B8CCF3 !important;
+}
+.status-pill.soft.dormant {
+  background: #F1F3F7 !important;
+  color: var(--sk-slate-2) !important;
+  border-color: #DBDFE7 !important;
+}
+.status-pill.soft.critical,
+.status-pill.soft.warn {
+  background: #FCE7EF !important;
+  color: var(--sk-critical) !important;
+  border-color: #F4C0D5 !important;
+}
+
+/* ---- 「大量に並ぶ list 内」 で 空白 collapse 防止 ---- */
+.status-pill + .status-pill,
+[class*="status-pill"] + [class*="status-pill"] {
+  margin-left: 4px !important;
+}
 
 /* ===== link (trust blue で FP tool らしい sober tone) ===== */
 a:not(.btn):not(.btn-cta-primary):not(.btn-cta-ghost):not(.btn-mini-action):not([class*="status-pill"]) {
