@@ -95,7 +95,7 @@
       <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;font-size:12px;line-height:1.65;opacity:0.95;">
         <input id="fp-terms-check" type="checkbox" style="margin-top:3px;width:16px;height:16px;flex-shrink:0;accent-color:#E63946;cursor:pointer;">
         <span>
-          <a href="./legal/specified-commercial.html" target="_blank" style="color:#FFE9A8;text-decoration:underline;">特商法表記</a>・<a href="./legal/privacy.html" target="_blank" style="color:#FFE9A8;text-decoration:underline;">プライバシーポリシー</a>・<a href="./legal/index.html" target="_blank" style="color:#FFE9A8;text-decoration:underline;">利用規約</a>を確認し、 同意します
+          <a href="./legal/specified-commercial.html" target="_blank" style="color:#0F1729;text-decoration:underline;font-weight:700;">特商法表記</a>・<a href="./legal/privacy.html" target="_blank" style="color:#0F1729;text-decoration:underline;font-weight:700;">プライバシーポリシー</a>・<a href="./legal/index.html" target="_blank" style="color:#0F1729;text-decoration:underline;font-weight:700;">利用規約</a>を確認し、 同意します
         </span>
       </label>
     </div>
@@ -985,7 +985,7 @@
                   </div>
                   <div class="mega-hero-stat">
                     <span class="mega-hero-stat-label">未読LINE</span>
-                    <span class="mega-hero-stat-value">3</span>
+                    <span class="mega-hero-stat-value" id="mh-stat-line">—</span>
                   </div>
                 </div>
 
@@ -2009,6 +2009,11 @@ window.fpReadyAfterAuth = function() {
     setText('mega-hero-num', String(topCount));
     setText('mh-stat-week', String(topCount));
     setText('mh-stat-events', String(count30));
+    // 2026-07-15 P0-1 fix: 未読LINE を 動的算出 (旧 hardcoded '3' → live count)
+    try {
+      const unreadLine = (window.LineAppLiveData?.line_messages || []).filter(m => m.direction === 'in').length;
+      setText('mh-stat-line', String(unreadLine));
+    } catch(_) { setText('mh-stat-line', '0'); }
     // 0件 なら 「今日は」 テキスト を 差替えて em-dash 誤解 を 消す
     try {
       const titleEl = document.querySelector('.mega-hero-title');

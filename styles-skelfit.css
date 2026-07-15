@@ -621,6 +621,8 @@ button.ghost:hover { background: #f5f7fa !important; border-color: #3a4560 !impo
 .sidebar-brand .brand-logo, .sidebar-brand .brand-logo-inner {
   background: #00c96a !important; color: #0f1729 !important;
   border: none !important; box-shadow: none !important;
+  border-radius: 8px !important;   /* audit fix P1-9: 外側 0px / 内側 8px の 二重 radius 事故 fix */
+  overflow: hidden !important;
 }
 .sidebar-brand .brand-logo-glow { display: none !important; }
 
@@ -3158,6 +3160,27 @@ button[data-dist-subtab].active {
     text-align: left !important;
     margin-top: 4px !important;
   }
+}
+
+/* ==================================================================
+   audit fix P0-3: ghost-btn-lg (「一斉配信」等) が white-on-white で 不可視
+   → light-hero context で ink text + hairline border に override
+   ================================================================== */
+.ghost-btn-lg {
+  background: #FFFFFF !important;
+  color: var(--ink, #0F1729) !important;
+  border: 1px solid var(--sk-hairline, #E5E7EB) !important;
+  font-weight: 700 !important;
+}
+.ghost-btn-lg:hover {
+  background: var(--sk-surface-2, #F5F7FA) !important;
+  border-color: var(--ink, #0F1729) !important;
+  color: var(--ink, #0F1729) !important;
+}
+.ghost-btn-lg i[data-lucide],
+.ghost-btn-lg svg.lucide {
+  color: var(--ink, #0F1729) !important;
+  opacity: 0.85 !important;
 }
 
 /* ==================================================================
