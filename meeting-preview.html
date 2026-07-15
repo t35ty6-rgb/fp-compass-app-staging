@@ -180,8 +180,131 @@
   </div>
 
 </div>
-<script src="./app.js"></script>
 <script>
+  // ── inlined renderStructuredSummary (app.js は 全 tenant 依存 で preview から load 不可 のため 直移植) ──
+  function escapeHtml(s) {
+    return String(s || '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+  }
+  window.renderStructuredSummary = function(text) {
+    const raw = String(text || '').trim();
+    if (!raw) return '<div class="fp-sum-empty">議事録 未生成</div>';
+    const hasStructure = /(?:^#{1,3}\s|【.+?】|\*\*.+?\*\*|^[-・•\*]\s|^\d+[.\)]\s|^⚠)/m.test(raw);
+    if (!hasStructure) {
+      const paragraphs = raw.split(/\n{2,}/).map(p => p.trim()).filter(Boolean);
+      if (paragraphs.length <= 1) return `<div class="fp-sum-body">${escapeHtml(raw).replace(/\n/g, '<br>')}</div>`;
+      return paragraphs.map(p => `<p class="fp-sum-p">${escapeHtml(p).replace(/\n/g, '<br>')}</p>`).join('');
+    }
+    const toneOf = (label) => {
+      if (/決定|合意|確認|結論|完了/.test(label)) return 'vital';
+      if (/TODO|todo|次回|課題|宿題|action|やること|アクション/i.test(label)) return 'attn';
+      if (/懸念|リスク|不安|注意|要検討|警告/.test(label)) return 'critical';
+      if (/質問|関心|興味|希望|プロフィール|人物/.test(label)) return 'trust';
+      if (/数字|試算|金額|コスト|見積|価格/.test(label)) return 'mono';
+      if (/提案|検討|方針|戦略/.test(label)) return 'vital';
+      return 'ink';
+    };
+    const NUM_RE = /((?:¥|￥)?\s*[\d,]+(?:\.\d+)?\s*(?:億|万|千|億円|万円|千円|円|％|%|ヶ月|カ月|か月|年間|年後|年|時間|分|人|件|回|名|社|棟|台|坪))/g;
+    const emphasizeNumbers = (safeHtml) => safeHtml.replace(NUM_RE, '<span class="fp-sum-num">$1</span>');
+    const inline = (s) => {
+      const safe = escapeHtml(s)
+        .replace(/\*\*([^*]+)\*\*/g, '<strong class="fp-sum-strong">$1</strong>')
+        .replace(/【([^】]+)】/g, '<strong class="fp-sum-strong">【$1】</strong>');
+      return emphasizeNumbers(safe);
+    };
+    const lines = raw.split(/\n/);
+    let out = '';
+    let warnings = [];
+    let sectionOpen = false, sectionTone = 'ink';
+    let inList = false, listType = 'ul';
+    const closeList = () => { if (inList) { out += `</${listType}>`; inList = false; } };
+    const closeSection = () => {
+      closeList();
+      if (sectionOpen) { out += '</div></section>'; sectionOpen = false; }
+    };
+    const openSection = (heading, tone) => {
+      closeSection();
+      sectionOpen = true; sectionTone = tone;
+      out += `<section class="fp-sum-section fp-sum-tone-${tone}">`;
+      out += `<header class="fp-sum-section-h"><span class="fp-sum-section-dot"></span><h4 class="fp-sum-section-title">${escapeHtml(heading)}</h4></header>`;
+      out += `<div class="fp-sum-section-body">`;
+    };
+    for (let i = 0; i < lines.length; i++) {
+      const t = lines[i].trim();
+      if (!t) continue;
+      const w = t.match(/^⚠\s*(.+)$/);
+      if (w && !sectionOpen && !/^#/.test(t)) {
+        warnings.push(w[1].trim());
+        lines[i] = '';
+      } else if (/^#/.test(t)) { break; }
+    }
+    if (warnings.length > 0) {
+      out += '<div class="fp-sum-warnings">';
+      warnings.forEach(w => {
+        const tone = /(欠落|必須|再生成)/.test(w) ? 'critical' : 'attn';
+        out += `<div class="fp-sum-warning fp-sum-warn-${tone}"><span class="fp-sum-warn-icon">!</span><span class="fp-sum-warn-text">${inline(w)}</span></div>`;
+      });
+      out += '</div>';
+    }
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      const trimmed = line.trim();
+      if (!trimmed) { closeList(); continue; }
+      const h = trimmed.match(/^(#{1,3})\s*(.+)$/);
+      if (h) {
+        const heading = h[2].replace(/^\*+|\*+$/g, '').trim();
+        openSection(heading, toneOf(heading));
+        continue;
+      }
+      if (!sectionOpen) { openSection('サマリー', 'ink'); }
+      const numbered = trimmed.match(/^(?:(\d+)[.\)、]|([①②③④⑤⑥⑦⑧⑨⑩]))\s*(?:\*\*([^*]+)\*\*|【([^】]+)】)(?:\s*[:：]\s*(.+))?$/);
+      if (numbered) {
+        closeList();
+        const num = numbered[1] || numbered[2];
+        const label = numbered[3] || numbered[4];
+        const rest = numbered[5] || '';
+        const tone = toneOf(label);
+        out += `<div class="fp-sum-item fp-sum-tone-${tone}">`;
+        out += `<div class="fp-sum-item-num">${escapeHtml(num)}</div>`;
+        out += `<div class="fp-sum-item-body">`;
+        out += `<div class="fp-sum-item-title">${inline(label)}</div>`;
+        if (rest) out += `<div class="fp-sum-item-desc">${inline(rest)}</div>`;
+        out += `</div></div>`;
+        continue;
+      }
+      const boldOnly = trimmed.match(/^(?:\*\*([^*]+)\*\*|【([^】]+)】)\s*[:：]?\s*(.*)$/);
+      if (boldOnly && (boldOnly[1] || boldOnly[2])) {
+        closeList();
+        const label = boldOnly[1] || boldOnly[2];
+        const rest = boldOnly[3] || '';
+        if (rest) { out += `<div class="fp-sum-row"><span class="fp-sum-label">${escapeHtml(label)}</span><span class="fp-sum-value">${inline(rest)}</span></div>`; }
+        else { out += `<h5 class="fp-sum-h5">${escapeHtml(label)}</h5>`; }
+        continue;
+      }
+      const kv = trimmed.match(/^([^:：]{2,32})[：:]\s*(.+)$/);
+      if (kv && !/^\d+[.\)]/.test(trimmed) && !/^[-・•]/.test(trimmed)) {
+        closeList();
+        out += `<div class="fp-sum-row"><span class="fp-sum-label">${escapeHtml(kv[1].trim())}</span><span class="fp-sum-value">${inline(kv[2])}</span></div>`;
+        continue;
+      }
+      const ol = trimmed.match(/^(\d+)[.\)]\s+(.+)$/);
+      if (ol) {
+        if (!inList || listType !== 'ol') { closeList(); out += '<ol class="fp-sum-list fp-sum-ol">'; inList = true; listType = 'ol'; }
+        out += `<li>${inline(ol[2])}</li>`;
+        continue;
+      }
+      const ul = trimmed.match(/^[-・•\*]\s+(.+)$/);
+      if (ul) {
+        if (!inList || listType !== 'ul') { closeList(); out += '<ul class="fp-sum-list fp-sum-ul">'; inList = true; listType = 'ul'; }
+        out += `<li>${inline(ul[1])}</li>`;
+        continue;
+      }
+      closeList();
+      out += `<p class="fp-sum-p">${inline(trimmed)}</p>`;
+    }
+    closeSection();
+    return out;
+  };
+
   // owner が 見せた 実 議事録 サンプル
   const OWNER_SAMPLE = `⚠ 音質warning: Whisper 幻覚 (動画系 文言混入)
 (下記は AI が 部分情報から 最善 で抽出した内容)
@@ -243,15 +366,7 @@
 - 短期（6月・12月閑散期対策）と中期（事業多角化）の両立戦略を立案
 - 次回面談では、体験型プログラムの試行版（1プログラム）の企画書を持参予定`;
 
-  // Wait for app.js to define renderStructuredSummary
-  function tryRender() {
-    if (typeof window.renderStructuredSummary === 'function') {
-      document.getElementById('fp-preview-case0').innerHTML = window.renderStructuredSummary(OWNER_SAMPLE);
-    } else {
-      setTimeout(tryRender, 100);
-    }
-  }
-  tryRender();
+  document.getElementById('fp-preview-case0').innerHTML = window.renderStructuredSummary(OWNER_SAMPLE);
 </script>
 </body>
 </html>
