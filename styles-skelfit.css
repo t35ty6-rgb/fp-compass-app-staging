@@ -2902,3 +2902,264 @@ button[data-dist-subtab].active {
     transition: none !important;
   }
 }
+
+/* ============================================================
+   PHASE 6 · 誕生日メッセージ タブ (birthdayTab)
+   line-app.js は 全 KPI カード を inline style で 描画するため
+   attribute selector + !important で 上書きする
+   ============================================================ */
+
+/* ── section header ── */
+[data-line-view="birthdayTab"] > .section-title,
+[data-line-view="birthdayTab"] .board-section > .section-title {
+  font-family: "Manrope", "Noto Sans JP", sans-serif !important;
+  font-size: 20px !important;
+  font-weight: 800 !important;
+  color: var(--ink) !important;
+  letter-spacing: -0.01em !important;
+  border: none !important;
+  padding: 0 !important;
+  margin: 0 0 6px !important;
+  position: relative !important;
+  display: block !important;
+}
+[data-line-view="birthdayTab"] > .section-title::before,
+[data-line-view="birthdayTab"] .board-section > .section-title::before {
+  content: '' !important;
+  display: inline-block !important;
+  width: 6px !important;
+  height: 6px !important;
+  border-radius: 999px !important;
+  background: var(--vital) !important;
+  vertical-align: middle !important;
+  margin-right: 10px !important;
+  transform: translateY(-2px) !important;
+}
+/* AI slop の eyebrow (data-eyebrow) を完全非表示 */
+[data-line-view="birthdayTab"] .section-title::after {
+  display: none !important;
+  content: none !important;
+}
+[data-line-view="birthdayTab"] > .section-sub {
+  color: var(--muted) !important;
+  font-size: 13px !important;
+  line-height: 1.7 !important;
+  margin: 0 0 22px !important;
+  font-family: "Noto Sans JP", sans-serif !important;
+}
+
+/* ── 4 KPI カード (inline style を上書き) ── */
+/* 4カラム grid */
+[data-line-view="birthdayTab"] > div[style*="grid-template-columns:repeat(4"] {
+  gap: 14px !important;
+  margin-bottom: 36px !important;
+}
+/* 各カード (inline background/border/padding/box-shadow を全上書き) */
+[data-line-view="birthdayTab"] > div[style*="grid-template-columns:repeat(4"] > div[style*="background:#fff"] {
+  background: #FFFFFF !important;
+  border: 1px solid var(--sk-rule) !important;
+  border-top-width: 3px !important;
+  border-top-style: solid !important;
+  border-radius: 12px !important;
+  padding: 22px 22px 20px !important;
+  box-shadow: 0 1px 2px rgba(15,23,41,0.04), 0 4px 12px rgba(15,23,41,0.04) !important;
+  transition: transform .18s ease, box-shadow .18s ease !important;
+}
+[data-line-view="birthdayTab"] > div[style*="grid-template-columns:repeat(4"] > div[style*="background:#fff"]:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(15,23,41,0.06), 0 16px 40px rgba(15,23,41,0.06) !important;
+}
+
+/* カードごとに border-top 色を SkelFit token に差し替え。
+   1枚目 (今日) = pulse、 2枚目 (今週) = amber、 3枚目 (今月) = ink、 4枚目 (Total) = vital  */
+[data-line-view="birthdayTab"] > div[style*="grid-template-columns:repeat(4"] > div:nth-child(1)[style*="background:#fff"] {
+  border-top-color: var(--pulse) !important;
+}
+[data-line-view="birthdayTab"] > div[style*="grid-template-columns:repeat(4"] > div:nth-child(2)[style*="background:#fff"] {
+  border-top-color: #D97706 !important;
+}
+[data-line-view="birthdayTab"] > div[style*="grid-template-columns:repeat(4"] > div:nth-child(3)[style*="background:#fff"] {
+  border-top-color: var(--ink) !important;
+}
+[data-line-view="birthdayTab"] > div[style*="grid-template-columns:repeat(4"] > div:nth-child(4)[style*="background:#fff"] {
+  border-top-color: var(--vital) !important;
+}
+
+/* icon capsule (旧 color/border) → 淡い surface */
+[data-line-view="birthdayTab"] > div[style*="grid-template-columns:repeat(4"] > div > div > span[style*="width:42px"] {
+  background: var(--sk-surface-2) !important;
+  color: var(--ink) !important;
+  border: 1px solid var(--sk-rule) !important;
+  border-radius: 10px !important;
+  width: 40px !important;
+  height: 40px !important;
+}
+[data-line-view="birthdayTab"] > div[style*="grid-template-columns:repeat(4"] > div:nth-child(1) > div > span[style*="width:42px"] {
+  background: rgba(225,29,72,0.08) !important;
+  color: var(--pulse) !important;
+  border-color: rgba(225,29,72,0.20) !important;
+}
+[data-line-view="birthdayTab"] > div[style*="grid-template-columns:repeat(4"] > div:nth-child(2) > div > span[style*="width:42px"] {
+  background: rgba(217,119,6,0.08) !important;
+  color: #B45309 !important;
+  border-color: rgba(217,119,6,0.22) !important;
+}
+[data-line-view="birthdayTab"] > div[style*="grid-template-columns:repeat(4"] > div:nth-child(3) > div > span[style*="width:42px"] {
+  background: rgba(15,23,41,0.06) !important;
+  color: var(--ink) !important;
+  border-color: rgba(15,23,41,0.15) !important;
+}
+[data-line-view="birthdayTab"] > div[style*="grid-template-columns:repeat(4"] > div:nth-child(4) > div > span[style*="width:42px"] {
+  background: var(--vital-soft) !important;
+  color: var(--vital-hi) !important;
+  border-color: rgba(16,185,129,0.24) !important;
+}
+
+/* label (Today / This Week / etc) — eyebrow-like tiny caps but with SkelFit tone */
+[data-line-view="birthdayTab"] > div[style*="grid-template-columns:repeat(4"] > div > div > span:nth-child(2)[style*="Inter"] {
+  font-family: "JetBrains Mono", "Inter", ui-monospace, monospace !important;
+  font-size: 10.5px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.14em !important;
+  text-transform: uppercase !important;
+  color: var(--muted) !important;
+}
+[data-line-view="birthdayTab"] > div[style*="grid-template-columns:repeat(4"] > div:nth-child(1) > div > span:nth-child(2)[style*="Inter"] { color: var(--pulse) !important; }
+[data-line-view="birthdayTab"] > div[style*="grid-template-columns:repeat(4"] > div:nth-child(2) > div > span:nth-child(2)[style*="Inter"] { color: #B45309 !important; }
+[data-line-view="birthdayTab"] > div[style*="grid-template-columns:repeat(4"] > div:nth-child(3) > div > span:nth-child(2)[style*="Inter"] { color: var(--ink) !important; }
+[data-line-view="birthdayTab"] > div[style*="grid-template-columns:repeat(4"] > div:nth-child(4) > div > span:nth-child(2)[style*="Inter"] { color: var(--vital-hi) !important; }
+
+/* 大きい数字 (count) */
+[data-line-view="birthdayTab"] > div[style*="grid-template-columns:repeat(4"] > div > div[style*="font-size:36px"] {
+  font-family: "Manrope", "Inter", sans-serif !important;
+  font-size: 34px !important;
+  font-weight: 800 !important;
+  line-height: 1 !important;
+  letter-spacing: -0.03em !important;
+  color: var(--ink) !important;
+  font-variant-numeric: tabular-nums !important;
+}
+/* count が 0 でない時 (active) は tone 色に */
+[data-line-view="birthdayTab"] > div[style*="grid-template-columns:repeat(4"] > div:nth-child(1) > div[style*="font-size:36px"]:not([style*="#0f1729"]) { color: var(--pulse) !important; }
+[data-line-view="birthdayTab"] > div[style*="grid-template-columns:repeat(4"] > div:nth-child(2) > div[style*="font-size:36px"]:not([style*="#0f1729"]) { color: #B45309 !important; }
+[data-line-view="birthdayTab"] > div[style*="grid-template-columns:repeat(4"] > div:nth-child(3) > div[style*="font-size:36px"]:not([style*="#0f1729"]) { color: var(--ink) !important; }
+[data-line-view="birthdayTab"] > div[style*="grid-template-columns:repeat(4"] > div:nth-child(4) > div[style*="font-size:36px"]:not([style*="#0f1729"]) { color: var(--vital-hi) !important; }
+
+/* 単位 (名) */
+[data-line-view="birthdayTab"] > div[style*="grid-template-columns:repeat(4"] > div > div[style*="font-size:36px"] > span {
+  font-family: "Noto Sans JP", sans-serif !important;
+  font-size: 12px !important;
+  font-weight: 500 !important;
+  color: var(--muted) !important;
+  margin-left: 6px !important;
+}
+
+/* card タイトル (今日の誕生日 / 1〜7日後 …) */
+[data-line-view="birthdayTab"] > div[style*="grid-template-columns:repeat(4"] > div > div[style*="font-size:12.5px"][style*="font-weight:700"] {
+  font-family: "Noto Sans JP", sans-serif !important;
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  color: var(--ink) !important;
+  letter-spacing: 0.005em !important;
+  margin-top: 14px !important;
+  line-height: 1.4 !important;
+}
+
+/* card サブ説明文 */
+[data-line-view="birthdayTab"] > div[style*="grid-template-columns:repeat(4"] > div > div[style*="font-size:11px"] {
+  font-family: "Noto Sans JP", sans-serif !important;
+  font-size: 11.5px !important;
+  color: var(--muted) !important;
+  line-height: 1.6 !important;
+  margin-top: 5px !important;
+}
+
+/* ── board-section (今日 / 今週 / 今月 の list wrapper) ── */
+[data-line-view="birthdayTab"] .board-section {
+  margin-top: 32px !important;
+}
+[data-line-view="birthdayTab"] .board-section > .section-title {
+  margin-bottom: 14px !important;
+}
+
+/* ── 各行 (renderBirthdayGroup 内 の inline-style row) ── */
+[data-line-view="birthdayTab"] .board-section > div[style*="grid-template-columns:80px"] {
+  background: #FFFFFF !important;
+  border: 1px solid var(--sk-rule) !important;
+  border-radius: 10px !important;
+  padding: 14px 18px !important;
+  margin-bottom: 8px !important;
+  box-shadow: 0 1px 2px rgba(15,23,41,0.03) !important;
+  transition: border-color .16s ease, transform .16s ease !important;
+}
+[data-line-view="birthdayTab"] .board-section > div[style*="grid-template-columns:80px"]:hover {
+  border-color: var(--vital) !important;
+  transform: translateX(1px);
+}
+/* 日付 col */
+[data-line-view="birthdayTab"] .board-section > div[style*="grid-template-columns:80px"] > div:nth-child(1) > div:first-child {
+  font-family: "Manrope", "Inter", sans-serif !important;
+  font-size: 18px !important;
+  font-weight: 800 !important;
+  letter-spacing: -0.01em !important;
+  color: var(--ink) !important;
+  font-variant-numeric: tabular-nums !important;
+}
+[data-line-view="birthdayTab"] .board-section > div[style*="grid-template-columns:80px"] > div:nth-child(1) > div:nth-child(2) {
+  font-family: "JetBrains Mono", monospace !important;
+  font-size: 10.5px !important;
+  color: var(--muted) !important;
+  margin-top: 3px !important;
+  letter-spacing: 0.04em !important;
+}
+/* 名前 */
+[data-line-view="birthdayTab"] .board-section > div[style*="grid-template-columns:80px"] strong {
+  font-family: "Noto Sans JP", sans-serif !important;
+  font-weight: 700 !important;
+  font-size: 14.5px !important;
+  color: var(--ink) !important;
+}
+[data-line-view="birthdayTab"] .board-section > div[style*="grid-template-columns:80px"] > div:nth-child(2) > div:nth-child(2) {
+  font-size: 11.5px !important;
+  color: var(--muted) !important;
+  margin-top: 4px !important;
+}
+[data-line-view="birthdayTab"] .board-section > div[style*="grid-template-columns:80px"] > div:nth-child(2) a {
+  color: var(--vital-hi) !important;
+  border-bottom: 1px solid rgba(16,185,129,0.25) !important;
+  text-decoration: none !important;
+}
+
+/* ── empty state (今日対象なし / 今週はありません / 今月はありません) ── */
+[data-line-view="birthdayTab"] .board-section > div[style*="border:1px dashed"] {
+  background: var(--sk-surface-2) !important;
+  border: 1px dashed var(--sk-rule) !important;
+  border-radius: 10px !important;
+  padding: 26px !important;
+  text-align: center !important;
+  color: var(--muted) !important;
+  font-size: 13px !important;
+  font-family: "Noto Sans JP", sans-serif !important;
+}
+
+/* ── mobile 380-720px: 4カラム → 2カラム / list → 単純縦積み ── */
+@media (max-width: 720px) {
+  [data-line-view="birthdayTab"] > div[style*="grid-template-columns:repeat(4"] {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 10px !important;
+  }
+}
+@media (max-width: 480px) {
+  [data-line-view="birthdayTab"] > div[style*="grid-template-columns:repeat(4"] {
+    grid-template-columns: 1fr !important;
+  }
+  [data-line-view="birthdayTab"] .board-section > div[style*="grid-template-columns:80px"] {
+    grid-template-columns: 60px 1fr !important;
+  }
+  [data-line-view="birthdayTab"] .board-section > div[style*="grid-template-columns:80px"] > div:nth-child(3) {
+    grid-column: 1 / -1 !important;
+    text-align: left !important;
+    margin-top: 4px !important;
+  }
+}
+
