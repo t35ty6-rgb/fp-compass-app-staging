@@ -335,22 +335,28 @@
   .fp-summary-structured .fp-sum-list > li:hover {
     border-color: #B0B0AC !important;
   }
-  /* 決定事項 (vital / ul) — 左に ✓ green check */
+  /* 決定事項 (vital / ul) — 左に ✓ green check + 4px 左緑 accent bar */
+  .fp-summary-structured .fp-sum-tone-vital + ul.fp-sum-list > li,
+  .fp-summary-structured .fp-sum-h4.fp-sum-tone-vital + ul.fp-sum-list > li {
+    border-left: 4px solid #047647 !important;
+    background: linear-gradient(90deg, rgba(4,118,71,0.03) 0%, transparent 40%) !important;
+  }
   .fp-summary-structured .fp-sum-tone-vital + ul.fp-sum-list > li::before,
   .fp-summary-structured .fp-sum-h4.fp-sum-tone-vital + ul.fp-sum-list > li::before {
     content: '✓' !important;
     position: absolute !important;
     left: 14px !important; top: 10px !important;
-    width: 20px !important; height: 20px !important;
+    width: 22px !important; height: 22px !important;
     background: #047647 !important;
     color: #FFFFFF !important;
     border-radius: 50% !important;
     display: inline-flex !important;
     align-items: center !important; justify-content: center !important;
-    font-size: 11px !important;
+    font-size: 12px !important;
     font-weight: 900 !important;
     font-family: 'Manrope', 'Noto Sans JP', sans-serif !important;
     line-height: 1 !important;
+    box-shadow: 0 0 0 2px rgba(4,118,71,0.15) !important;
   }
   /* TODO (attn / ol) — 番号 chip 濃橙 */
   .fp-summary-structured .fp-sum-tone-attn + ol.fp-sum-list,
@@ -360,6 +366,12 @@
   .fp-summary-structured .fp-sum-tone-attn + ol.fp-sum-list > li,
   .fp-summary-structured .fp-sum-h4.fp-sum-tone-attn + ol.fp-sum-list > li {
     counter-increment: fp-todo !important;
+  }
+  /* TODO li に 左 4px 濃橙 accent + subtle amber wash */
+  .fp-summary-structured .fp-sum-tone-attn + ol.fp-sum-list > li,
+  .fp-summary-structured .fp-sum-h4.fp-sum-tone-attn + ol.fp-sum-list > li {
+    border-left: 4px solid #B5530F !important;
+    background: linear-gradient(90deg, rgba(181,83,15,0.03) 0%, transparent 40%) !important;
   }
   .fp-summary-structured .fp-sum-tone-attn + ol.fp-sum-list > li::before,
   .fp-summary-structured .fp-sum-h4.fp-sum-tone-attn + ol.fp-sum-list > li::before {
@@ -376,6 +388,23 @@
     font-size: 12px !important;
     font-weight: 800 !important;
     line-height: 1 !important;
+    box-shadow: 0 0 0 2px rgba(181,83,15,0.15) !important;
+  }
+  /* TODO li 右上 に 「TODO」 小さいタグ */
+  .fp-summary-structured .fp-sum-tone-attn + ol.fp-sum-list > li::after,
+  .fp-summary-structured .fp-sum-h4.fp-sum-tone-attn + ol.fp-sum-list > li::after {
+    content: 'TODO' !important;
+    position: absolute !important;
+    right: 10px !important; top: 10px !important;
+    font-family: 'Manrope', 'Noto Sans JP', sans-serif !important;
+    font-size: 9px !important;
+    font-weight: 800 !important;
+    letter-spacing: 0.14em !important;
+    color: #B5530F !important;
+    background: rgba(181,83,15,0.08) !important;
+    padding: 2px 7px !important;
+    border-radius: 4px !important;
+    line-height: 1.2 !important;
   }
   /* 数字・試算 (mono / ul) — 左に 小さな ink 縦 bar (数字 chip 埋込 済 の 別強調) */
   .fp-summary-structured .fp-sum-tone-mono + ul.fp-sum-list > li,
@@ -407,39 +436,50 @@
     vertical-align: baseline !important;
   }
 
-  /* fp-sum-strong (bold 強調) — 濃色下線 で 上品 に */
+  /* fp-sum-strong (bold 強調) — 蛍光ペン風 マーカー (淡黄) */
   .fp-summary-structured .fp-sum-strong {
     font-weight: 700 !important;
     color: #0A0A0A !important;
-    background: linear-gradient(transparent 68%, rgba(10,10,10,0.14) 68%) !important;
-    padding: 0 1px !important;
+    background: linear-gradient(transparent 55%, #FFF176 55%, #FFEB3B 88%, transparent 88%) !important;
+    padding: 0 3px !important;
+    border-radius: 2px !important;
+    text-decoration: none !important;
   }
 
-  /* 懸念事項 row (label + value) を 警告 alert card 化 */
+  /* 懸念事項 row (label + value) を alert card 化 — label 濃赤 pill + 左4px 濃赤 bar + ⚠ icon */
   .fp-summary-structured .fp-sum-row {
     display: grid !important;
-    grid-template-columns: 200px 1fr !important;
+    grid-template-columns: 220px 1fr !important;
     gap: 12px 18px !important;
     align-items: start !important;
     background: #FFFFFF !important;
     border: 1px solid #ECECEA !important;
-    border-left: 3px solid #6B6B6B !important;
+    border-left: 4px solid #DC2B2B !important;
     border-radius: 8px !important;
-    padding: 12px 16px !important;
+    padding: 14px 16px 14px 18px !important;
     margin: 6px 0 !important;
-  }
-  .fp-summary-structured .fp-sum-row.fp-sum-tone-critical,
-  .fp-summary-structured .fp-sum-tone-critical + .fp-sum-row,
-  .fp-summary-structured .fp-sum-h4.fp-sum-tone-critical ~ .fp-sum-row {
-    border-left-color: #DC2B2B !important;
+    position: relative !important;
   }
   .fp-summary-structured .fp-sum-row .fp-sum-label {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    padding: 4px 10px 4px 8px !important;
+    background: #DC2B2B !important;
+    color: #FFFFFF !important;
+    border-radius: 5px !important;
     font-family: 'Manrope', 'Noto Sans JP', sans-serif !important;
-    font-size: 12.5px !important;
+    font-size: 11.5px !important;
     font-weight: 800 !important;
-    color: #0A0A0A !important;
-    letter-spacing: 0.005em !important;
-    padding-top: 2px !important;
+    letter-spacing: 0.02em !important;
+    line-height: 1.3 !important;
+    align-self: start !important;
+    width: fit-content !important;
+    max-width: 100% !important;
+  }
+  .fp-summary-structured .fp-sum-row .fp-sum-label::before {
+    content: '⚠' !important;
+    font-size: 11px !important;
   }
   .fp-summary-structured .fp-sum-row .fp-sum-value {
     font-size: 13.5px !important;
