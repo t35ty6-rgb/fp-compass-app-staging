@@ -497,7 +497,7 @@
     const since = t.contractStartedAt?.toDate?.()?.toISOString?.()?.slice(0,10) || "—";
     $("info-since").textContent = since;
     const billStatus = t.billing?.status || (t.status === "active" ? "active" : "—");
-    $("info-billing").innerHTML = `<span style="display:inline-block;padding:3px 10px;border-radius:5px;background:${billStatus==='active'?'#ECFDF5':'#FEF7E1'};color:${billStatus==='active'?'#065F46':'#92400E'};font-family:'JetBrains Mono',monospace;font-size:11.5px;font-weight:700;letter-spacing:0.06em;">${(billStatus||'').toUpperCase()}</span>`;
+    $("info-billing").innerHTML = `<span style="display:inline-block;padding:3px 10px;border-radius:999px;background:${billStatus==='active'?'#ECFDF5':'#FEF7E1'};color:${billStatus==='active'?'#065F46':'#92400E'};font-family:'JetBrains Mono',monospace;font-size:11.5px;font-weight:700;letter-spacing:0.06em;">${(billStatus||'').toUpperCase()}</span>`;
 
     // 解約済 / past_due → 再加入バナー (ページ上部に prepend)
     if (billStatus === "canceled" || billStatus === "past_due") {
