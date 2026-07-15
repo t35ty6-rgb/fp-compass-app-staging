@@ -1222,4 +1222,1683 @@ button[data-dist-subtab] {
 }
 
 
+/* ============================================================
+   Phase 5 — 各タブ 中身 の 個別 class を SkelFit token に 塗り直し
+   (Phase 4 の attribute-selector 総括 では 届かない 具体 class を 個別上書き)
+   対象: ライフイベント / 新規顧客フォーム / 配信 / 議事録 / KPI /
+        senior カード / status pill / modal / table / form controls
+   ============================================================ */
 
+/* ─── Timeline (ライフイベント・マップ) ─── */
+.tl-toolbar {
+  background: #fff !important;
+  border: 1px solid #e4e7ee !important;
+  border-radius: 12px !important;
+  padding: 14px 16px !important;
+  margin-bottom: 20px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 10px !important;
+  box-shadow: none !important;
+}
+.tl-toolbar-row {
+  display: flex !important;
+  gap: 6px !important;
+  align-items: center !important;
+  flex-wrap: wrap !important;
+}
+.tl-label {
+  font-family: "Noto Sans JP", sans-serif !important;
+  font-size: 11px !important;
+  font-weight: 800 !important;
+  color: #5f6a86 !important;
+  letter-spacing: 0.08em !important;
+  margin-right: 6px !important;
+  text-transform: none !important;
+}
+.tl-pill {
+  background: #f5f7fa !important;
+  color: #3a4560 !important;
+  border: 1px solid transparent !important;
+  border-radius: 999px !important;
+  padding: 6px 12px !important;
+  font-family: "Noto Sans JP", sans-serif !important;
+  font-size: 12.5px !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  transition: background 120ms, color 120ms, border-color 120ms !important;
+  min-height: 32px !important;
+  line-height: 1.2 !important;
+}
+.tl-pill:hover {
+  background: #eef0f5 !important;
+  color: #0f1729 !important;
+}
+.tl-pill.on {
+  background: #0f1729 !important;
+  color: #fff !important;
+  border-color: #0f1729 !important;
+}
+.tl-count {
+  margin-left: auto !important;
+  font-family: 'JetBrains Mono', monospace !important;
+  font-size: 11.5px !important;
+  color: #5f6a86 !important;
+  letter-spacing: 0.02em !important;
+}
+.tl-month-group {
+  margin-bottom: 24px !important;
+}
+.tl-month-header {
+  display: flex !important;
+  align-items: baseline !important;
+  gap: 12px !important;
+  padding: 10px 4px 12px !important;
+  border-bottom: 1px solid #e4e7ee !important;
+  margin-bottom: 12px !important;
+}
+.tl-month-title {
+  font-family: "Noto Sans JP", sans-serif !important;
+  font-size: 15px !important;
+  font-weight: 800 !important;
+  color: #0f1729 !important;
+  letter-spacing: -0.01em !important;
+}
+.tl-month-sub {
+  font-family: "Noto Sans JP", sans-serif !important;
+  font-size: 12px !important;
+  color: #5f6a86 !important;
+  font-weight: 500 !important;
+}
+.tl-month-count {
+  margin-left: auto !important;
+  font-family: 'JetBrains Mono', monospace !important;
+  font-size: 11px !important;
+  color: #5f6a86 !important;
+  letter-spacing: 0.02em !important;
+}
+.tl-card-list {
+  display: grid !important;
+  gap: 8px !important;
+}
+.tl-card {
+  background: #fff !important;
+  border: 1px solid #e4e7ee !important;
+  border-radius: 12px !important;
+  padding: 14px 16px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 14px !important;
+  box-shadow: none !important;
+  cursor: pointer !important;
+  transition: border-color 120ms, background 120ms !important;
+  transform: none !important;
+}
+.tl-card:hover {
+  background: #f5f7fa !important;
+  border-color: #3a4560 !important;
+  transform: none !important;
+  box-shadow: none !important;
+}
+.tl-card-bar {
+  /* category color dot (side-stripe 3px 以下 で 絶対禁止 回避、 SkelFit vital 系) */
+  width: 3px !important;
+  align-self: stretch !important;
+  border-radius: 2px !important;
+  background: #00844a !important;
+  flex-shrink: 0 !important;
+}
+.tl-card-bar.cat-education { background: #00844a !important; }
+.tl-card-bar.cat-retirement { background: #0f1729 !important; }
+.tl-card-bar.cat-pension { background: #0f1729 !important; }
+.tl-card-bar.cat-mortgage { background: #3a4560 !important; }
+.tl-card-bar.cat-inherit,
+.tl-card-bar.cat-inheritance { background: #5f6a86 !important; }
+.tl-card-bar.cat-health { background: #ff4d7a !important; }
+.tl-card-bar.cat-elder { background: #b45309 !important; }
+.tl-card-bar.cat-finance { background: #00c96a !important; }
+.tl-card-bar.cat-family { background: #ff4d7a !important; }
+.tl-card-bar.cat-general { background: #6f7891 !important; }
+.tl-card-bar.major { width: 4px !important; }
+.tl-card-body {
+  flex: 1 !important;
+  min-width: 0 !important;
+}
+.tl-card-head {
+  display: flex !important;
+  align-items: baseline !important;
+  gap: 10px !important;
+  margin-bottom: 4px !important;
+}
+.tl-card-date {
+  font-family: 'JetBrains Mono', monospace !important;
+  font-size: 12.5px !important;
+  color: #5f6a86 !important;
+  letter-spacing: 0.02em !important;
+  min-width: 42px !important;
+}
+.tl-card-label {
+  font-family: "Noto Sans JP", sans-serif !important;
+  font-size: 14px !important;
+  font-weight: 700 !important;
+  color: #0f1729 !important;
+  letter-spacing: -0.005em !important;
+}
+.tl-major-tag {
+  display: inline-block !important;
+  background: #ff4d7a !important;
+  color: #fff !important;
+  font-family: "Noto Sans JP", sans-serif !important;
+  font-size: 10px !important;
+  font-weight: 800 !important;
+  padding: 1px 6px !important;
+  border-radius: 3px !important;
+  margin-left: 6px !important;
+  letter-spacing: 0.02em !important;
+  vertical-align: middle !important;
+}
+.tl-card-sub {
+  display: flex !important;
+  gap: 12px !important;
+  font-size: 12px !important;
+  color: #5f6a86 !important;
+  font-family: "Noto Sans JP", sans-serif !important;
+  flex-wrap: wrap !important;
+}
+.tl-card-client {
+  color: #1e2740 !important;
+  font-weight: 600 !important;
+}
+.tl-card-who {
+  color: #5f6a86 !important;
+}
+.tl-card-cta {
+  font-family: 'JetBrains Mono', monospace !important;
+  color: #5f6a86 !important;
+  font-size: 16px !important;
+  flex-shrink: 0 !important;
+  transition: color 120ms, transform 120ms !important;
+}
+.tl-card:hover .tl-card-cta {
+  color: #0f1729 !important;
+  transform: translateX(2px) !important;
+}
+.timeline-event {
+  font-family: "Noto Sans JP", sans-serif !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  padding: 2px 6px !important;
+  border-radius: 3px !important;
+  background: #f5f7fa !important;
+  color: #1e2740 !important;
+  border: 1px solid #e4e7ee !important;
+}
+
+/* ─── Client form modal (新規顧客登録) ─── */
+#form-overlay {
+  background: rgba(15, 23, 41, 0.55) !important;
+  backdrop-filter: blur(6px) !important;
+  -webkit-backdrop-filter: blur(6px) !important;
+}
+#form-overlay .modal,
+#modal-overlay .modal {
+  background: #fff !important;
+  border-radius: 14px !important;
+  border: 1px solid #e4e7ee !important;
+  box-shadow: 0 24px 60px rgba(15,23,41,0.24), 0 8px 16px rgba(15,23,41,0.12) !important;
+  overflow: hidden !important;
+}
+#form-overlay .modal-header,
+#modal-overlay .modal-header {
+  padding: 20px 24px !important;
+  border-bottom: 1px solid #eef0f5 !important;
+  background: #fff !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 12px !important;
+}
+#form-overlay .modal-header h2,
+#modal-overlay .modal-header h2 {
+  margin: 0 !important;
+  font-family: "Noto Sans JP", sans-serif !important;
+  font-size: 18px !important;
+  font-weight: 800 !important;
+  color: #0f1729 !important;
+  letter-spacing: -0.015em !important;
+  line-height: 1.3 !important;
+}
+#form-overlay .modal-close,
+#modal-overlay .modal-close {
+  background: #f5f7fa !important;
+  border: 1px solid #e4e7ee !important;
+  color: #3a4560 !important;
+  width: 32px !important;
+  height: 32px !important;
+  border-radius: 8px !important;
+  cursor: pointer !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 18px !important;
+  line-height: 1 !important;
+  font-family: "Noto Sans JP", sans-serif !important;
+  transition: background 120ms, color 120ms !important;
+}
+#form-overlay .modal-close:hover,
+#modal-overlay .modal-close:hover {
+  background: #eef0f5 !important;
+  color: #0f1729 !important;
+}
+#form-overlay .modal-body,
+#modal-overlay .modal-body {
+  padding: 20px 24px 24px !important;
+  background: #fff !important;
+  max-height: 78vh !important;
+  overflow-y: auto !important;
+}
+#form-overlay .form-section {
+  padding: 18px 0 !important;
+  border-bottom: 1px solid #eef0f5 !important;
+  margin: 0 !important;
+}
+#form-overlay .form-section:last-of-type {
+  border-bottom: none !important;
+}
+#form-overlay .form-section h3 {
+  margin: 0 0 12px !important;
+  font-family: "Noto Sans JP", sans-serif !important;
+  font-size: 13.5px !important;
+  font-weight: 800 !important;
+  color: #0f1729 !important;
+  letter-spacing: -0.005em !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+}
+#form-overlay .form-grid {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 14px 16px !important;
+}
+#form-overlay .form-row {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 6px !important;
+  min-width: 0 !important;
+}
+#form-overlay .form-row label,
+#form-overlay .modal-body label:not(.toggle-switch) {
+  font-family: "Noto Sans JP", sans-serif !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  color: #1e2740 !important;
+  letter-spacing: 0.02em !important;
+  text-transform: none !important;
+  margin: 0 !important;
+}
+#form-overlay input[type="text"],
+#form-overlay input[type="number"],
+#form-overlay input[type="date"],
+#form-overlay input[type="email"],
+#form-overlay input[type="tel"],
+#form-overlay input[type="search"],
+#form-overlay select,
+#form-overlay textarea {
+  background: #fff !important;
+  border: 1.5px solid #e4e7ee !important;
+  border-radius: 8px !important;
+  color: #0f1729 !important;
+  font-family: "Noto Sans JP", sans-serif !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  padding: 10px 12px !important;
+  min-height: 42px !important;
+  line-height: 1.4 !important;
+  transition: border-color 120ms, box-shadow 120ms !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  box-shadow: none !important;
+}
+#form-overlay textarea {
+  min-height: 84px !important;
+  resize: vertical !important;
+  font-family: "Noto Sans JP", sans-serif !important;
+}
+#form-overlay input:focus,
+#form-overlay select:focus,
+#form-overlay textarea:focus {
+  border-color: #00844a !important;
+  box-shadow: 0 0 0 3px rgba(0, 201, 106, 0.20) !important;
+  outline: none !important;
+}
+#form-overlay input::placeholder,
+#form-overlay textarea::placeholder {
+  color: #8892a8 !important;
+  font-weight: 400 !important;
+}
+#form-overlay .family-row {
+  display: grid !important;
+  grid-template-columns: 100px 1fr 140px 32px !important;
+  gap: 8px !important;
+  align-items: center !important;
+  padding: 8px !important;
+  background: #f5f7fa !important;
+  border: 1px solid #eef0f5 !important;
+  border-radius: 8px !important;
+  margin-bottom: 6px !important;
+}
+#form-overlay .family-row select,
+#form-overlay .family-row input {
+  min-height: 36px !important;
+  padding: 6px 10px !important;
+  font-size: 13px !important;
+  background: #fff !important;
+}
+#form-overlay .del-family {
+  background: transparent !important;
+  border: 1px solid transparent !important;
+  color: #5f6a86 !important;
+  width: 28px !important;
+  height: 28px !important;
+  border-radius: 6px !important;
+  padding: 0 !important;
+  cursor: pointer !important;
+  font-size: 16px !important;
+  min-height: unset !important;
+  transition: background 120ms, color 120ms !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+#form-overlay .del-family:hover {
+  background: #ffe4ec !important;
+  color: #b91c1c !important;
+}
+#form-overlay button.primary,
+#form-overlay #form-save-btn {
+  background: #0f1729 !important;
+  color: #fff !important;
+  border: 1px solid #0f1729 !important;
+  border-radius: 8px !important;
+  font-family: "Noto Sans JP", sans-serif !important;
+  font-size: 14px !important;
+  font-weight: 700 !important;
+  padding: 12px 20px !important;
+  min-height: 44px !important;
+  cursor: pointer !important;
+  transition: background 120ms, transform 60ms !important;
+  letter-spacing: -0.005em !important;
+  box-shadow: none !important;
+}
+#form-overlay button.primary:hover,
+#form-overlay #form-save-btn:hover {
+  background: #1e2740 !important;
+  color: #fff !important;
+}
+#form-overlay #form-cancel-btn,
+#form-overlay .ghost,
+#form-overlay button.ghost {
+  background: #fff !important;
+  color: #3a4560 !important;
+  border: 1.5px solid #e4e7ee !important;
+  border-radius: 8px !important;
+  font-family: "Noto Sans JP", sans-serif !important;
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  padding: 10px 18px !important;
+  min-height: 44px !important;
+  cursor: pointer !important;
+  transition: background 120ms, border-color 120ms !important;
+}
+#form-overlay #form-cancel-btn:hover,
+#form-overlay .ghost:hover,
+#form-overlay button.ghost:hover {
+  background: #f5f7fa !important;
+  border-color: #3a4560 !important;
+  color: #0f1729 !important;
+}
+#form-overlay #form-delete-btn {
+  background: #fff !important;
+  color: #b91c1c !important;
+  border: 1.5px solid #fecaca !important;
+  border-radius: 8px !important;
+  font-family: "Noto Sans JP", sans-serif !important;
+  font-size: 13.5px !important;
+  font-weight: 700 !important;
+  padding: 10px 16px !important;
+  min-height: 44px !important;
+  cursor: pointer !important;
+  transition: background 120ms !important;
+}
+#form-overlay #form-delete-btn:hover {
+  background: #fee2e2 !important;
+}
+/* Toggle switch (LINE 連携) */
+#form-overlay .toggle-switch {
+  display: inline-flex !important;
+  align-items: center !important;
+  position: relative !important;
+  width: 44px !important;
+  height: 24px !important;
+  border-radius: 999px !important;
+  background: #e4e7ee !important;
+  cursor: pointer !important;
+  transition: background 160ms !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+#form-overlay .toggle-switch input {
+  opacity: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  position: absolute !important;
+  cursor: pointer !important;
+  min-height: unset !important;
+}
+#form-overlay .toggle-switch span {
+  position: absolute !important;
+  left: 2px !important;
+  top: 2px !important;
+  width: 20px !important;
+  height: 20px !important;
+  border-radius: 999px !important;
+  background: #fff !important;
+  box-shadow: 0 1px 3px rgba(15,23,41,0.20) !important;
+  transition: transform 160ms cubic-bezier(0.22,1,0.36,1) !important;
+}
+#form-overlay .toggle-switch input:checked ~ span {
+  transform: translateX(20px) !important;
+}
+#form-overlay .toggle-switch:has(input:checked) {
+  background: #00c96a !important;
+}
+
+/* mobile: form-grid → 1 column */
+@media (max-width: 640px) {
+  #form-overlay .form-grid {
+    grid-template-columns: 1fr !important;
+  }
+  #form-overlay .family-row {
+    grid-template-columns: 90px 1fr 32px !important;
+    grid-template-rows: auto auto !important;
+  }
+  #form-overlay .family-row input[data-f="birth"] {
+    grid-column: 1 / -1 !important;
+  }
+}
+
+/* ─── Client toolbar (顧客台帳 search bar) ─── */
+.client-toolbar {
+  background: #fff !important;
+  border: 1px solid #e4e7ee !important;
+  border-radius: 12px !important;
+  padding: 12px 14px !important;
+  margin-bottom: 14px !important;
+  display: flex !important;
+  gap: 10px !important;
+  align-items: center !important;
+  flex-wrap: wrap !important;
+  box-shadow: none !important;
+}
+.client-toolbar input[type="search"],
+.client-toolbar input[type="text"] {
+  background: #f5f7fa !important;
+  border: 1.5px solid transparent !important;
+  border-radius: 8px !important;
+  color: #0f1729 !important;
+  font-family: "Noto Sans JP", sans-serif !important;
+  font-size: 14px !important;
+  padding: 9px 12px !important;
+  min-height: 40px !important;
+  flex: 1 1 240px !important;
+  min-width: 200px !important;
+  transition: border-color 120ms, background 120ms !important;
+  box-shadow: none !important;
+}
+.client-toolbar input[type="search"]:focus,
+.client-toolbar input[type="text"]:focus {
+  border-color: #00844a !important;
+  background: #fff !important;
+  outline: none !important;
+  box-shadow: 0 0 0 3px rgba(0,201,106,0.15) !important;
+}
+.client-toolbar select {
+  background: #fff !important;
+  border: 1.5px solid #e4e7ee !important;
+  border-radius: 8px !important;
+  color: #0f1729 !important;
+  font-family: "Noto Sans JP", sans-serif !important;
+  font-size: 13px !important;
+  padding: 8px 30px 8px 12px !important;
+  min-height: 40px !important;
+  cursor: pointer !important;
+  transition: border-color 120ms !important;
+  box-shadow: none !important;
+}
+.client-toolbar select:hover {
+  border-color: #3a4560 !important;
+}
+.client-toolbar select:focus {
+  border-color: #00844a !important;
+  outline: none !important;
+  box-shadow: 0 0 0 3px rgba(0,201,106,0.15) !important;
+}
+.client-toolbar .count {
+  font-family: 'JetBrains Mono', monospace !important;
+  font-size: 12px !important;
+  color: #5f6a86 !important;
+  letter-spacing: 0.02em !important;
+  padding: 6px 10px !important;
+  background: #f5f7fa !important;
+  border-radius: 6px !important;
+}
+
+/* ─── Client table (顧客台帳) ─── */
+table.clients {
+  background: #fff !important;
+  border-radius: 12px !important;
+  border: 1px solid #e4e7ee !important;
+  box-shadow: none !important;
+  border-collapse: separate !important;
+  border-spacing: 0 !important;
+  width: 100% !important;
+  overflow: hidden !important;
+}
+table.clients thead th {
+  background: #f5f7fa !important;
+  color: #5f6a86 !important;
+  font-family: "Noto Sans JP", sans-serif !important;
+  font-size: 11px !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.06em !important;
+  text-transform: none !important;
+  padding: 12px 14px !important;
+  text-align: left !important;
+  border-bottom: 1px solid #e4e7ee !important;
+  white-space: nowrap !important;
+}
+table.clients tbody td {
+  padding: 14px !important;
+  border-bottom: 1px solid #eef0f5 !important;
+  font-family: "Noto Sans JP", sans-serif !important;
+  font-size: 13.5px !important;
+  color: #0f1729 !important;
+  vertical-align: middle !important;
+  background: #fff !important;
+}
+table.clients tbody tr:last-child td {
+  border-bottom: none !important;
+}
+table.clients tbody tr {
+  transition: background 100ms !important;
+  cursor: pointer !important;
+}
+table.clients tbody tr:hover td {
+  background: #f5f7fa !important;
+}
+table.clients .col-aum {
+  font-family: 'JetBrains Mono', monospace !important;
+  font-variant-numeric: tabular-nums !important;
+  letter-spacing: -0.01em !important;
+  text-align: right !important;
+  color: #1e2740 !important;
+  font-weight: 600 !important;
+}
+
+/* ─── Status pill (5状態 統一) ─── */
+.status-pill {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+  padding: 2px 8px !important;
+  border-radius: 999px !important;
+  font-family: "Noto Sans JP", sans-serif !important;
+  font-size: 10.5px !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.04em !important;
+  line-height: 1.4 !important;
+  border: 1px solid transparent !important;
+  white-space: nowrap !important;
+  vertical-align: middle !important;
+}
+.status-pill.active {
+  background: #cff2df !important;
+  color: #00844a !important;
+  border-color: #a8e6c2 !important;
+}
+.status-pill.new {
+  background: #ffe4ec !important;
+  color: #b91c4a !important;
+  border-color: #ffc9d8 !important;
+}
+.status-pill.dormant {
+  background: #f5f7fa !important;
+  color: #5f6a86 !important;
+  border-color: #e4e7ee !important;
+}
+.status-pill.pending {
+  background: #fef3c7 !important;
+  color: #92400e !important;
+  border-color: #fde68a !important;
+}
+.status-pill.important {
+  background: #0f1729 !important;
+  color: #fff !important;
+  border-color: #0f1729 !important;
+}
+.status-pill.critical,
+.status-pill.warn {
+  background: #fef3c7 !important;
+  color: #92400e !important;
+  border-color: #fde68a !important;
+}
+.status-pill.good {
+  background: #cff2df !important;
+  color: #00844a !important;
+  border-color: #a8e6c2 !important;
+}
+
+/* ─── KPI card (業務 KPI とタスク) ─── */
+.kpi-card {
+  background: #fff !important;
+  border: 1px solid #e4e7ee !important;
+  border-radius: 14px !important;
+  padding: 20px 22px !important;
+  margin-bottom: 16px !important;
+  box-shadow: none !important;
+  position: relative !important;
+  overflow: hidden !important;
+}
+.kpi-card::before {
+  content: '' !important;
+  position: absolute !important;
+  top: 0; left: 0; height: 3px; width: 100% !important;
+  background: #00c96a !important;
+}
+.kpi-card.kpi-tone-good::before { background: #00c96a !important; }
+.kpi-card.kpi-tone-warn::before { background: #f59e0b !important; }
+.kpi-card.kpi-tone-critical::before { background: #ff4d7a !important; }
+.kpi-card-head {
+  display: flex !important;
+  gap: 14px !important;
+  align-items: flex-start !important;
+  padding-bottom: 14px !important;
+  border-bottom: 1px solid #eef0f5 !important;
+  margin-bottom: 14px !important;
+}
+.kpi-card-icon {
+  width: 40px !important;
+  height: 40px !important;
+  border-radius: 10px !important;
+  background: #f5f7fa !important;
+  color: #0f1729 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex-shrink: 0 !important;
+}
+.kpi-card-icon svg {
+  width: 20px !important;
+  height: 20px !important;
+  stroke: currentColor !important;
+}
+.kpi-card-meta {
+  flex: 1 !important;
+  min-width: 0 !important;
+}
+.kpi-card-title {
+  font-family: "Noto Sans JP", sans-serif !important;
+  font-size: 15px !important;
+  font-weight: 800 !important;
+  color: #0f1729 !important;
+  letter-spacing: -0.005em !important;
+  margin-bottom: 2px !important;
+}
+.kpi-card-goal {
+  font-family: "Noto Sans JP", sans-serif !important;
+  font-size: 12px !important;
+  color: #5f6a86 !important;
+  font-weight: 500 !important;
+}
+.kpi-card-stats {
+  text-align: right !important;
+  flex-shrink: 0 !important;
+}
+.kpi-stat-num {
+  font-family: 'Inter', sans-serif !important;
+  font-size: 28px !important;
+  font-weight: 800 !important;
+  color: #0f1729 !important;
+  line-height: 1 !important;
+  letter-spacing: -0.02em !important;
+  font-variant-numeric: tabular-nums !important;
+}
+.kpi-stat-unit {
+  font-family: "Noto Sans JP", sans-serif !important;
+  font-size: 12px !important;
+  color: #5f6a86 !important;
+  font-weight: 600 !important;
+  margin-left: 2px !important;
+}
+.kpi-stat-label {
+  font-family: "Noto Sans JP", sans-serif !important;
+  font-size: 10.5px !important;
+  color: #5f6a86 !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.06em !important;
+  margin-top: 2px !important;
+}
+.kpi-card-progress {
+  margin-bottom: 12px !important;
+}
+.kpi-progress-bar {
+  background: #eef0f5 !important;
+  border-radius: 999px !important;
+  height: 6px !important;
+  overflow: hidden !important;
+  margin-bottom: 6px !important;
+}
+.kpi-progress-fill {
+  background: #00c96a !important;
+  height: 100% !important;
+  border-radius: 999px !important;
+  transition: width 400ms cubic-bezier(0.22,1,0.36,1) !important;
+}
+.kpi-card.kpi-tone-warn .kpi-progress-fill { background: #f59e0b !important; }
+.kpi-card.kpi-tone-critical .kpi-progress-fill { background: #ff4d7a !important; }
+.kpi-progress-meta {
+  font-family: "Noto Sans JP", sans-serif !important;
+  font-size: 11.5px !important;
+  color: #5f6a86 !important;
+}
+.kpi-progress-meta strong {
+  color: #0f1729 !important;
+  font-family: 'JetBrains Mono', monospace !important;
+  font-weight: 700 !important;
+  font-variant-numeric: tabular-nums !important;
+}
+.kpi-card-intent {
+  display: flex !important;
+  gap: 8px !important;
+  align-items: flex-start !important;
+  padding: 10px 12px !important;
+  background: #f5f7fa !important;
+  border-radius: 8px !important;
+  margin-bottom: 12px !important;
+  font-family: "Noto Sans JP", sans-serif !important;
+  font-size: 12.5px !important;
+  color: #3a4560 !important;
+  line-height: 1.6 !important;
+}
+.kpi-card-intent svg {
+  width: 14px !important;
+  height: 14px !important;
+  flex-shrink: 0 !important;
+  margin-top: 3px !important;
+  color: #5f6a86 !important;
+}
+.kpi-task-list {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 6px !important;
+}
+.kpi-task {
+  display: flex !important;
+  gap: 12px !important;
+  align-items: center !important;
+  padding: 10px 12px !important;
+  background: #fff !important;
+  border: 1px solid #eef0f5 !important;
+  border-radius: 10px !important;
+  cursor: pointer !important;
+  transition: border-color 120ms, background 120ms !important;
+}
+.kpi-task:hover {
+  background: #f5f7fa !important;
+  border-color: #3a4560 !important;
+}
+.kpi-task-avatar {
+  width: 32px !important;
+  height: 32px !important;
+  border-radius: 999px !important;
+  background: #0f1729 !important;
+  color: #fff !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-family: "Noto Sans JP", sans-serif !important;
+  font-weight: 700 !important;
+  font-size: 13px !important;
+  flex-shrink: 0 !important;
+}
+.kpi-task-body {
+  flex: 1 !important;
+  min-width: 0 !important;
+}
+.kpi-task-name {
+  font-family: "Noto Sans JP", sans-serif !important;
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  color: #0f1729 !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  flex-wrap: wrap !important;
+  margin-bottom: 2px !important;
+}
+.kpi-task-meta {
+  font-family: "Noto Sans JP", sans-serif !important;
+  font-size: 11.5px !important;
+  color: #5f6a86 !important;
+}
+.kpi-task-btn,
+.kpi-task-btn.primary {
+  background: #0f1729 !important;
+  color: #fff !important;
+  border: 1px solid #0f1729 !important;
+  border-radius: 8px !important;
+  font-family: "Noto Sans JP", sans-serif !important;
+  font-size: 12.5px !important;
+  font-weight: 700 !important;
+  padding: 8px 12px !important;
+  min-height: 36px !important;
+  cursor: pointer !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+  flex-shrink: 0 !important;
+  transition: background 120ms !important;
+  box-shadow: none !important;
+}
+.kpi-task-btn:hover {
+  background: #1e2740 !important;
+}
+.kpi-task-btn svg {
+  width: 14px !important;
+  height: 14px !important;
+}
+.kpi-empty {
+  padding: 24px !important;
+  text-align: center !important;
+  color: #5f6a86 !important;
+  font-family: "Noto Sans JP", sans-serif !important;
+  font-size: 13px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  background: #f5f7fa !important;
+  border-radius: 10px !important;
+}
+
+/* ─── Distribution presets (LINE配信 tab) ─── */
+.fp-dist-presets {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)) !important;
+  gap: 12px !important;
+  margin-bottom: 20px !important;
+}
+.fp-dist-preset-card {
+  background: #fff !important;
+  border: 1px solid #e4e7ee !important;
+  border-radius: 12px !important;
+  padding: 16px 18px !important;
+  box-shadow: none !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 10px !important;
+  transition: border-color 120ms, transform 120ms !important;
+}
+.fp-dist-preset-card:hover {
+  border-color: #3a4560 !important;
+  transform: none !important;
+}
+.fp-dist-preset-head {
+  display: flex !important;
+  gap: 10px !important;
+  align-items: flex-start !important;
+}
+.fp-dist-preset-emoji {
+  font-size: 22px !important;
+  line-height: 1 !important;
+  flex-shrink: 0 !important;
+  filter: grayscale(0) !important;
+}
+.fp-dist-preset-titleblock {
+  flex: 1 !important;
+  min-width: 0 !important;
+}
+.fp-dist-preset-title {
+  font-family: "Noto Sans JP", sans-serif !important;
+  font-size: 14.5px !important;
+  font-weight: 800 !important;
+  color: #0f1729 !important;
+  letter-spacing: -0.005em !important;
+  margin-bottom: 2px !important;
+}
+.fp-dist-preset-sub {
+  font-family: "Noto Sans JP", sans-serif !important;
+  font-size: 12px !important;
+  color: #5f6a86 !important;
+}
+.fp-dist-preset-cadence-tag {
+  font-family: 'JetBrains Mono', monospace !important;
+  font-size: 10.5px !important;
+  font-weight: 700 !important;
+  color: #00844a !important;
+  background: #cff2df !important;
+  padding: 2px 8px !important;
+  border-radius: 4px !important;
+  letter-spacing: 0.02em !important;
+  flex-shrink: 0 !important;
+  height: fit-content !important;
+}
+.fp-dist-preset-why {
+  font-family: "Noto Sans JP", sans-serif !important;
+  font-size: 12.5px !important;
+  color: #3a4560 !important;
+  line-height: 1.65 !important;
+  padding: 10px 12px !important;
+  background: #f5f7fa !important;
+  border-radius: 8px !important;
+}
+.fp-dist-preset-count {
+  font-family: "Noto Sans JP", sans-serif !important;
+  font-size: 12px !important;
+  color: #5f6a86 !important;
+}
+.fp-dist-preset-count strong {
+  color: #0f1729 !important;
+  font-family: 'JetBrains Mono', monospace !important;
+  font-weight: 700 !important;
+  font-variant-numeric: tabular-nums !important;
+}
+.fp-dist-preset-actions {
+  display: flex !important;
+  gap: 8px !important;
+  margin-top: 4px !important;
+  flex-wrap: wrap !important;
+}
+.fp-dist-preset-now {
+  background: #0f1729 !important;
+  color: #fff !important;
+  border: 1px solid #0f1729 !important;
+  border-radius: 8px !important;
+  font-family: "Noto Sans JP", sans-serif !important;
+  font-size: 12.5px !important;
+  font-weight: 700 !important;
+  padding: 8px 14px !important;
+  min-height: 38px !important;
+  cursor: pointer !important;
+  transition: background 120ms !important;
+  flex: 1 !important;
+  box-shadow: none !important;
+}
+.fp-dist-preset-now:hover {
+  background: #1e2740 !important;
+}
+.fp-dist-preset-add {
+  background: #fff !important;
+  color: #3a4560 !important;
+  border: 1.5px solid #e4e7ee !important;
+  border-radius: 8px !important;
+  font-family: "Noto Sans JP", sans-serif !important;
+  font-size: 12.5px !important;
+  font-weight: 600 !important;
+  padding: 8px 14px !important;
+  min-height: 38px !important;
+  cursor: pointer !important;
+  transition: border-color 120ms, background 120ms !important;
+}
+.fp-dist-preset-add:hover {
+  background: #f5f7fa !important;
+  border-color: #3a4560 !important;
+  color: #0f1729 !important;
+}
+
+/* ─── Distribution schedule list (毎回配信予定) ─── */
+.fp-dist-sched-list {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 6px !important;
+  margin-bottom: 20px !important;
+}
+.fp-dist-sched-row {
+  display: grid !important;
+  grid-template-columns: 120px 1fr auto auto auto !important;
+  gap: 12px !important;
+  align-items: center !important;
+  padding: 12px 14px !important;
+  background: #fff !important;
+  border: 1px solid #e4e7ee !important;
+  border-radius: 10px !important;
+  cursor: pointer !important;
+  transition: border-color 120ms, background 120ms !important;
+  text-align: left !important;
+  font-family: "Noto Sans JP", sans-serif !important;
+  width: 100% !important;
+  box-shadow: none !important;
+}
+.fp-dist-sched-row:hover {
+  background: #f5f7fa !important;
+  border-color: #3a4560 !important;
+}
+.fp-dist-sched-row-cadence {
+  font-family: 'JetBrains Mono', monospace !important;
+  font-size: 11.5px !important;
+  color: #00844a !important;
+  background: #cff2df !important;
+  padding: 3px 8px !important;
+  border-radius: 4px !important;
+  letter-spacing: 0.02em !important;
+  text-align: center !important;
+  font-weight: 700 !important;
+}
+.fp-dist-sched-row-name {
+  font-family: "Noto Sans JP", sans-serif !important;
+  font-size: 13.5px !important;
+  font-weight: 700 !important;
+  color: #0f1729 !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+  min-width: 0 !important;
+}
+.fp-dist-sched-row-seg {
+  font-size: 16px !important;
+  flex-shrink: 0 !important;
+}
+.fp-dist-sched-row-count {
+  font-family: 'JetBrains Mono', monospace !important;
+  font-size: 12px !important;
+  color: #5f6a86 !important;
+  font-variant-numeric: tabular-nums !important;
+}
+.fp-dist-sched-row-next {
+  font-family: "Noto Sans JP", sans-serif !important;
+  font-size: 11.5px !important;
+  color: #5f6a86 !important;
+}
+.fp-dist-sched-row-arrow {
+  color: #5f6a86 !important;
+  font-family: 'JetBrains Mono', monospace !important;
+  transition: color 120ms, transform 120ms !important;
+}
+.fp-dist-sched-row:hover .fp-dist-sched-row-arrow {
+  color: #0f1729 !important;
+  transform: translateX(2px) !important;
+}
+
+/* ─── Distribution birthday list ─── */
+.fp-dist-bday-list,
+.bday-row-container,
+.delivery-list {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 6px !important;
+}
+.fp-dist-bday-row,
+.bday-row {
+  display: grid !important;
+  grid-template-columns: 60px 1fr auto auto !important;
+  gap: 12px !important;
+  align-items: center !important;
+  padding: 12px 14px !important;
+  background: #fff !important;
+  border: 1px solid #e4e7ee !important;
+  border-radius: 10px !important;
+  font-family: "Noto Sans JP", sans-serif !important;
+  box-shadow: none !important;
+  transition: border-color 120ms, background 120ms !important;
+}
+.fp-dist-bday-row:hover,
+.bday-row:hover {
+  background: #f5f7fa !important;
+  border-color: #3a4560 !important;
+}
+.fp-dist-bday-date,
+.bday-date {
+  font-family: 'JetBrains Mono', monospace !important;
+  font-size: 12.5px !important;
+  color: #0f1729 !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.02em !important;
+  text-align: center !important;
+  padding: 6px 8px !important;
+  background: #f5f7fa !important;
+  border-radius: 6px !important;
+  font-variant-numeric: tabular-nums !important;
+}
+.fp-dist-bday-main,
+.bday-main {
+  min-width: 0 !important;
+}
+.fp-dist-bday-rel,
+.bday-rel,
+.bday-rel-tag {
+  font-family: "Noto Sans JP", sans-serif !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  color: #b91c4a !important;
+  background: #ffe4ec !important;
+  padding: 1px 6px !important;
+  border-radius: 3px !important;
+  letter-spacing: 0.02em !important;
+  display: inline-block !important;
+  margin-right: 4px !important;
+}
+.bday-meta,
+.fp-dist-bday-status {
+  font-family: "Noto Sans JP", sans-serif !important;
+  font-size: 11.5px !important;
+  color: #5f6a86 !important;
+}
+.bday-action,
+.fp-dist-bday-action {
+  background: #fff !important;
+  color: #3a4560 !important;
+  border: 1.5px solid #e4e7ee !important;
+  border-radius: 8px !important;
+  font-family: "Noto Sans JP", sans-serif !important;
+  font-size: 12.5px !important;
+  font-weight: 600 !important;
+  padding: 6px 12px !important;
+  min-height: 36px !important;
+  cursor: pointer !important;
+  transition: background 120ms, border-color 120ms !important;
+}
+.bday-action:hover,
+.fp-dist-bday-action:hover {
+  background: #f5f7fa !important;
+  border-color: #3a4560 !important;
+  color: #0f1729 !important;
+}
+
+/* ─── Delivery / booking rows (書類配布・予約) ─── */
+.delivery-row,
+.booking-row {
+  display: grid !important;
+  grid-template-columns: 44px 1fr auto !important;
+  gap: 12px !important;
+  align-items: center !important;
+  padding: 12px 14px !important;
+  background: #fff !important;
+  border: 1px solid #e4e7ee !important;
+  border-radius: 10px !important;
+  font-family: "Noto Sans JP", sans-serif !important;
+  transition: border-color 120ms, background 120ms !important;
+  box-shadow: none !important;
+}
+.delivery-row:hover,
+.booking-row:hover {
+  background: #f5f7fa !important;
+  border-color: #3a4560 !important;
+}
+.delivery-num {
+  width: 32px !important;
+  height: 32px !important;
+  border-radius: 999px !important;
+  background: #0f1729 !important;
+  color: #fff !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-family: 'JetBrains Mono', monospace !important;
+  font-weight: 700 !important;
+  font-size: 13px !important;
+  font-variant-numeric: tabular-nums !important;
+}
+.delivery-body {
+  min-width: 0 !important;
+}
+.delivery-name,
+.booking-name {
+  font-family: "Noto Sans JP", sans-serif !important;
+  font-size: 13.5px !important;
+  font-weight: 700 !important;
+  color: #0f1729 !important;
+  margin-bottom: 3px !important;
+}
+.delivery-meta-row,
+.booking-meta,
+.delivery-meta-sub,
+.delivery-meta-note {
+  font-family: "Noto Sans JP", sans-serif !important;
+  font-size: 11.5px !important;
+  color: #5f6a86 !important;
+  line-height: 1.5 !important;
+}
+.delivery-map-link {
+  color: #00844a !important;
+  text-decoration: underline !important;
+  text-underline-offset: 2px !important;
+}
+.delivery-action,
+.booking-cta {
+  background: #0f1729 !important;
+  color: #fff !important;
+  border: 1px solid #0f1729 !important;
+  border-radius: 8px !important;
+  font-family: "Noto Sans JP", sans-serif !important;
+  font-size: 12.5px !important;
+  font-weight: 700 !important;
+  padding: 8px 14px !important;
+  min-height: 38px !important;
+  cursor: pointer !important;
+  transition: background 120ms !important;
+  box-shadow: none !important;
+}
+.delivery-action:hover,
+.booking-cta:hover {
+  background: #1e2740 !important;
+}
+.booking-when,
+.booking-time,
+.booking-date {
+  font-family: 'JetBrains Mono', monospace !important;
+  color: #0f1729 !important;
+  font-variant-numeric: tabular-nums !important;
+  letter-spacing: 0.01em !important;
+}
+.booking-want {
+  font-family: "Noto Sans JP", sans-serif !important;
+  font-size: 11.5px !important;
+  color: #3a4560 !important;
+  background: #f5f7fa !important;
+  padding: 4px 8px !important;
+  border-radius: 5px !important;
+  display: inline-block !important;
+  margin-top: 4px !important;
+}
+
+/* ─── Senior card (「今日 話すべき方」) ─── */
+.senior-card {
+  background: #fff !important;
+  border: 1px solid #e4e7ee !important;
+  border-radius: 14px !important;
+  padding: 18px 20px !important;
+  box-shadow: none !important;
+  display: flex !important;
+  gap: 14px !important;
+  align-items: flex-start !important;
+  transition: border-color 120ms, transform 120ms !important;
+  position: relative !important;
+}
+.senior-card:hover {
+  border-color: #3a4560 !important;
+  transform: none !important;
+}
+.senior-card.senior-card-top {
+  border: 2px solid #0f1729 !important;
+  background: linear-gradient(180deg, #fbfbfd, #fff) !important;
+}
+.senior-card-rank {
+  position: absolute !important;
+  top: -6px; left: -6px !important;
+  width: 26px !important;
+  height: 26px !important;
+  border-radius: 999px !important;
+  background: #0f1729 !important;
+  color: #fff !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-family: 'Inter', sans-serif !important;
+  font-weight: 800 !important;
+  font-size: 12px !important;
+  font-variant-numeric: tabular-nums !important;
+  box-shadow: 0 2px 6px rgba(15,23,41,0.16) !important;
+}
+.senior-card-head {
+  display: flex !important;
+  gap: 12px !important;
+  align-items: center !important;
+  flex-shrink: 0 !important;
+}
+.senior-card-avatar {
+  width: 44px !important;
+  height: 44px !important;
+  border-radius: 999px !important;
+  background: #f5f7fa !important;
+  color: #0f1729 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-family: "Noto Sans JP", sans-serif !important;
+  font-weight: 800 !important;
+  font-size: 16px !important;
+  border: 1px solid #e4e7ee !important;
+}
+.senior-card-name {
+  font-family: "Noto Sans JP", sans-serif !important;
+  font-size: 15px !important;
+  font-weight: 800 !important;
+  color: #0f1729 !important;
+  letter-spacing: -0.005em !important;
+}
+.senior-card-sub {
+  font-family: "Noto Sans JP", sans-serif !important;
+  font-size: 12px !important;
+  color: #5f6a86 !important;
+}
+.senior-card-honor {
+  font-family: 'JetBrains Mono', monospace !important;
+  font-size: 10.5px !important;
+  color: #00844a !important;
+  background: #cff2df !important;
+  padding: 2px 6px !important;
+  border-radius: 4px !important;
+  letter-spacing: 0.02em !important;
+  font-weight: 700 !important;
+  display: inline-block !important;
+}
+.senior-card-action {
+  flex: 1 !important;
+  min-width: 0 !important;
+}
+.senior-action-label {
+  font-family: "Noto Sans JP", sans-serif !important;
+  font-size: 11px !important;
+  font-weight: 800 !important;
+  color: #5f6a86 !important;
+  letter-spacing: 0.06em !important;
+  margin-bottom: 4px !important;
+}
+.senior-action-event {
+  font-family: "Noto Sans JP", sans-serif !important;
+  font-size: 14px !important;
+  font-weight: 700 !important;
+  color: #0f1729 !important;
+  margin-bottom: 4px !important;
+}
+.senior-action-reason,
+.senior-action-text {
+  font-family: "Noto Sans JP", sans-serif !important;
+  font-size: 12.5px !important;
+  color: #3a4560 !important;
+  line-height: 1.65 !important;
+  margin-bottom: 8px !important;
+}
+.senior-action-contact {
+  font-family: "Noto Sans JP", sans-serif !important;
+  font-size: 11.5px !important;
+  color: #5f6a86 !important;
+}
+.senior-card-kpi,
+.senior-kpi-badges {
+  display: flex !important;
+  gap: 6px !important;
+  flex-wrap: wrap !important;
+  margin: 8px 0 !important;
+}
+.senior-kpi-badge {
+  background: #f5f7fa !important;
+  border: 1px solid #e4e7ee !important;
+  border-radius: 6px !important;
+  padding: 3px 8px !important;
+  font-family: "Noto Sans JP", sans-serif !important;
+  font-size: 11px !important;
+  color: #3a4560 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+}
+.senior-kpi-label {
+  font-weight: 600 !important;
+}
+.senior-card-buttons {
+  display: flex !important;
+  gap: 8px !important;
+  margin-top: 10px !important;
+  flex-wrap: wrap !important;
+}
+.senior-btn-primary,
+.senior-btn {
+  background: #0f1729 !important;
+  color: #fff !important;
+  border: 1px solid #0f1729 !important;
+  border-radius: 8px !important;
+  font-family: "Noto Sans JP", sans-serif !important;
+  font-size: 12.5px !important;
+  font-weight: 700 !important;
+  padding: 8px 14px !important;
+  min-height: 38px !important;
+  cursor: pointer !important;
+  transition: background 120ms !important;
+  box-shadow: none !important;
+}
+.senior-btn-primary:hover,
+.senior-btn:hover {
+  background: #1e2740 !important;
+}
+.senior-btn-secondary {
+  background: #fff !important;
+  color: #3a4560 !important;
+  border: 1.5px solid #e4e7ee !important;
+  border-radius: 8px !important;
+  font-family: "Noto Sans JP", sans-serif !important;
+  font-size: 12.5px !important;
+  font-weight: 600 !important;
+  padding: 8px 14px !important;
+  min-height: 38px !important;
+  cursor: pointer !important;
+  transition: background 120ms, border-color 120ms !important;
+}
+.senior-btn-secondary:hover {
+  background: #f5f7fa !important;
+  border-color: #3a4560 !important;
+  color: #0f1729 !important;
+}
+.senior-card-quick-msg {
+  background: #f5f7fa !important;
+  border: 1px solid #eef0f5 !important;
+  border-radius: 8px !important;
+  padding: 8px 10px !important;
+  font-family: "Noto Sans JP", sans-serif !important;
+  font-size: 12px !important;
+  color: #3a4560 !important;
+  line-height: 1.6 !important;
+  margin-top: 6px !important;
+}
+
+/* ─── Detail modal (顧客詳細 modal-overlay) 中身 の 個別要素 ─── */
+#modal-overlay .modal-body {
+  padding: 0 !important;
+  max-height: 82vh !important;
+  overflow-y: auto !important;
+}
+
+/* ─── Empty state (footnote, empty) ─── */
+.footnote {
+  font-family: "Noto Sans JP", sans-serif !important;
+  font-size: 11.5px !important;
+  color: #5f6a86 !important;
+  line-height: 1.7 !important;
+  padding: 12px 14px !important;
+  background: #f5f7fa !important;
+  border-radius: 8px !important;
+  border-left: 3px solid #00844a !important;
+  margin-top: 16px !important;
+}
+.empty {
+  padding: 40px 20px !important;
+  text-align: center !important;
+  color: #5f6a86 !important;
+  font-family: "Noto Sans JP", sans-serif !important;
+  font-size: 13.5px !important;
+  background: #fff !important;
+  border: 1px dashed #e4e7ee !important;
+  border-radius: 12px !important;
+}
+
+/* ─── Meeting card (面談履歴・議事録) ─── */
+.fp-meeting-card {
+  background: #fff !important;
+  border: 1px solid #e4e7ee !important;
+  border-radius: 12px !important;
+  padding: 16px 18px !important;
+  margin-bottom: 12px !important;
+  box-shadow: none !important;
+  transition: border-color 120ms !important;
+}
+.fp-meeting-card:hover {
+  border-color: #3a4560 !important;
+}
+.fp-meeting-block-label {
+  font-family: "Noto Sans JP", sans-serif !important;
+  font-size: 10.5px !important;
+  font-weight: 800 !important;
+  color: #5f6a86 !important;
+  letter-spacing: 0.06em !important;
+  margin-bottom: 4px !important;
+  text-transform: none !important;
+}
+.fp-meeting-block {
+  padding: 10px 12px !important;
+  background: #f5f7fa !important;
+  border-radius: 8px !important;
+  margin-bottom: 8px !important;
+  font-family: "Noto Sans JP", sans-serif !important;
+  font-size: 13px !important;
+  color: #1e2740 !important;
+  line-height: 1.7 !important;
+}
+.fp-meeting-card-actions {
+  display: flex !important;
+  gap: 8px !important;
+  margin-top: 10px !important;
+  flex-wrap: wrap !important;
+}
+
+/* ─── Sub-tab buttons (data-dist-subtab / data-tab / m-tab) 統一 ─── */
+button[data-dist-subtab] {
+  background: transparent !important;
+  color: #5f6a86 !important;
+  border: none !important;
+  border-bottom: 2px solid transparent !important;
+  border-radius: 0 !important;
+  font-family: "Noto Sans JP", sans-serif !important;
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  padding: 10px 14px !important;
+  min-height: 40px !important;
+  cursor: pointer !important;
+  transition: color 120ms, border-color 120ms !important;
+  box-shadow: none !important;
+}
+button[data-dist-subtab]:hover {
+  color: #0f1729 !important;
+}
+button[data-dist-subtab].on,
+button[data-dist-subtab].active {
+  color: #0f1729 !important;
+  border-bottom-color: #00c96a !important;
+  background: transparent !important;
+}
+
+/* ─── Section titles / section-sub inside tab bodies ─── */
+.section-title {
+  font-family: "Noto Sans JP", sans-serif !important;
+  font-size: 15px !important;
+  font-weight: 800 !important;
+  color: #0f1729 !important;
+  letter-spacing: -0.005em !important;
+  margin: 20px 0 8px !important;
+}
+.section-sub {
+  font-family: "Noto Sans JP", sans-serif !important;
+  font-size: 12.5px !important;
+  color: #5f6a86 !important;
+  margin-bottom: 12px !important;
+  line-height: 1.65 !important;
+}
+
+/* ─── Line-hub demo-notice / empty banners ─── */
+.demo-notice {
+  background: #fef3c7 !important;
+  color: #92400e !important;
+  border: 1px solid #fde68a !important;
+  border-radius: 8px !important;
+  padding: 10px 14px !important;
+  font-family: "Noto Sans JP", sans-serif !important;
+  font-size: 12.5px !important;
+  margin-bottom: 12px !important;
+}
+
+/* ─── Cta rows / CTA arrow (btn-cta-primary etc) ─── */
+.cta-row {
+  display: flex !important;
+  gap: 8px !important;
+  margin-top: 12px !important;
+  flex-wrap: wrap !important;
+}
+.btn-cta-primary,
+.btn-cta-primary-chip {
+  background: #0f1729 !important;
+  color: #fff !important;
+  border: 1px solid #0f1729 !important;
+  border-radius: 8px !important;
+  font-family: "Noto Sans JP", sans-serif !important;
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  padding: 9px 16px !important;
+  min-height: 40px !important;
+  cursor: pointer !important;
+  transition: background 120ms !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 5px !important;
+  box-shadow: none !important;
+}
+.btn-cta-primary:hover,
+.btn-cta-primary-chip:hover {
+  background: #1e2740 !important;
+}
+.btn-cta-ghost {
+  background: #fff !important;
+  color: #3a4560 !important;
+  border: 1.5px solid #e4e7ee !important;
+  border-radius: 8px !important;
+  font-family: "Noto Sans JP", sans-serif !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  padding: 8px 16px !important;
+  min-height: 40px !important;
+  cursor: pointer !important;
+  transition: background 120ms, border-color 120ms !important;
+}
+.btn-cta-ghost:hover {
+  background: #f5f7fa !important;
+  border-color: #3a4560 !important;
+  color: #0f1729 !important;
+}
+.btn-mini,
+.btn-mini-action {
+  background: #f5f7fa !important;
+  color: #3a4560 !important;
+  border: 1px solid #e4e7ee !important;
+  border-radius: 6px !important;
+  font-family: "Noto Sans JP", sans-serif !important;
+  font-size: 11.5px !important;
+  font-weight: 600 !important;
+  padding: 4px 10px !important;
+  min-height: 28px !important;
+  cursor: pointer !important;
+  transition: background 120ms, border-color 120ms !important;
+}
+.btn-mini:hover,
+.btn-mini-action:hover {
+  background: #eef0f5 !important;
+  border-color: #3a4560 !important;
+  color: #0f1729 !important;
+}
+
+/* ─── prefers-reduced-motion ─── */
+@media (prefers-reduced-motion: reduce) {
+  .tl-card, .kpi-task, .fp-dist-preset-card, .fp-dist-sched-row,
+  .delivery-row, .booking-row, .senior-card, .fp-dist-bday-row, .bday-row,
+  #form-overlay .toggle-switch span, .kpi-progress-fill {
+    transition: none !important;
+  }
+}
