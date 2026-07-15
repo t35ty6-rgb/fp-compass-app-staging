@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>議事録デザイン プレビュー — FP Compass STG</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&family=Noto+Sans+JP:wght@400;500;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./styles-v2.css">
+<link rel="stylesheet" href="./styles-v8-workspace.css">
+<link rel="stylesheet" href="./styles-skelfit.css">
+<style>
+  body { margin: 0; padding: 40px 24px 80px; background: #F5F7FA; font-family: 'Noto Sans JP', sans-serif; -webkit-font-smoothing: antialiased; }
+  .wrap { max-width: 920px; margin: 0 auto; }
+  .preview-banner { background: #0F1729; color: #FFF; padding: 18px 24px; border-radius: 12px; margin-bottom: 28px; display: flex; align-items: center; gap: 16px; }
+  .preview-banner .lbl { background: #00844A; color: #FFF; font-size: 10.5px; font-weight: 900; letter-spacing: 0.14em; padding: 5px 12px; border-radius: 999px; }
+  .preview-banner .msg { font-size: 13.5px; line-height: 1.7; }
+  .preview-banner .msg b { color: #00c96a; }
+  h1 { font-family: 'Manrope','Noto Sans JP',sans-serif; font-weight: 800; font-size: 28px; color: #0F1729; letter-spacing: -0.01em; margin: 0 0 6px; }
+  .sub { color: #64748B; font-size: 14px; margin-bottom: 30px; line-height: 1.7; }
+  .demo-label { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #64748B; letter-spacing: 0.14em; text-transform: uppercase; font-weight: 600; margin: 32px 0 12px; }
+  .footer-note { margin-top: 40px; padding: 18px 22px; background: #FFFFFF; border: 1px solid #E4E7EE; border-radius: 10px; color: #475569; font-size: 13px; line-height: 1.8; }
+  .footer-note b { color: #0F1729; }
+  .fp-btn { display: inline-block; padding: 6px 12px; background: #0F1729; color: #FFF; text-decoration: none; font-size: 12px; font-weight: 700; border-radius: 6px; font-family: 'Noto Sans JP', sans-serif; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="preview-banner">
+    <span class="lbl">PREVIEW</span>
+    <div class="msg">
+      これは <b>デザイン確認用の プレビュー</b> です。 実 顧客カルテ の 議事録タブ で 同じ 見た目 が 出ます。<br>
+      実データ (Zoom 面談 + AI 生成) は tenant セットアップ + 面談 実施 が必要。 このページ は 合成 サンプル で 見た目 だけ 確認 できます。
+    </div>
+  </div>
+
+  <h1>議事録 見え方 (owner request)</h1>
+  <p class="sub">
+    「ボックス + デザイン + LINE風 chat」 の 全部 反映。 以下 が 実際 の 顧客カルテ 議事録タブ で 表示 される 見た目 です。
+  </p>
+
+  <div class="demo-label">CASE 1 — LINE風 chat + 構造化 summary (代表的 な 議事録)</div>
+
+  <!-- Meeting card: full sample -->
+  <div class="fp-meeting-card">
+    <div class="fp-meeting-card-head">
+      <div>
+        <div class="fp-meeting-card-eyebrow" style="font-size:13px;font-weight:900;color:#1B3A5C;">📹 Zoom 3回目 <span style="font-size:11px;color:#9CA3AF;font-weight:700;margin-left:8px;font-family:'JetBrains Mono',monospace;">#20260716-1430</span></div>
+        <div class="fp-meeting-card-date" style="font-size:14px;font-weight:700;margin-top:2px;">2026/07/16 14:30 面談</div>
+        <div class="fp-meeting-card-recstart" style="font-size:11.5px;color:#6B7280;font-weight:600;margin-top:3px;">録画開始: 14:30 (2026/07/16)</div>
+      </div>
+      <div class="fp-meeting-card-actions">
+        <a href="#" class="fp-btn">🎥 録画を見る</a>
+      </div>
+    </div>
+
+    <!-- Whisper 文字起こし: LINE風 chat -->
+    <div class="fp-meeting-block">
+      <div class="fp-meeting-block-label" style="display:flex;justify-content:space-between;align-items:center;">
+        <span>AI 文字起こし (Whisper)</span>
+        <div class="fp-transcript-view-toggle">
+          <button type="button" class="fp-tv-btn fp-tv-active">💬 会話</button>
+          <button type="button" class="fp-tv-btn">📄 プレーン</button>
+        </div>
+      </div>
+      <div class="fp-transcript-chat">
+        <div style="display:flex;justify-content:flex-end;"><div><div>FP先生</div><div>今日はよろしくお願いします。まず現在のご資産状況を確認させてください。</div></div></div>
+        <div style="display:flex;justify-content:flex-start;"><div><div>お客様</div><div>よろしくお願いします。今 銀行預金で 500万円 くらい、 投資信託で 200万円 くらい あります。</div></div></div>
+        <div style="display:flex;justify-content:flex-end;"><div><div>FP先生</div><div>ありがとうございます。お子様の 教育資金 について、 いつ頃 どの程度 準備が必要か 教えてください。</div></div></div>
+        <div style="display:flex;justify-content:flex-start;"><div><div>お客様</div><div>長男が 高校2年で、 大学入学まで あと 2年です。 私立文系で 4年間で 500万円くらい と 聞いています。</div></div></div>
+        <div style="display:flex;justify-content:flex-end;"><div><div>FP先生</div><div>なるほど、 2年後に 一部 取り崩しが 発生しますね。 投資信託の リスクレベルも 見直しましょうか。</div></div></div>
+        <div style="display:flex;justify-content:flex-start;"><div><div>お客様</div><div>そうですね。 元本保証が 効く商品に 少し 移した方が いいでしょうか。</div></div></div>
+      </div>
+    </div>
+
+    <!-- Claude 議事録: 構造化 render -->
+    <div class="fp-meeting-block">
+      <div class="fp-meeting-block-label" style="display:flex;justify-content:space-between;align-items:center;">
+        <span>AI 議事録 (Claude) <span style="font-size:10px;color:#9CA3AF;font-weight:600;margin-left:6px;">編集・追記可</span></span>
+        <button class="fp-minutes-edit" style="background:#fff;border:1px solid #E2E8F0;color:#475569;font-size:11px;font-weight:700;padding:4px 10px;border-radius:5px;cursor:pointer;">✏ 編集</button>
+      </div>
+      <div class="fp-meeting-body fp-summary-structured">
+        <h4 class="fp-sum-h4 fp-sum-tone-vital"><span class="fp-sum-dot"></span>本日の決定事項</h4>
+        <ul class="fp-sum-list fp-sum-ul">
+          <li>投資信託 200万円 の リスクレベル を <strong class="fp-sum-strong">中〜低</strong> に見直し</li>
+          <li>長男 大学入学 に 向けて <strong class="fp-sum-strong">2年後 100万円</strong> の 学資保険 加入 検討</li>
+          <li>次回 面談 で ご主人 も 同席の上、 詳細プラン 提示</li>
+        </ul>
+
+        <h4 class="fp-sum-h4 fp-sum-tone-trust"><span class="fp-sum-dot"></span>お客様の関心事</h4>
+        <p class="fp-sum-p">現在 の 資産 500万 (銀行預金) + 200万 (投資信託)。 長男 私立文系 大学入学まで 2年、 総額 500万 の 教育資金 準備が 必要。</p>
+
+        <h4 class="fp-sum-h4 fp-sum-tone-attn"><span class="fp-sum-dot"></span>次回までのTODO</h4>
+        <ol class="fp-sum-list fp-sum-ol">
+          <li>学資保険 3社比較 資料 を 準備</li>
+          <li>投資信託 現行 ポートフォリオ の リスク分析 を実施</li>
+          <li>ご主人 の 面談 スケジュール 調整</li>
+        </ol>
+
+        <h4 class="fp-sum-h4 fp-sum-tone-critical"><span class="fp-sum-dot"></span>懸念事項</h4>
+        <div class="fp-sum-row fp-sum-tone-critical">
+          <span class="fp-sum-label">教育資金 不足</span>
+          <span class="fp-sum-value">現状 700万 の 半分が 高校2年 の 教育費に 消えている。 残り 350万 で 大学 500万 は カバー不足</span>
+        </div>
+
+        <h5 class="fp-sum-h5">補足メモ</h5>
+        <p class="fp-sum-p">お客様 は <strong class="fp-sum-strong">保守的 な 投資スタンス</strong> を 希望。 元本毀損 の リスクを 極力避けたい との こと。 <strong class="fp-sum-strong">iDeCo</strong> の 提案は 来期以降で 検討。</p>
+      </div>
+    </div>
+
+    <!-- 関心事 chips -->
+    <div class="fp-meeting-block">
+      <div class="fp-meeting-block-label">お客様の関心事</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;">
+        <span class="fp-concern-chip">教育資金</span>
+        <span class="fp-concern-chip">投資信託 リスク</span>
+        <span class="fp-concern-chip">学資保険</span>
+        <span class="fp-concern-chip">iDeCo</span>
+      </div>
+    </div>
+
+    <!-- 次回質問 予測 -->
+    <div class="fp-meeting-block">
+      <div class="fp-meeting-block-label" style="display:flex;align-items:center;gap:6px;">
+        🔮 次回 聞かれそうな 質問
+        <span style="font-size:9.5px;font-weight:600;color:#94A3B8;background:#F1F5F9;padding:1px 6px;border-radius:99px;">AI 予測</span>
+      </div>
+      <ul style="margin:0;padding-left:18px;font-size:13px;color:#1F2A3F;line-height:1.85;">
+        <li>学資保険 の 元本保証 は どこまで 効くか?</li>
+        <li>投資信託 を 一部 売却したら 税金 は どう なるか?</li>
+        <li>ご主人 と 一緒に 面談 するとき の 資料 準備 は 必要か?</li>
+      </ul>
+      <div style="font-size:10.5px;color:#64748B;margin-top:6px;line-height:1.55;">次の LINE 連絡 や 次回 面談 の 事前 準備 で 先回り 対応 してください。</div>
+    </div>
+  </div>
+
+  <div class="demo-label">CASE 2 — 非構造化 summary (Claude が シンプルに 生成 した場合)</div>
+
+  <div class="fp-meeting-card">
+    <div class="fp-meeting-card-head">
+      <div>
+        <div class="fp-meeting-card-eyebrow" style="font-size:13px;font-weight:900;color:#1B3A5C;">📹 Zoom 1回目</div>
+        <div class="fp-meeting-card-date" style="font-size:14px;font-weight:700;margin-top:2px;">2026/07/10 10:00 面談</div>
+      </div>
+    </div>
+    <div class="fp-meeting-block">
+      <div class="fp-meeting-block-label"><span>AI 議事録 (Claude)</span></div>
+      <div class="fp-meeting-body fp-summary-structured">
+        <p class="fp-sum-p">初回 面談。 お客様 は 40代 会社員。 現在 の 家計 収支 と 貯金額 を ヒアリング。 老後 資金 と 子供 の 教育 資金 に 不安 を 感じている。</p>
+        <p class="fp-sum-p">まず 現状 の キャッシュフロー を 整理 し、 3ヶ月分 の 生活防衛資金 を 確保 する方針。 その上で NISA 枠 の 活用 を 提案 予定。</p>
+        <p class="fp-sum-p">次回 面談 で 具体的 な 商品 提案。 それまでに 家計簿 3ヶ月分 を 用意 いただく。</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer-note">
+    <b>デザイン反映 場所</b>: 顧客カルテ → 議事録 タブ → 各 Zoom 面談 カード<br>
+    <b>いつ 見える か</b>: 実 Zoom 面談 を 録音 → 5〜10分 の AI 処理後、 顧客カルテ の 議事録 タブ に 表示<br>
+    <b>データ 依存</b>: Whisper 文字起こし が あれば 💬 会話 (chat bubble) が 出る。 Claude 議事録 が # 見出し や • 箇条書き を含む と 5色 セクション に 自動 分解 される。 それ以外 は 段落 表示 (この preview の CASE 2)。
+  </div>
+
+</div>
+</body>
+</html>
