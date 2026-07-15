@@ -5578,7 +5578,7 @@ ${ctxText}${surveyTxt}`;
                   <span>AI 議事録 (Claude) <span style="font-size:10px;color:#9CA3AF;font-weight:600;margin-left:6px;">編集・追記可</span></span>
                   <button class="fp-minutes-edit" style="background:#fff;border:1px solid #E2E8F0;color:#475569;font-size:11px;font-weight:700;padding:4px 10px;border-radius:5px;cursor:pointer;font-family:inherit;">✏ 編集</button>
                 </div>
-                <div class="fp-meeting-body fp-minutes-view" style="${aiData.summary ? '' : 'color:#9CA3AF;font-style:italic;'}">${aiData.summary ? escapeHtml(aiData.summary) : '議事録 未生成 — 「✏ 編集」 から手動追記 可'}</div>
+                <div class="fp-meeting-body fp-minutes-view fp-summary-structured" data-raw-summary="${escapeHtml(aiData.summary || '')}">${window.renderStructuredSummary ? window.renderStructuredSummary(aiData.summary) : (aiData.summary ? escapeHtml(aiData.summary) : '議事録 未生成 — 「✏ 編集」 から手動追記 可')}</div>
                 <div class="fp-minutes-edit-wrap" style="display:none;">
                   <textarea class="fp-minutes-textarea" rows="10" style="width:100%;padding:12px 14px;border:1.5px solid #BFDBFE;border-radius:8px;font-size:13px;font-family:inherit;line-height:1.9;resize:vertical;box-sizing:border-box;">${escapeHtml(aiData.summary || '')}</textarea>
                   <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:8px;">
@@ -9765,6 +9765,103 @@ ${client.name}さん、ありがとうございます。
     if (typeof c !== 'string') return '#888';
     return /^#[0-9a-fA-F]{3,8}$/.test(c) ? c : '#888';
   }
+
+  // 2026-07-16 v6: Claude 議事録 の markdown-like 構造 を SkelFit 視覚セクション に変換
+  //   parse rule:
+  //     - "##" or "###" 行 → セクション見出し (h4)
+  //     - "**xxx**" or "【xxx】" → 強調ラベル
+  //     - "- " or "・" or "•" or "*" 始まる 行 → bullet list
+  //     - "1. " or "1) " 始まる 行 → ordered list
+  //     - 空行区切り → 段落
+  //     - 「決定」「TODO」「次回」「懸念」 等の キーワード → colored accent
+  window.renderStructuredSummary = function renderStructuredSummary(text) {
+    const raw = String(text || '').trim();
+    if (!raw) return '<div class="fp-sum-empty">議事録 未生成 — 「編集」 から手動追記 可</div>';
+
+    // No structure detected → render as clean paragraphs
+    const hasStructure = /(?:^#{1,3}\s|【.+?】|\*\*.+?\*\*|^[-・•\*]\s|^\d+[.\)]\s)/m.test(raw);
+    if (!hasStructure) {
+      const paragraphs = raw.split(/\n{2,}/).map(p => p.trim()).filter(Boolean);
+      if (paragraphs.length <= 1) {
+        return `<div class="fp-sum-body">${escapeHtml(raw).replace(/\n/g, '<br>')}</div>`;
+      }
+      return paragraphs.map(p => `<p class="fp-sum-p">${escapeHtml(p).replace(/\n/g, '<br>')}</p>`).join('');
+    }
+
+    // Section-aware parse
+    const lines = raw.split(/\n/);
+    let html = '';
+    let inList = false;
+    let listType = 'ul';
+    const closeList = () => { if (inList) { html += `</${listType}>`; inList = false; } };
+    const toneOf = (label) => {
+      const s = label.toLowerCase();
+      if (/決定|合意|確認|結論/.test(label)) return 'vital';   // green
+      if (/todo|次回|課題|宿題|action|やること/i.test(label + s)) return 'attn'; // amber
+      if (/懸念|リスク|不安|注意|要検討/.test(label)) return 'critical'; // pink
+      if (/質問|関心|興味|希望/.test(label)) return 'trust';   // blue
+      return 'ink';                                              // default
+    };
+    const inlineBold = (s) => {
+      // **xxx** or 【xxx】 → strong
+      return escapeHtml(s)
+        .replace(/\*\*([^*]+)\*\*/g, '<strong class="fp-sum-strong">$1</strong>')
+        .replace(/【([^】]+)】/g, '<strong class="fp-sum-strong">【$1】</strong>');
+    };
+
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      const trimmed = line.trim();
+      if (!trimmed) { closeList(); continue; }
+
+      // Heading
+      const h = trimmed.match(/^(#{1,3})\s*(.+)$/);
+      if (h) {
+        closeList();
+        const text = h[2].replace(/^\*+|\*+$/g, '').trim();
+        const tone = toneOf(text);
+        html += `<h4 class="fp-sum-h4 fp-sum-tone-${tone}"><span class="fp-sum-dot"></span>${escapeHtml(text)}</h4>`;
+        continue;
+      }
+
+      // Standalone bold label like "**xxx**" or "【xxx】" on its own line
+      const boldOnly = trimmed.match(/^(?:\*\*([^*]+)\*\*|【([^】]+)】)\s*[:：]?\s*(.*)$/);
+      if (boldOnly && (boldOnly[1] || boldOnly[2])) {
+        closeList();
+        const label = boldOnly[1] || boldOnly[2];
+        const rest = boldOnly[3] || '';
+        const tone = toneOf(label);
+        if (rest) {
+          html += `<div class="fp-sum-row fp-sum-tone-${tone}"><span class="fp-sum-label">${escapeHtml(label)}</span><span class="fp-sum-value">${inlineBold(rest)}</span></div>`;
+        } else {
+          html += `<h5 class="fp-sum-h5 fp-sum-tone-${tone}">${escapeHtml(label)}</h5>`;
+        }
+        continue;
+      }
+
+      // Ordered list
+      const ol = trimmed.match(/^(\d+)[.\)]\s+(.+)$/);
+      if (ol) {
+        if (!inList || listType !== 'ol') { closeList(); html += '<ol class="fp-sum-list fp-sum-ol">'; inList = true; listType = 'ol'; }
+        html += `<li>${inlineBold(ol[2])}</li>`;
+        continue;
+      }
+
+      // Unordered list
+      const ul = trimmed.match(/^[-・•\*]\s+(.+)$/);
+      if (ul) {
+        if (!inList || listType !== 'ul') { closeList(); html += '<ul class="fp-sum-list fp-sum-ul">'; inList = true; listType = 'ul'; }
+        html += `<li>${inlineBold(ul[1])}</li>`;
+        continue;
+      }
+
+      // Plain paragraph
+      closeList();
+      html += `<p class="fp-sum-p">${inlineBold(trimmed)}</p>`;
+    }
+    closeList();
+    return html;
+  };
 
   // ============================
   // 初期化

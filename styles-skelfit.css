@@ -3163,6 +3163,315 @@ button[data-dist-subtab].active {
 }
 
 /* ==================================================================
+   議事録 セクション 分かりやすく (2026-07-16 owner request)
+   - Claude summary を 構造化 (見出し / bullet / label:value) 視覚セクション
+   - 各セクション に SkelFit tone (vital/attn/critical/trust/ink) top-stripe
+   - chat bubble を polish (大きく + 話者アイコン + 内容差)
+   ================================================================== */
+
+/* ---- meeting card 本体 (visual 強化) ---- */
+.fp-meeting-card {
+  background: #FFFFFF !important;
+  border: 1px solid #E4E7EE !important;
+  border-radius: 14px !important;
+  padding: 20px 22px !important;
+  margin-bottom: 14px !important;
+  box-shadow: 0 1px 2px rgba(11,18,32,0.04), 0 4px 10px rgba(11,18,32,0.04) !important;
+  transition: border-color 160ms, box-shadow 160ms !important;
+  position: relative !important;
+  overflow: hidden !important;
+}
+.fp-meeting-card::before {
+  content: '' !important;
+  position: absolute !important;
+  top: 0 !important; left: 0 !important; right: 0 !important;
+  height: 3px !important;
+  background: linear-gradient(90deg, #0F1729 0%, #00844A 100%) !important;
+}
+.fp-meeting-card:hover {
+  border-color: #94A3B8 !important;
+  box-shadow: 0 4px 12px rgba(11,18,32,0.06), 0 16px 40px rgba(11,18,32,0.05) !important;
+}
+.fp-meeting-card-head {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: flex-start !important;
+  gap: 12px !important;
+  padding-bottom: 12px !important;
+  border-bottom: 1px solid #F1F3F7 !important;
+  margin-bottom: 14px !important;
+}
+
+/* ---- fp-meeting-block (各セクション box) ---- */
+.fp-meeting-block {
+  padding: 14px 16px 12px !important;
+  background: #F5F7FA !important;
+  border: 1px solid #E4E7EE !important;
+  border-radius: 10px !important;
+  margin-bottom: 10px !important;
+  font-family: "Noto Sans JP", sans-serif !important;
+  font-size: 13.5px !important;
+  color: #0F1729 !important;
+  line-height: 1.75 !important;
+  position: relative !important;
+}
+.fp-meeting-block-label {
+  font-family: "Noto Sans JP", sans-serif !important;
+  font-size: 11px !important;
+  font-weight: 900 !important;
+  color: #475569 !important;
+  letter-spacing: 0.06em !important;
+  margin-bottom: 8px !important;
+  text-transform: none !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+}
+.fp-meeting-block-label::before {
+  content: '' !important;
+  display: inline-block !important;
+  width: 4px !important;
+  height: 14px !important;
+  background: #00844A !important;
+  border-radius: 2px !important;
+  flex-shrink: 0 !important;
+}
+
+/* ---- Claude 議事録: 構造化 render ---- */
+.fp-summary-structured {
+  background: #FFFFFF !important;
+  padding: 4px 0 !important;
+}
+.fp-summary-structured .fp-sum-h4 {
+  font-family: "Manrope", "Noto Sans JP", sans-serif !important;
+  font-size: 14px !important;
+  font-weight: 800 !important;
+  color: #0F1729 !important;
+  margin: 18px 0 8px !important;
+  padding: 6px 12px 6px 10px !important;
+  background: #F5F7FA !important;
+  border-radius: 6px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  letter-spacing: -0.005em !important;
+  line-height: 1.4 !important;
+}
+.fp-summary-structured .fp-sum-h4:first-child { margin-top: 4px !important; }
+.fp-summary-structured .fp-sum-dot {
+  display: inline-block !important;
+  width: 8px !important;
+  height: 8px !important;
+  border-radius: 999px !important;
+  background: #64748B !important;
+  flex-shrink: 0 !important;
+}
+.fp-summary-structured .fp-sum-h4.fp-sum-tone-vital { background: #ECFDF5 !important; color: #00844A !important; }
+.fp-summary-structured .fp-sum-h4.fp-sum-tone-vital .fp-sum-dot { background: #00844A !important; }
+.fp-summary-structured .fp-sum-h4.fp-sum-tone-attn { background: #FEF3C7 !important; color: #92400E !important; }
+.fp-summary-structured .fp-sum-h4.fp-sum-tone-attn .fp-sum-dot { background: #B45309 !important; }
+.fp-summary-structured .fp-sum-h4.fp-sum-tone-critical { background: #FEF2F2 !important; color: #BE185D !important; }
+.fp-summary-structured .fp-sum-h4.fp-sum-tone-critical .fp-sum-dot { background: #BE185D !important; }
+.fp-summary-structured .fp-sum-h4.fp-sum-tone-trust { background: #DBEAFE !important; color: #1E40AF !important; }
+.fp-summary-structured .fp-sum-h4.fp-sum-tone-trust .fp-sum-dot { background: #1E40AF !important; }
+
+.fp-summary-structured .fp-sum-h5 {
+  font-family: "Noto Sans JP", sans-serif !important;
+  font-size: 12.5px !important;
+  font-weight: 800 !important;
+  color: #334155 !important;
+  margin: 14px 0 6px !important;
+  padding: 0 !important;
+}
+
+.fp-summary-structured .fp-sum-p {
+  font-family: "Noto Sans JP", sans-serif !important;
+  font-size: 13.5px !important;
+  color: #1F2A44 !important;
+  line-height: 1.85 !important;
+  margin: 6px 0 !important;
+  text-wrap: pretty;
+}
+.fp-summary-structured .fp-sum-body {
+  font-size: 13.5px !important;
+  color: #1F2A44 !important;
+  line-height: 1.85 !important;
+  white-space: pre-wrap;
+}
+.fp-summary-structured .fp-sum-strong {
+  color: #0F1729 !important;
+  font-weight: 800 !important;
+}
+
+.fp-summary-structured .fp-sum-list {
+  margin: 6px 0 10px !important;
+  padding-left: 22px !important;
+  font-size: 13.5px !important;
+  color: #1F2A44 !important;
+  line-height: 1.85 !important;
+}
+.fp-summary-structured .fp-sum-list li {
+  margin: 3px 0 !important;
+  padding-left: 4px !important;
+  text-wrap: pretty;
+}
+.fp-summary-structured .fp-sum-ul { list-style: none !important; padding-left: 4px !important; }
+.fp-summary-structured .fp-sum-ul li {
+  position: relative !important;
+  padding-left: 18px !important;
+}
+.fp-summary-structured .fp-sum-ul li::before {
+  content: '' !important;
+  position: absolute !important;
+  left: 4px !important;
+  top: 12px !important;
+  width: 6px !important;
+  height: 2px !important;
+  background: #00844A !important;
+  border-radius: 2px !important;
+}
+.fp-summary-structured .fp-sum-ol {
+  font-variant-numeric: tabular-nums !important;
+}
+
+.fp-summary-structured .fp-sum-row {
+  display: flex !important;
+  align-items: baseline !important;
+  gap: 12px !important;
+  padding: 8px 12px !important;
+  background: #F5F7FA !important;
+  border-radius: 6px !important;
+  margin: 5px 0 !important;
+  border-left: none !important;
+  border: 1px solid #EEF0F5 !important;
+}
+.fp-summary-structured .fp-sum-row.fp-sum-tone-vital { border-color: rgba(0,132,74,0.24) !important; background: #ECFDF5 !important; }
+.fp-summary-structured .fp-sum-row.fp-sum-tone-attn { border-color: rgba(180,83,9,0.24) !important; background: #FEF3C7 !important; }
+.fp-summary-structured .fp-sum-row.fp-sum-tone-critical { border-color: rgba(190,24,93,0.22) !important; background: #FEF2F2 !important; }
+.fp-summary-structured .fp-sum-row.fp-sum-tone-trust { border-color: rgba(30,64,175,0.24) !important; background: #DBEAFE !important; }
+.fp-summary-structured .fp-sum-row .fp-sum-label {
+  flex-shrink: 0 !important;
+  font-weight: 800 !important;
+  font-size: 12.5px !important;
+  color: #0F1729 !important;
+  min-width: 90px !important;
+}
+.fp-summary-structured .fp-sum-row .fp-sum-value {
+  font-size: 13px !important;
+  color: #1F2A44 !important;
+  line-height: 1.7 !important;
+  flex: 1 !important;
+}
+
+.fp-summary-structured .fp-sum-empty {
+  color: #94A3B8 !important;
+  font-style: italic !important;
+  font-size: 13px !important;
+  padding: 8px 0 !important;
+}
+
+/* ---- chat bubble polish (話者ラベル + 大きく + 影) ---- */
+.fp-transcript-chat {
+  padding: 18px 20px !important;
+  background: linear-gradient(180deg, #F8FAFC 0%, #F1F5F9 100%) !important;
+  max-height: 480px !important;
+  overflow-y: auto !important;
+  scroll-behavior: smooth;
+}
+.fp-transcript-chat > div {
+  margin-bottom: 12px !important;
+}
+.fp-transcript-chat > div > div {
+  max-width: 80% !important;
+  padding: 10px 14px !important;
+  border-radius: 16px !important;
+  font-size: 13px !important;
+  line-height: 1.75 !important;
+  position: relative !important;
+}
+/* FP先生 (右) */
+.fp-transcript-chat > div[style*="justify-content:flex-end"] > div {
+  background: linear-gradient(135deg, #00844A 0%, #006B3D 100%) !important;
+  color: #FFFFFF !important;
+  border-radius: 16px 16px 4px 16px !important;
+  box-shadow: 0 2px 8px rgba(0,132,74,0.28) !important;
+}
+/* お客様 (左) */
+.fp-transcript-chat > div[style*="justify-content:flex-start"] > div {
+  background: #FFFFFF !important;
+  color: #0F1729 !important;
+  border-radius: 16px 16px 16px 4px !important;
+  border: 1px solid #E4E7EE !important;
+  box-shadow: 0 1px 4px rgba(15,23,41,0.08) !important;
+}
+.fp-transcript-chat > div > div > div:first-child {
+  font-size: 10.5px !important;
+  font-weight: 900 !important;
+  letter-spacing: 0.08em !important;
+  margin-bottom: 5px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+}
+.fp-transcript-chat > div[style*="flex-end"] > div > div:first-child {
+  color: rgba(255,255,255,0.92) !important;
+}
+.fp-transcript-chat > div[style*="flex-end"] > div > div:first-child::before {
+  content: '★';
+  font-size: 9px;
+  opacity: 0.9;
+}
+.fp-transcript-chat > div[style*="flex-start"] > div > div:first-child {
+  color: #64748B !important;
+}
+.fp-transcript-chat > div[style*="flex-start"] > div > div:first-child::before {
+  content: '●';
+  font-size: 8px;
+  color: #94A3B8;
+}
+
+/* ---- transcript view toggle (💬 vs 📄) ---- */
+.fp-transcript-view-toggle {
+  background: #F1F5F9 !important;
+  border-radius: 10px !important;
+  padding: 3px !important;
+  gap: 2px !important;
+  display: inline-flex !important;
+}
+.fp-tv-btn {
+  background: transparent !important;
+  color: #64748B !important;
+  border: none !important;
+  padding: 6px 14px !important;
+  border-radius: 7px !important;
+  font-size: 11.5px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.02em !important;
+  cursor: pointer !important;
+  transition: background 120ms, color 120ms !important;
+  font-family: "Noto Sans JP", sans-serif !important;
+}
+.fp-tv-btn.fp-tv-active {
+  background: #FFFFFF !important;
+  color: #0F1729 !important;
+  box-shadow: 0 1px 3px rgba(15,23,42,0.10) !important;
+}
+
+/* ---- concern chips + questions polish ---- */
+.fp-concern-chip {
+  display: inline-block !important;
+  background: #FEF3C7 !important;
+  color: #92400E !important;
+  border: 1px solid rgba(180,83,9,0.22) !important;
+  padding: 4px 10px !important;
+  border-radius: 999px !important;
+  font-size: 11.5px !important;
+  font-weight: 700 !important;
+  margin: 3px 3px 3px 0 !important;
+  font-family: "Noto Sans JP", sans-serif !important;
+}
+
+/* ==================================================================
    audit fix P0-3: ghost-btn-lg (「一斉配信」等) が white-on-white で 不可視
    → light-hero context で ink text + hairline border に override
    ================================================================== */
