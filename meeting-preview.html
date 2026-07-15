@@ -71,7 +71,8 @@
   .wrap { max-width: 960px; margin: 0 auto; padding: 48px 32px 96px; }
 
   /* Page header (editorial 風、ポスター 感 排除) */
-  .page-head { margin-bottom: 40px; }
+  /* 外部 CSS が <header> を display:flex に強制 → 縦書き事故 の 対策 */
+  .page-head { display: block !important; margin-bottom: 40px; }
   .page-head .kicker {
     display: inline-flex; align-items: center; gap: 8px;
     font-family: 'Manrope', 'Noto Sans JP', sans-serif;
