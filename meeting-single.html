@@ -300,6 +300,186 @@
     background: #FFFFFF !important;
   }
 
+  /* ============================================================
+     LIST / ROW / STAT / MEMO の 見やすさ polish (中身の editorial 化)
+     ============================================================ */
+
+  /* h4 pill の 次にくる list は マージン 詰めて 直下感 */
+  .fp-summary-structured .fp-sum-h4 + ul.fp-sum-list,
+  .fp-summary-structured .fp-sum-h4 + ol.fp-sum-list,
+  .fp-summary-structured .fp-sum-h4 + p.fp-sum-p,
+  .fp-summary-structured .fp-sum-h4 + .fp-sum-row {
+    margin-top: 4px !important;
+  }
+
+  /* list 共通 — 素bullet 廃止、 各 li を hairline card 化 */
+  .fp-summary-structured .fp-sum-list {
+    list-style: none !important;
+    padding: 0 !important;
+    margin: 6px 0 22px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 6px !important;
+  }
+  .fp-summary-structured .fp-sum-list > li {
+    position: relative !important;
+    background: #FFFFFF !important;
+    border: 1px solid #ECECEA !important;
+    border-radius: 8px !important;
+    padding: 11px 14px 11px 42px !important;
+    font-size: 13.5px !important;
+    line-height: 1.75 !important;
+    color: #1A1A1A !important;
+    transition: border-color 120ms cubic-bezier(0.22, 1, 0.36, 1) !important;
+  }
+  .fp-summary-structured .fp-sum-list > li:hover {
+    border-color: #B0B0AC !important;
+  }
+  /* 決定事項 (vital / ul) — 左に ✓ green check */
+  .fp-summary-structured .fp-sum-tone-vital + ul.fp-sum-list > li::before,
+  .fp-summary-structured .fp-sum-h4.fp-sum-tone-vital + ul.fp-sum-list > li::before {
+    content: '✓' !important;
+    position: absolute !important;
+    left: 14px !important; top: 10px !important;
+    width: 20px !important; height: 20px !important;
+    background: #047647 !important;
+    color: #FFFFFF !important;
+    border-radius: 50% !important;
+    display: inline-flex !important;
+    align-items: center !important; justify-content: center !important;
+    font-size: 11px !important;
+    font-weight: 900 !important;
+    font-family: 'Manrope', 'Noto Sans JP', sans-serif !important;
+    line-height: 1 !important;
+  }
+  /* TODO (attn / ol) — 番号 chip 濃橙 */
+  .fp-summary-structured .fp-sum-tone-attn + ol.fp-sum-list,
+  .fp-summary-structured .fp-sum-h4.fp-sum-tone-attn + ol.fp-sum-list {
+    counter-reset: fp-todo !important;
+  }
+  .fp-summary-structured .fp-sum-tone-attn + ol.fp-sum-list > li,
+  .fp-summary-structured .fp-sum-h4.fp-sum-tone-attn + ol.fp-sum-list > li {
+    counter-increment: fp-todo !important;
+  }
+  .fp-summary-structured .fp-sum-tone-attn + ol.fp-sum-list > li::before,
+  .fp-summary-structured .fp-sum-h4.fp-sum-tone-attn + ol.fp-sum-list > li::before {
+    content: counter(fp-todo) !important;
+    position: absolute !important;
+    left: 12px !important; top: 9px !important;
+    width: 22px !important; height: 22px !important;
+    background: #B5530F !important;
+    color: #FFFFFF !important;
+    border-radius: 6px !important;
+    display: inline-flex !important;
+    align-items: center !important; justify-content: center !important;
+    font-family: 'Manrope', 'Noto Sans JP', sans-serif !important;
+    font-size: 12px !important;
+    font-weight: 800 !important;
+    line-height: 1 !important;
+  }
+  /* 数字・試算 (mono / ul) — 左に 小さな ink 縦 bar (数字 chip 埋込 済 の 別強調) */
+  .fp-summary-structured .fp-sum-tone-mono + ul.fp-sum-list > li,
+  .fp-summary-structured .fp-sum-h4.fp-sum-tone-mono + ul.fp-sum-list > li,
+  .fp-summary-structured .fp-sum-tone-ink + ul.fp-sum-list > li,
+  .fp-summary-structured .fp-sum-h4.fp-sum-tone-ink + ul.fp-sum-list > li {
+    padding-left: 14px !important;
+    border-left: 3px solid #0A0A0A !important;
+  }
+  .fp-summary-structured .fp-sum-tone-mono + ul.fp-sum-list > li::before,
+  .fp-summary-structured .fp-sum-h4.fp-sum-tone-mono + ul.fp-sum-list > li::before,
+  .fp-summary-structured .fp-sum-tone-ink + ul.fp-sum-list > li::before,
+  .fp-summary-structured .fp-sum-h4.fp-sum-tone-ink + ul.fp-sum-list > li::before {
+    content: none !important;
+  }
+
+  /* fp-sum-num (¥/円/万 数字 の 埋込 highlight) を もっと 主張 させる — mono chip 化 */
+  .fp-summary-structured .fp-sum-num {
+    background: #0A0A0A !important;
+    color: #FFFFFF !important;
+    padding: 1px 7px !important;
+    border-radius: 5px !important;
+    font-family: 'JetBrains Mono', 'Manrope', ui-monospace, monospace !important;
+    font-weight: 700 !important;
+    font-size: 12px !important;
+    letter-spacing: 0.01em !important;
+    display: inline-block !important;
+    line-height: 1.4 !important;
+    vertical-align: baseline !important;
+  }
+
+  /* fp-sum-strong (bold 強調) — 濃色下線 で 上品 に */
+  .fp-summary-structured .fp-sum-strong {
+    font-weight: 700 !important;
+    color: #0A0A0A !important;
+    background: linear-gradient(transparent 68%, rgba(10,10,10,0.14) 68%) !important;
+    padding: 0 1px !important;
+  }
+
+  /* 懸念事項 row (label + value) を 警告 alert card 化 */
+  .fp-summary-structured .fp-sum-row {
+    display: grid !important;
+    grid-template-columns: 200px 1fr !important;
+    gap: 12px 18px !important;
+    align-items: start !important;
+    background: #FFFFFF !important;
+    border: 1px solid #ECECEA !important;
+    border-left: 3px solid #6B6B6B !important;
+    border-radius: 8px !important;
+    padding: 12px 16px !important;
+    margin: 6px 0 !important;
+  }
+  .fp-summary-structured .fp-sum-row.fp-sum-tone-critical,
+  .fp-summary-structured .fp-sum-tone-critical + .fp-sum-row,
+  .fp-summary-structured .fp-sum-h4.fp-sum-tone-critical ~ .fp-sum-row {
+    border-left-color: #DC2B2B !important;
+  }
+  .fp-summary-structured .fp-sum-row .fp-sum-label {
+    font-family: 'Manrope', 'Noto Sans JP', sans-serif !important;
+    font-size: 12.5px !important;
+    font-weight: 800 !important;
+    color: #0A0A0A !important;
+    letter-spacing: 0.005em !important;
+    padding-top: 2px !important;
+  }
+  .fp-summary-structured .fp-sum-row .fp-sum-value {
+    font-size: 13.5px !important;
+    line-height: 1.75 !important;
+    color: #1A1A1A !important;
+  }
+
+  /* fp-sum-p (段落) の 見やすさ調整 */
+  .fp-summary-structured .fp-sum-p {
+    font-size: 13.5px !important;
+    line-height: 1.85 !important;
+    color: #1A1A1A !important;
+    margin: 6px 0 22px !important;
+    max-width: 68ch !important;
+  }
+
+  /* 補足メモ h5 (小見出し) — 濃色 罫線 header */
+  .fp-summary-structured .fp-sum-h5 {
+    font-family: 'Manrope', 'Noto Sans JP', sans-serif !important;
+    font-size: 11.5px !important;
+    font-weight: 800 !important;
+    letter-spacing: 0.08em !important;
+    color: #6B6B6B !important;
+    text-transform: uppercase !important;
+    padding: 0 0 8px !important;
+    margin: 28px 0 12px !important;
+    border-bottom: 1px solid #ECECEA !important;
+  }
+
+  @media (max-width: 640px) {
+    .fp-summary-structured .fp-sum-row {
+      grid-template-columns: 1fr !important;
+      gap: 6px !important;
+    }
+    .fp-summary-structured .fp-sum-list > li {
+      font-size: 13px !important;
+      padding-right: 12px !important;
+    }
+  }
+
   @media (max-width: 640px) {
     .preview-topbar { padding: 12px 18px; flex-wrap: wrap; gap: 10px; }
     .preview-topbar .crumb { display: none; }
