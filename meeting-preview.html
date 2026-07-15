@@ -13,37 +13,216 @@
 <style>
   /* workspace CSS が html,body を height:100%/overflow:hidden で固定するので preview page 用に上書き */
   html, body { height: auto !important; overflow: auto !important; }
-  body { margin: 0; padding: 40px 24px 80px; background: #F5F7FA; font-family: 'Noto Sans JP', sans-serif; -webkit-font-smoothing: antialiased; }
-  .wrap { max-width: 920px; margin: 0 auto; }
-  .preview-banner { background: #0F1729; color: #FFF; padding: 18px 24px; border-radius: 12px; margin-bottom: 28px; display: flex; align-items: center; gap: 16px; }
-  .preview-banner .lbl { background: #00844A; color: #FFF; font-size: 10.5px; font-weight: 900; letter-spacing: 0.14em; padding: 5px 12px; border-radius: 999px; }
-  .preview-banner .msg { font-size: 13.5px; line-height: 1.7; }
-  .preview-banner .msg b { color: #00c96a; }
-  h1 { font-family: 'Manrope','Noto Sans JP',sans-serif; font-weight: 800; font-size: 28px; color: #0F1729; letter-spacing: -0.01em; margin: 0 0 6px; }
-  .sub { color: #64748B; font-size: 14px; margin-bottom: 30px; line-height: 1.7; }
-  .demo-label { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #64748B; letter-spacing: 0.14em; text-transform: uppercase; font-weight: 600; margin: 32px 0 12px; }
-  .footer-note { margin-top: 40px; padding: 18px 22px; background: #FFFFFF; border: 1px solid #E4E7EE; border-radius: 10px; color: #475569; font-size: 13px; line-height: 1.8; }
-  .footer-note b { color: #0F1729; }
-  .fp-btn { display: inline-block; padding: 6px 12px; background: #0F1729; color: #FFF; text-decoration: none; font-size: 12px; font-weight: 700; border-radius: 6px; font-family: 'Noto Sans JP', sans-serif; }
+  body {
+    margin: 0;
+    padding: 0;
+    background: #F6F6F4;
+    color: #0A0A0A;
+    font-family: 'Noto Sans JP', -apple-system, BlinkMacSystemFont, 'Hiragino Sans', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Top workspace bar — FP Compass アプリ の sidebar と同じ deep slate を薄く上部だけ流用 */
+  .preview-topbar {
+    background: #0F1117;
+    color: #E4E6EB;
+    padding: 14px 32px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    font-size: 12.5px;
+    letter-spacing: 0.01em;
+  }
+  .preview-topbar .brand {
+    font-family: 'Manrope', 'Noto Sans JP', sans-serif;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    font-size: 14px;
+    color: #FFFFFF;
+  }
+  .preview-topbar .brand-dot {
+    display: inline-block; width: 7px; height: 7px; border-radius: 50%;
+    background: #5B5BF0; box-shadow: 0 0 0 4px rgba(91,91,240,0.18);
+    margin-right: 10px; vertical-align: middle; transform: translateY(-1px);
+  }
+  .preview-topbar .divider { width: 1px; height: 16px; background: #232838; }
+  .preview-topbar .crumb { color: #7A8194; font-size: 12px; }
+  .preview-topbar .crumb b { color: #E4E6EB; font-weight: 600; }
+  .preview-topbar .env {
+    margin-left: auto;
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 4px 10px 4px 8px;
+    background: rgba(91,91,240,0.14);
+    color: #A5A5F8;
+    border: 1px solid rgba(91,91,240,0.28);
+    border-radius: 999px;
+    font-family: 'Manrope', 'Noto Sans JP', sans-serif;
+    font-size: 10.5px; font-weight: 700;
+    letter-spacing: 0.08em;
+  }
+  .preview-topbar .env::before {
+    content: ''; width: 5px; height: 5px; border-radius: 50%;
+    background: #5B5BF0; box-shadow: 0 0 6px rgba(91,91,240,0.6);
+  }
+
+  .wrap { max-width: 960px; margin: 0 auto; padding: 48px 32px 96px; }
+
+  /* Page header (editorial 風、ポスター 感 排除) */
+  .page-head { margin-bottom: 40px; }
+  .page-head .kicker {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-family: 'Manrope', 'Noto Sans JP', sans-serif;
+    font-size: 11px; font-weight: 700;
+    color: #5B5BF0;
+    letter-spacing: 0.14em;
+    margin-bottom: 14px;
+  }
+  .page-head .kicker::before {
+    content: ''; width: 20px; height: 1.5px; background: #5B5BF0;
+  }
+  h1 {
+    font-family: 'Manrope', 'Noto Sans JP', sans-serif;
+    font-weight: 800;
+    font-size: clamp(28px, 3.4vw, 38px);
+    color: #0A0A0A;
+    letter-spacing: -0.02em;
+    line-height: 1.15;
+    margin: 0 0 14px;
+    text-wrap: balance;
+  }
+  .sub {
+    color: #3F3F46;
+    font-size: 15px;
+    line-height: 1.75;
+    max-width: 68ch;
+    margin: 0;
+  }
+  .sub .highlight { color: #0A0A0A; font-weight: 700; background: linear-gradient(transparent 62%, rgba(91,91,240,0.14) 62%); padding: 0 2px; }
+
+  /* Info panel — 「これは何?」 説明 (banner の代替、control 感を出す) */
+  .info-panel {
+    margin-top: 24px;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 14px 16px;
+    padding: 18px 22px;
+    background: #FFFFFF;
+    border: 1px solid #ECECEA;
+    border-radius: 14px;
+    box-shadow: 0 1px 2px rgba(16,24,40,0.04);
+  }
+  .info-panel .ip-icon {
+    width: 36px; height: 36px; border-radius: 10px;
+    background: #F5F7FF;
+    color: #5B5BF0;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+    grid-row: span 2;
+  }
+  .info-panel .ip-title {
+    font-family: 'Manrope', 'Noto Sans JP', sans-serif;
+    font-size: 13.5px; font-weight: 700; color: #0A0A0A;
+    letter-spacing: -0.005em;
+  }
+  .info-panel .ip-body {
+    font-size: 13px; line-height: 1.75; color: #3F3F46;
+    grid-column: 2;
+  }
+
+  /* Section divider — demo-label を全大文字 mono から editorial 風 に格下げ */
+  .demo-label {
+    display: flex; align-items: center; gap: 14px;
+    margin: 56px 0 18px;
+    font-family: 'Manrope', 'Noto Sans JP', sans-serif;
+    font-size: 12px; font-weight: 700;
+    color: #6B6B6B;
+    letter-spacing: 0.02em;
+  }
+  .demo-label::before {
+    content: ''; width: 24px; height: 1px; background: #DCDCD8;
+  }
+  .demo-label::after {
+    content: ''; flex: 1; height: 1px; background: #ECECEA;
+  }
+  .demo-label .idx {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 10.5px; color: #9A9A9A;
+    letter-spacing: 0.06em;
+  }
+
+  /* Footer note */
+  .footer-note {
+    margin-top: 56px;
+    padding: 22px 26px;
+    background: #FFFFFF;
+    border: 1px solid #ECECEA;
+    border-radius: 14px;
+    color: #3F3F46;
+    font-size: 13px;
+    line-height: 1.85;
+    box-shadow: 0 1px 2px rgba(16,24,40,0.04);
+  }
+  .footer-note b { color: #0A0A0A; font-weight: 700; }
+
+  .fp-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 7px 14px;
+    background: #0A0A0A;
+    color: #FFFFFF;
+    text-decoration: none;
+    font-size: 12px; font-weight: 600;
+    border-radius: 8px;
+    font-family: 'Noto Sans JP', sans-serif;
+    transition: transform 120ms cubic-bezier(0.22, 1, 0.36, 1), background 120ms;
+  }
+  .fp-btn:hover { background: #3F3F46; transform: translateY(-1px); }
+
+  @media (max-width: 640px) {
+    .preview-topbar { padding: 12px 18px; flex-wrap: wrap; gap: 10px; }
+    .preview-topbar .crumb { display: none; }
+    .wrap { padding: 32px 20px 72px; }
+    .info-panel { grid-template-columns: 1fr; }
+    .info-panel .ip-icon { grid-row: auto; }
+    .info-panel .ip-body { grid-column: 1; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .fp-btn { transition: none; }
+  }
 </style>
 </head>
 <body>
+
+<div class="preview-topbar">
+  <span class="brand"><span class="brand-dot"></span>FP Compass</span>
+  <span class="divider"></span>
+  <span class="crumb">Design Preview <b>/ 議事録 レイアウト</b></span>
+  <span class="env">STG</span>
+</div>
+
 <div class="wrap">
 
-  <div class="preview-banner">
-    <span class="lbl">PREVIEW</span>
-    <div class="msg">
-      これは <b>デザイン確認用の プレビュー</b> です。 実 顧客カルテ の 議事録タブ で 同じ 見た目 が 出ます。<br>
-      実データ (Zoom 面談 + AI 生成) は tenant セットアップ + 面談 実施 が必要。 このページ は 合成 サンプル で 見た目 だけ 確認 できます。
+  <header class="page-head">
+    <div class="kicker">Design Preview</div>
+    <h1>議事録 の 見え方</h1>
+    <p class="sub">
+      実 顧客カルテ の <span class="highlight">議事録タブ</span> で 同じ レイアウト が 表示 されます。 このページ は 合成 サンプル で 見た目 だけ 確認 できます。
+    </p>
+    <div class="info-panel">
+      <div class="ip-icon" aria-hidden="true">◐</div>
+      <div class="ip-title">これは デザイン プレビュー です</div>
+      <div class="ip-body">
+        実データ (Zoom 面談 + AI 生成 議事録) を 見る には、 tenant セットアップ と 面談 実施 が 必要。 ここ で は 「実 UI と 同じ CSS で 描画 された 合成 サンプル」 を 3ケース 並べて 見せて います。
+      </div>
     </div>
+  </header>
+
+  <div class="demo-label">
+    <span class="idx">CASE 01</span>
+    <span>owner が 見せた 実 Claude summary (v7 polish 版)</span>
   </div>
-
-  <h1>議事録 見え方 (owner request)</h1>
-  <p class="sub">
-    「ボックス + デザイン + LINE風 chat」 の 全部 反映。 以下 が 実際 の 顧客カルテ 議事録タブ で 表示 される 見た目 です。
-  </p>
-
-  <div class="demo-label">CASE 0 — owner が 見せた 実 Claude summary (v7 polish 版)</div>
 
   <div class="fp-meeting-card">
     <div class="fp-meeting-card-head">
@@ -61,7 +240,10 @@
     </div>
   </div>
 
-  <div class="demo-label">CASE 1 — LINE風 chat + 構造化 summary (別 case)</div>
+  <div class="demo-label">
+    <span class="idx">CASE 02</span>
+    <span>LINE風 chat + 構造化 summary</span>
+  </div>
 
   <!-- Meeting card: full sample -->
   <div class="fp-meeting-card">
@@ -156,7 +338,10 @@
     </div>
   </div>
 
-  <div class="demo-label">CASE 2 — 非構造化 summary (Claude が シンプルに 生成 した場合)</div>
+  <div class="demo-label">
+    <span class="idx">CASE 03</span>
+    <span>非構造化 summary (Claude が シンプルに 生成 した場合)</span>
+  </div>
 
   <div class="fp-meeting-card">
     <div class="fp-meeting-card-head">
