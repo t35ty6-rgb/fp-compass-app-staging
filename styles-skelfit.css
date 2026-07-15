@@ -2519,9 +2519,7 @@ table.clients .col-aum {
   border-radius: 14px !important;
   padding: 18px 20px !important;
   box-shadow: none !important;
-  display: flex !important;
-  gap: 14px !important;
-  align-items: flex-start !important;
+  display: block !important;   /* 2026-07-15 fix: 旧 flex で children が 横並び → やる事カラム 縦積み事故 (owner screenshot) */
   transition: border-color 120ms, transform 120ms !important;
   position: relative !important;
 }
@@ -2554,7 +2552,6 @@ table.clients .col-aum {
   display: flex !important;
   gap: 12px !important;
   align-items: center !important;
-  flex-shrink: 0 !important;
 }
 .senior-card-avatar {
   width: 44px !important;
@@ -2594,7 +2591,7 @@ table.clients .col-aum {
   display: inline-block !important;
 }
 .senior-card-action {
-  flex: 1 !important;
+  margin-top: 12px !important;
   min-width: 0 !important;
 }
 .senior-action-label {
