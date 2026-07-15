@@ -2731,6 +2731,14 @@
 
     wait.remove();
 
+    // ★ 2026-07-15: Chrome拡張 に この顧客 arm (拡張入ってれば Zoomタブ で アイコン押すだけ で 該当顧客の 録音開始)
+    try {
+      const finalClientId = result.customerId || clientId;
+      if (typeof window.armTabRecorder === 'function' && finalClientId) {
+        window.armTabRecorder(finalClientId, clientName, window.currentTenantId);
+      }
+    } catch (e) { console.warn('armTabRecorder failed:', e); }
+
     // 成功 → 結果モーダル — LINE 送信成否で 出し分け
     const ov = document.createElement('div');
     ov.id = 'fp-quick-zoom-result';
@@ -2763,6 +2771,22 @@
           </button>
           <div style="font-size:11px;color:#6B7280;margin-top:8px;line-height:1.55;">画面共有ダイアログで <strong>「Zoom タブ」 + 音声を共有</strong> を 選んで OK → 自動で 議事録 生成 されます</div>
         </div>
+
+        <!-- ★ Chrome拡張機能 install 済 の場合の別ルート案内 (AirPods等 で 相手の声が拾えない客向け) -->
+        ${window.__fpTabRecorder ? `
+          <div style="background:#ECFDF5;border:1.5px solid #10B981;border-radius:10px;padding:14px 16px;margin-bottom:14px;">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+              <span style="font-size:16px;">🧩</span>
+              <div style="font-size:10.5px;font-weight:800;color:#059669;letter-spacing:0.14em;">CHROME拡張で録音 (画面共有ダイアログ 不要)</div>
+            </div>
+            <div style="font-size:12.5px;color:#0F1729;line-height:1.65;margin-bottom:6px;">
+              ${escapeHtml(clientName)} さん を <b>拡張機能に arm済</b>。 上のZoom URL を 開いて、 <b>Zoom タブ の状態で 拡張機能アイコン (Chrome 右上) を 1回クリック</b> で 自動 録音開始します。
+            </div>
+            <div style="font-size:11px;color:#065F46;line-height:1.6;">
+              ✓ 顧客紐付け 済 &nbsp; ✓ AirPods でも 相手の声 拾える &nbsp; ✓ Zoom タブ 閉じたら 自動停止 → 議事録 生成
+            </div>
+          </div>
+        ` : ''}
 
         <!-- お客様用 URL 共有エリア -->
         ${result.linePushed ? `
@@ -2885,35 +2909,69 @@
     });
   }
 
-  // ★ 2026-07-14 v11: Chrome拡張 (Zoom タブ音声レコーダー) から の 録音 blob 受信
-  //   content.js が postMessage で FP_RECORDING_DONE を 送って くる → 音声 を 既存 onRecordingComplete パイプライン に 流す
+  // ★ 2026-07-15 v11.1: Chrome拡張 (Zoom タブ音声レコーダー) から の 録音 blob 受信
+  //   content.js が postMessage で FP_RECORDING_DONE を 送ってくる → 音声 を 既存 onRecordingComplete パイプライン に 流す
+  //   meta.clientId が armed 済 なら その 顧客 の 議事録 として 保存、 なければ 「未分類」で 保存
   if (!window._fpTabRecorderListener) {
     window._fpTabRecorderListener = true;
     window.addEventListener('message', async (ev) => {
       if (ev.source !== window) return;
       const d = ev.data;
-      if (!d || d.source !== 'fp-tab-recorder' || d.type !== 'RECORDING_DONE') return;
+      if (!d || d.source !== 'fp-tab-recorder') return;
+
+      // 録音開始 通知 (badge 光っただけ の 場合、 UI 側 で 顧客名 トースト 出す)
+      if (d.type === 'RECORDING_STARTED') {
+        const p = d.payload || {};
+        try {
+          const t = document.createElement('div');
+          t.innerHTML = '● <b>録音開始</b>: ' + (p.clientName || '(顧客未指定)') + ' さん の Zoom タブ音声 を 収録中…';
+          t.style.cssText = 'position:fixed;top:24px;left:50%;transform:translateX(-50%);background:#DC2626;color:#fff;padding:12px 22px;border-radius:99px;font-size:13px;font-weight:800;z-index:2147483647;box-shadow:0 12px 32px rgba(0,0,0,.35);';
+          document.body.appendChild(t);
+          setTimeout(() => { t.style.opacity = '0'; t.style.transition = 'opacity .4s'; }, 3500);
+          setTimeout(() => t.remove(), 4000);
+        } catch(_) {}
+        return;
+      }
+
+      if (d.type !== 'RECORDING_DONE') return;
+
       const payload = d.payload || {};
-      console.log('[fp-tab-recorder] 受信:', payload.size, 'bytes,', Math.round(payload.durationMs / 1000), '秒');
+      const meta = payload.meta || {};
+      console.log('[fp-tab-recorder] 受信:', payload.size, 'bytes,', Math.round(payload.durationMs / 1000), '秒, clientId:', meta.clientId);
       try {
-        // base64 → Blob
         const bin = atob(payload.base64 || '');
         const arr = new Uint8Array(bin.length);
         for (let i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
         const blob = new Blob([arr], { type: payload.mime || 'audio/webm' });
         const blobUrl = URL.createObjectURL(blob);
-        // bookingTs 新規発行 (拡張 起点 の 場合 は 客カルテ 未紐付 → 「未分類」 で 保存 → 後で UI で 紐付け)
-        const bookingTs = payload.meta?.bookingTs || (new Date().toISOString().replace(/[:.]/g, '-') + '-tabrec');
-        // トースト 通知
+
+        // ★ armed 済 なら 該当顧客 の bookingTs を 発行 して 顧客紐付け保証
+        //   fp-quick-inperson-meta に事前登録 → onRecordingComplete が それを見て 顧客ID解決
+        const bookingTs = meta.bookingTs || (new Date().toISOString().replace(/[:.]/g, '-') + '-tabrec');
+        if (meta.clientId && !meta.bookingTs) {
+          try {
+            const existing = JSON.parse(localStorage.getItem('fp-quick-inperson-meta') || '[]');
+            existing.push({
+              ts: bookingTs,
+              clientId: meta.clientId,
+              clientName: meta.clientName || '(名前未取得)',
+              startedAt: new Date(meta.startedAt || Date.now()).toISOString(),
+              mode: 'chrome-ext-tabrec',
+            });
+            localStorage.setItem('fp-quick-inperson-meta', JSON.stringify(existing.slice(-50)));
+          } catch(_) {}
+        }
+
+        const clientName = meta.clientName || '(顧客未指定)';
         try {
           const t = document.createElement('div');
-          t.textContent = '✓ Chrome拡張 から 音声 受信 (' + Math.round(blob.size/1024) + 'KB, ' + Math.round(payload.durationMs/1000) + '秒)。 議事録 生成 中…';
-          t.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#059669;color:#fff;padding:12px 22px;border-radius:8px;font-size:13px;font-weight:800;z-index:99999;box-shadow:0 4px 12px rgba(0,0,0,.25);';
+          t.innerHTML = '✓ <b>' + escapeHtml(clientName) + '</b> さん の 音声 受信 (' + Math.round(blob.size/1024) + 'KB, ' + Math.round(payload.durationMs/1000) + '秒)。 議事録 生成中…';
+          t.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#059669;color:#fff;padding:14px 26px;border-radius:8px;font-size:13px;font-weight:800;z-index:2147483647;box-shadow:0 12px 32px rgba(0,0,0,.35);';
           document.body.appendChild(t);
-          setTimeout(() => { t.style.opacity = '0'; t.style.transition = 'opacity .3s'; }, 4000);
-          setTimeout(() => t.remove(), 4500);
+          setTimeout(() => { t.style.opacity = '0'; t.style.transition = 'opacity .4s'; }, 4500);
+          setTimeout(() => t.remove(), 5000);
         } catch(_) {}
-        // 既存 パイプライン に 流す
+
         if (typeof onRecordingComplete === 'function') {
           await onRecordingComplete(bookingTs, blob, blobUrl);
         } else {
@@ -2921,10 +2979,25 @@
         }
       } catch (e) {
         console.error('[fp-tab-recorder] 処理 失敗:', e);
-        alert('拡張 から の 音声 受信 に 失敗 しました。 通信 or 拡張 の 状態 を 確認 して ください。');
+        alert('拡張 から の 音声 受信 に 失敗 しました。 通信 or 拡張 の 状態 を 確認 して ください。\n' + (e?.message || e));
       }
     });
   }
+
+  // ★ 2026-07-15: 拡張機能に 「顧客 arm」 を 送るヘルパー (startQuickZoom / 顧客カルテから 呼ぶ)
+  window.armTabRecorder = function armTabRecorder(clientId, clientName, tenantId) {
+    if (!clientId) return;
+    window.postMessage({
+      source: 'fp-compass',
+      type: 'ARM_TAB_RECORDER',
+      clientId,
+      clientName: clientName || '(名前未取得)',
+      tenantId: tenantId || (window.currentTenantId || ''),
+    }, '*');
+  };
+  window.disarmTabRecorder = function disarmTabRecorder() {
+    window.postMessage({ source: 'fp-compass', type: 'DISARM_TAB_RECORDER' }, '*');
+  };
 
   // ★ 2026-06-22 roundG: マイクのみ録音 fallback (カメラ NotFound / 不要 時)
   //   音声 → 同じパイプライン (upload → AI議事録)
