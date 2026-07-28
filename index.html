@@ -24,9 +24,6 @@
 <link rel="stylesheet" href="styles-v2.css?v=20260715E-line-error-wrap-all-6-sites">
 <link rel="stylesheet" href="styles-v3.css?v=20260715E-line-error-wrap-all-6-sites">
 <link rel="stylesheet" href="styles-v8-workspace.css?v=20260715E-line-error-wrap-all-6-sites">
-<!-- 🎨 STG のみ: SkelFit design 適用 (owner FB 2026-07-15 「配置 変えず デザイン だけ」) -->
-<link rel="stylesheet" href="styles-skelfit.css?v=20260717A-meeting-polish" id="skelfit-stg-override">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <!-- ★ 2026-06-26 perf: lucide(350KB) と chart.js(201KB) を defer 化 -->
 <!--   どちらも DOMContentLoaded 後ハイドレートで OK (lucide: setInterval scan / chart: tryRender polling) -->
 <script defer src="https://unpkg.com/lucide@0.469.0/dist/umd/lucide.min.js"></script>
@@ -95,7 +92,7 @@
       <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;font-size:12px;line-height:1.65;opacity:0.95;">
         <input id="fp-terms-check" type="checkbox" style="margin-top:3px;width:16px;height:16px;flex-shrink:0;accent-color:#E63946;cursor:pointer;">
         <span>
-          <a href="./legal/specified-commercial.html" target="_blank" style="color:#0F1729;text-decoration:underline;font-weight:700;">特商法表記</a>・<a href="./legal/privacy.html" target="_blank" style="color:#0F1729;text-decoration:underline;font-weight:700;">プライバシーポリシー</a>・<a href="./legal/index.html" target="_blank" style="color:#0F1729;text-decoration:underline;font-weight:700;">利用規約</a>を確認し、 同意します
+          <a href="./legal/specified-commercial.html" target="_blank" style="color:#FFE9A8;text-decoration:underline;">特商法表記</a>・<a href="./legal/privacy.html" target="_blank" style="color:#FFE9A8;text-decoration:underline;">プライバシーポリシー</a>・<a href="./legal/index.html" target="_blank" style="color:#FFE9A8;text-decoration:underline;">利用規約</a>を確認し、 同意します
         </span>
       </label>
     </div>
@@ -985,7 +982,7 @@
                   </div>
                   <div class="mega-hero-stat">
                     <span class="mega-hero-stat-label">未読LINE</span>
-                    <span class="mega-hero-stat-value" id="mh-stat-line">—</span>
+                    <span class="mega-hero-stat-value">3</span>
                   </div>
                 </div>
 
@@ -1377,7 +1374,7 @@ window.fpReadyAfterAuth = function() {
     });
   })();
 
-  const ver = "20260715E";
+  const ver = "20260728A";
   // ★ 2026-06-26 perf: critical (画面初期表示に必須) と deferred (LINE/charts) を 分離
   // critical: 顧客台帳・ホーム描画に必須
   // deferred: LINE タブ (line-app.js 555KB) / dashboard charts (charts.js) → idle で 後ロード
@@ -2009,11 +2006,6 @@ window.fpReadyAfterAuth = function() {
     setText('mega-hero-num', String(topCount));
     setText('mh-stat-week', String(topCount));
     setText('mh-stat-events', String(count30));
-    // 2026-07-15 P0-1 fix: 未読LINE を 動的算出 (旧 hardcoded '3' → live count)
-    try {
-      const unreadLine = (window.LineAppLiveData?.line_messages || []).filter(m => m.direction === 'in').length;
-      setText('mh-stat-line', String(unreadLine));
-    } catch(_) { setText('mh-stat-line', '0'); }
     // 0件 なら 「今日は」 テキスト を 差替えて em-dash 誤解 を 消す
     try {
       const titleEl = document.querySelector('.mega-hero-title');
@@ -2123,7 +2115,7 @@ window.fpReadyAfterAuth = function() {
 <script>
 (function(){
   // 最新の ver を 1 箇所に集約 (fpReadyAfterAuth 側と一致させる必要あり)
-  const FP_VERSION = "20260715F-chrome-ext-arm-flow-stg";
+  const FP_VERSION = "20260715E-line-error-wrap-all-6-sites";
   try { window.FP_VERSION = FP_VERSION; } catch(_) {}
 
   // 2026-07-13 v11: Chrome拡張 (Zoom タブ音声 レコーダー) 検知

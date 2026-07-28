@@ -2731,13 +2731,31 @@
 
     wait.remove();
 
-    // ★ 2026-07-15: Chrome拡張 に この顧客 arm (拡張入ってれば Zoomタブ で アイコン押すだけ で 該当顧客の 録音開始)
+    // ★ 2026-07-17: Chrome拡張 が install 済 なら arm + Zoom タブ を 自動 open + 自動 録音開始
+    //   拡張 未 install なら 従来通り (arm のみ、 modal から window.open 手動)
+    const finalClientId = result.customerId || clientId;
+    let extAutoOpened = false;
     try {
-      const finalClientId = result.customerId || clientId;
-      if (typeof window.armTabRecorder === 'function' && finalClientId) {
+      if (window.__fpTabRecorder && typeof window.armAndOpenZoom === 'function' && finalClientId && result.zoomUrl) {
+        // hostZoomUrl (FP先生 が host で 参加する URL) を 優先、 無ければ zoomUrl
+        const rawHostUrl = result.hostZoomUrl || result.startUrl || result.zoomUrl;
+        // ★ 2026-07-18 fix (qa FAIL C): /s/ (startUrl) は /wc/{id}/start に、 /j/ は /wc/join/{id} に 変換
+        //   前は 全部 /wc/join に していた が、 それだと FP先生 が host権限 なく 参加者 として 入る バグ
+        const forceWebUrl = (() => {
+          try {
+            const m = rawHostUrl.match(/\/(j|s)\/(\d+)([?&].*)?/);
+            if (!m) return rawHostUrl;
+            const u = new URL(rawHostUrl);
+            const isStart = m[1] === 's';
+            return `https://${u.host}/wc/${isStart ? m[2] + '/start' : 'join/' + m[2]}${m[3] || ''}`;
+          } catch (_) { return rawHostUrl; }
+        })();
+        extAutoOpened = window.armAndOpenZoom(finalClientId, clientName, window.currentTenantId, forceWebUrl);
+      } else if (typeof window.armTabRecorder === 'function' && finalClientId) {
+        // 従来 fallback (拡張 未 install)
         window.armTabRecorder(finalClientId, clientName, window.currentTenantId);
       }
-    } catch (e) { console.warn('armTabRecorder failed:', e); }
+    } catch (e) { console.warn('extension arm failed:', e); }
 
     // 成功 → 結果モーダル — LINE 送信成否で 出し分け
     const ov = document.createElement('div');
@@ -2753,7 +2771,9 @@
     const smsUrl = `sms:?body=${smsBody}`;
 
     ov.innerHTML = `
-      <div style="background:#fff;border-radius:14px;max-width:540px;width:100%;padding:28px 32px;box-shadow:0 32px 80px rgba(0,0,0,0.5);">
+      <div style="background:#fff;border-radius:14px;max-width:540px;width:100%;padding:28px 32px;box-shadow:0 32px 80px rgba(0,0,0,0.5);position:relative;">
+        <!-- ★ 2026-07-18 fix: 閉じる button 追加 (owner が modal 詰み 報告 — 下 の 「閉じる」 が scroll 下 で 見えない ケース 対策) -->
+        <button id="fp-qz-close-top" aria-label="閉じる" style="position:absolute;top:14px;right:14px;background:transparent;border:none;font-size:24px;line-height:1;color:#6B7280;cursor:pointer;padding:4px 8px;border-radius:6px;">×</button>
         <div style="display:inline-flex;align-items:center;gap:8px;background:#FBF5E3;color:#9A5A18;font-size:11px;font-weight:800;padding:5px 12px;border-radius:99px;letter-spacing:0.12em;margin-bottom:14px;">⚡ Zoom 発行完了</div>
         <h2 style="font-family:'Noto Sans JP',serif;font-size:20px;font-weight:700;color:#111827;margin:0 0 6px;">${escapeHtml(clientName)} 様 と Zoom 開始</h2>
 
@@ -2830,7 +2850,19 @@
       const w = document.getElementById('fp-qz-qr-wrap');
       if (w) w.style.display = w.style.display === 'none' ? 'block' : 'none';
     });
-    document.getElementById('fp-qz-close').addEventListener('click', () => ov.remove());
+    // ★ 2026-07-18 fix v2: 「× で 閉じれない」 owner 報告 対応。 event delegation で 全 button 型 close トリガー を 一括ハンドル
+    //   optional chain + delegation で 1つ でも throw しても 他 の close 手段 は 生きる
+    const _closeOv = () => { try { ov.remove(); } catch (_) {} };
+    ov.addEventListener('click', (e) => {
+      const t = e.target;
+      // 背景 click (overlay 本体) → 閉じる
+      if (t === ov) { _closeOv(); return; }
+      // 「閉じる」 button (下) / × button (右上) の どちらでも 閉じる
+      if (t.id === 'fp-qz-close' || t.id === 'fp-qz-close-top' || t.closest?.('#fp-qz-close, #fp-qz-close-top')) {
+        e.preventDefault(); e.stopPropagation(); _closeOv();
+      }
+    }, true);  // capture phase で 拾って 確実 に fire
+    document.addEventListener('keydown', function _esc(e) { if (e.key === 'Escape') { _closeOv(); document.removeEventListener('keydown', _esc); } });
     // ★ オーナーfb 2026-06-25: FPホストZoom入室 と 同時に startScreenRecording 起動
     //   ★ 2026-06-26 v.O fix: window.open を 先にすると user gesture 切れて Invalid state エラー
     //     → 画面共有ダイアログ先 → 許可後に startScreenRecording 内で Zoom を全画面で開く
@@ -2937,7 +2969,29 @@
 
       const payload = d.payload || {};
       const meta = payload.meta || {};
-      console.log('[fp-tab-recorder] 受信:', payload.size, 'bytes,', Math.round(payload.durationMs / 1000), '秒, clientId:', meta.clientId);
+      // 2026-07-28: 拡張 が 全 FP tab に broadcast する 過去 bug + 同 tab で 二重 dispatch
+      // (SW re-spawn / tab restore) の いずれ でも 同 recording を 2 回 処理 して
+      // 議事録 が 重複 保存 される 事故 が 発生。 startedAt + size + duration を key に
+      // localStorage TTL 5分 で cross-tab claim (extension 側 単一 tab 送信 fix と 二重防御)
+      const recId = 'rec:' + (meta.startedAt || '') + ':' + (payload.size || 0) + ':' + (payload.durationMs || 0);
+      try {
+        const lockKey = 'fp-recording-processed-' + recId;
+        const now = Date.now();
+        const prev = parseInt(localStorage.getItem(lockKey) || '0', 10);
+        if (prev && (now - prev) < 5 * 60 * 1000) {
+          console.warn('[fp-tab-recorder] duplicate RECORDING_DONE skipped', { recId, ageMs: now - prev });
+          return;
+        }
+        localStorage.setItem(lockKey, String(now));
+        // 24h 以上 前 の lock は cleanup
+        for (let i = localStorage.length - 1; i >= 0; i--) {
+          const k = localStorage.key(i);
+          if (!k || !k.startsWith('fp-recording-processed-')) continue;
+          const v = parseInt(localStorage.getItem(k) || '0', 10);
+          if (v && (now - v) > 24 * 60 * 60 * 1000) localStorage.removeItem(k);
+        }
+      } catch (_) { /* storage quota / private mode → 続行 */ }
+      console.log('[fp-tab-recorder] 受信:', payload.size, 'bytes,', Math.round(payload.durationMs / 1000), '秒, clientId:', meta.clientId, 'recId:', recId);
       try {
         const bin = atob(payload.base64 || '');
         const arr = new Uint8Array(bin.length);
@@ -2972,6 +3026,44 @@
           setTimeout(() => t.remove(), 5000);
         } catch(_) {}
 
+        // ★ 2026-07-20 CRITICAL FIX (qa-reviewer FAIL #1): AI処理 pipeline (Whisper + Claude + GAS + Drive) を 実行
+        //   前 は onRecordingComplete だけ 呼んでたが、 それ は UI トースト 用 で AI処理 されず 「議事録 に入って こない」 バグ
+        //   startAudioOnlyRecording (line 3382) と 同じ full flow で 処理
+        const fallbackBooking = {
+          ts: bookingTs,
+          name: clientName,
+          userId: meta.clientId || '',
+          isInperson: false,
+        };
+        try { showUnifiedProgressPanel(clientName, blob); } catch (_) {}
+        try { updateProgressStep('save', 'done'); updateProgressStep('drive', 'active'); updateProgressStep('ai', 'active'); } catch (_) {}
+        try { showCenterToast('議事録 を 生成中…', clientName + ' 様 の Zoom 録音 → AI で 文字起こし + 議事録 作成 中。 30-60秒 ほど お待ちください', { tone: 'progress', duration: 0 }); } catch (_) {}
+
+        const drivePromise = autoUploadRecording(blob, bookingTs, clientName, fallbackBooking)
+          .then(() => { try { updateProgressStep('drive', 'done'); } catch(_){} })
+          .catch(() => { try { updateProgressStep('drive', 'error'); } catch(_){} });
+
+        let aiResult = null;
+        try { aiResult = await aiProcessRecording(blob, bookingTs, clientName, fallbackBooking); }
+        catch (e) { console.error('[fp-tab-recorder] aiProcessRecording fail:', e); }
+
+        if (aiResult && aiResult.ok) {
+          try { updateProgressStep('ai', 'done'); } catch(_){}
+          window._fpAIResult = { result: aiResult, customerName: clientName, booking: fallbackBooking };
+          try { autoSaveAIResult(aiResult, clientName, fallbackBooking); } catch(_){}
+          try { showProgressDoneAction(); } catch(_){}
+        } else {
+          try { updateProgressStep('ai', 'error', aiResult?.error); } catch(_){}
+          try {
+            autoSaveAIResult({
+              ok: true, bookingTs, userId: meta.clientId || '', customerName: clientName,
+              summary: '⚠ AI処理 失敗\n\nエラー: ' + (aiResult?.error || '不明') + '\n\n録音ファイル自体は Drive に保存されています。',
+              transcript: '', key_concerns: ['AI処理エラー'], tasks: [], error: true,
+            }, clientName, fallbackBooking);
+          } catch(_){}
+        }
+        await drivePromise;
+
         if (typeof onRecordingComplete === 'function') {
           await onRecordingComplete(bookingTs, blob, blobUrl);
         } else {
@@ -2998,6 +3090,266 @@
   window.disarmTabRecorder = function disarmTabRecorder() {
     window.postMessage({ source: 'fp-compass', type: 'DISARM_TAB_RECORDER' }, '*');
   };
+
+  // ★ 2026-07-17: 拡張機能に 「arm + Zoom タブ を 開いて 自動 録音」 を お願い
+  //   Zoom 面談 button click に つなぐ (owner の click は user gesture → 拡張が Zoom タブ open → auto tabCapture)
+  window.armAndOpenZoom = function armAndOpenZoom(clientId, clientName, tenantId, zoomUrl) {
+    if (!clientId || !zoomUrl) return false;
+    if (!window.__fpTabRecorder) {
+      // 拡張 未 install → 従来 通り window.open で 手動 フロー
+      return false;
+    }
+    window.postMessage({
+      source: 'fp-compass',
+      type: 'ARM_AND_OPEN_ZOOM',
+      clientId,
+      clientName: clientName || '(名前未取得)',
+      tenantId: tenantId || (window.currentTenantId || ''),
+      zoomUrl,
+    }, '*');
+    return true;
+  };
+
+  // ★ 拡張 → app: auto-start 失敗時 通知 (user gesture 制約 等) — 旧トーストは HUD に統合
+  //   FP_AUTO_START_FAILED も HUD の状態変化として扱う (下の HUD listener で処理)
+
+  // ★ 2026-07-18 撤去: 拡張機能 recording flow (owner 明示 「全部削除」)
+  //   fp-rec-pad / fp-rec-dbg / fp-ext-hud / armAndOpenZoom auto-arm 全 廃止。 元 の window.open Zoom flow に 復元
+  /* DISABLED — owner 明示 削除
+  (function initRecorderButtons() {
+    if (window._fpRecPad) return;
+    const pad = document.createElement('div');
+    pad.id = 'fp-rec-pad';
+    pad.style.cssText = 'position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:2147483644;display:flex;gap:12px;background:#FFFFFF;padding:14px 18px;border-radius:99px;border:1px solid #ECECEA;box-shadow:0 12px 32px rgba(15,23,42,0.18),0 4px 8px rgba(15,23,42,0.08);font-family:"Noto Sans JP",sans-serif;';
+    pad.innerHTML = `
+      <button id="fp-rec-start" style="background:#DC2B2B;color:#FFF;border:none;padding:12px 24px;border-radius:99px;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit;letter-spacing:0.02em;display:inline-flex;align-items:center;gap:8px;box-shadow:0 4px 12px rgba(220,43,43,0.35);">
+        <span style="width:10px;height:10px;border-radius:50%;background:#FFF;"></span>
+        録画開始
+      </button>
+      <button id="fp-rec-stop" style="background:#0A0A0A;color:#FFF;border:none;padding:12px 24px;border-radius:99px;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit;letter-spacing:0.02em;display:inline-flex;align-items:center;gap:8px;box-shadow:0 4px 12px rgba(15,23,42,0.2);opacity:0.5;" disabled>
+        <span style="width:10px;height:10px;background:#FFF;"></span>
+        録画終了
+      </button>
+      <button id="fp-rec-hide" title="非表示" style="background:transparent;color:#9A9A9A;border:none;padding:8px 10px;font-size:16px;line-height:1;cursor:pointer;">×</button>`;
+    document.body.appendChild(pad);
+    const $start = pad.querySelector('#fp-rec-start');
+    const $stop = pad.querySelector('#fp-rec-stop');
+    const $hide = pad.querySelector('#fp-rec-hide');
+    let isRecording = false;
+    const setState = (rec) => {
+      isRecording = rec;
+      if (rec) {
+        $start.style.opacity = '0.5'; $start.disabled = true;
+        $stop.style.opacity = '1'; $stop.disabled = false;
+      } else {
+        $start.style.opacity = '1'; $start.disabled = false;
+        $stop.style.opacity = '0.5'; $stop.disabled = true;
+      }
+    };
+    // ★ 永続 debug パネル (recording pad の 上 に 出す、 全 通信 log)
+    const dbgPanel = document.createElement('div');
+    dbgPanel.id = 'fp-rec-dbg';
+    dbgPanel.style.cssText = 'position:fixed;bottom:88px;left:50%;transform:translateX(-50%);z-index:2147483644;background:#0F1117;color:#E4E6EB;padding:10px 14px;border-radius:8px;font-family:ui-monospace,Menlo,monospace;font-size:11px;line-height:1.55;max-width:600px;max-height:200px;overflow-y:auto;box-shadow:0 12px 32px rgba(0,0,0,.4);display:none;';
+    document.body.appendChild(dbgPanel);
+    const dbg = (msg, color) => {
+      const line = document.createElement('div');
+      const ts = new Date().toISOString().slice(11, 19);
+      line.innerHTML = '<span style="color:#7A8194;">[' + ts + ']</span> <span style="color:' + (color || '#E4E6EB') + ';">' + msg + '</span>';
+      dbgPanel.appendChild(line);
+      dbgPanel.scrollTop = dbgPanel.scrollHeight;
+      dbgPanel.style.display = 'block';
+      console.log('[fp-rec-dbg]', msg);
+    };
+    // 拡張 → app の 全 message を log
+    window.addEventListener('message', (ev) => {
+      if (ev.source !== window || ev.data?.source !== 'fp-tab-recorder') return;
+      dbg('← ext: ' + ev.data.type + ' ' + JSON.stringify(ev.data.payload || {}).substring(0, 200), '#A5A5F8');
+    });
+
+    $start.addEventListener('click', () => {
+      dbg('▶ 録画開始 button clicked', '#10B981');
+      dbg('window.__fpTabRecorder = ' + JSON.stringify(window.__fpTabRecorder), '#FCD34D');
+      if (!window.__fpTabRecorder) {
+        dbg('❌ 拡張機能 未 install / 未認識', '#DC2B2B');
+        alert('拡張機能 が 未 install または 認識されていません。\nchrome://extensions/ で v1.5.0 以降 が enabled か 確認してください。');
+        return;
+      }
+      dbg('→ ext: REQUEST_START_RECORDING 送信', '#10B981');
+      window.postMessage({ source: 'fp-compass', type: 'REQUEST_START_RECORDING' }, '*');
+      // 10秒 タイムアウト
+      let received = false;
+      const onResult = (ev) => {
+        if (ev.source !== window || ev.data?.source !== 'fp-tab-recorder' || ev.data?.type !== 'START_RESULT') return;
+        received = true;
+        window.removeEventListener('message', onResult);
+        const r = ev.data.payload || {};
+        if (r.ok) {
+          dbg('✅ START 成功 (targetTabId=' + r.targetTabId + ')', '#10B981');
+        } else {
+          dbg('❌ START 失敗: ' + (r.error || 'error なし'), '#DC2B2B');
+        }
+      };
+      window.addEventListener('message', onResult);
+      setTimeout(() => {
+        window.removeEventListener('message', onResult);
+        if (!received) dbg('⚠ 10秒 経過 も 拡張 から 応答なし。 content.js が REQUEST_START_RECORDING handler 持ってない or 拡張 disabled 疑い。', '#B5530F');
+      }, 10000);
+    });
+    $stop.addEventListener('click', () => {
+      window.postMessage({ source: 'fp-compass', type: 'REQUEST_STOP_TAB_RECORDING' }, '*');
+      const t = document.createElement('div');
+      t.textContent = '⏹ 録画停止 要求 送信中…';
+      t.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#0A0A0A;color:#FFF;padding:10px 18px;border-radius:8px;font-size:12.5px;font-weight:700;z-index:2147483647;';
+      document.body.appendChild(t);
+      setTimeout(() => t.remove(), 3000);
+    });
+    $hide.addEventListener('click', () => { pad.style.display = 'none'; });
+
+    // 拡張 message で state 更新
+    window.addEventListener('message', (ev) => {
+      if (ev.source !== window) return;
+      const d = ev.data;
+      if (!d || d.source !== 'fp-tab-recorder') return;
+      if (d.type === 'RECORDING_STARTED') setState(true);
+      if (d.type === 'RECORDING_DONE') setState(false);
+      if (d.type === 'STATE' && d.payload) setState(!!d.payload.recording);
+    });
+
+    window._fpRecPad = { show: () => pad.style.display = 'flex', hide: () => pad.style.display = 'none', setState };
+    // 初期: 拡張 の 現在 state を 問い合わせ
+    setTimeout(() => window.postMessage({ source: 'fp-compass', type: 'GET_TAB_RECORDER_STATE' }, '*'), 500);
+  })();
+
+  (function initStatusHud() {
+    if (window._fpExtHud) return;
+    // HUD element (fixed top-right)
+    const hud = document.createElement('div');
+    hud.id = 'fp-ext-hud';
+    hud.style.cssText = 'position:fixed;top:16px;right:16px;z-index:2147483645;background:#FFFFFF;border:1px solid #ECECEA;border-radius:12px;padding:12px 16px;box-shadow:0 8px 24px rgba(15,23,42,0.15),0 2px 6px rgba(15,23,42,0.08);font-family:"Noto Sans JP",sans-serif;font-size:12.5px;line-height:1.55;max-width:340px;display:none;cursor:default;';
+    hud.innerHTML = `
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span id="fp-hud-dot" style="width:10px;height:10px;border-radius:50%;background:#9A9A9A;flex-shrink:0;"></span>
+        <div style="font-family:'Manrope','Noto Sans JP',sans-serif;font-size:10.5px;font-weight:800;letter-spacing:0.14em;color:#6B6B6B;">RECORDING STATUS</div>
+        <button id="fp-hud-close" style="margin-left:auto;background:transparent;border:none;color:#9A9A9A;cursor:pointer;padding:0 4px;font-size:16px;line-height:1;">×</button>
+      </div>
+      <div id="fp-hud-title" style="font-size:14px;font-weight:800;color:#0A0A0A;margin-top:8px;line-height:1.4;">—</div>
+      <div id="fp-hud-body" style="font-size:12px;color:#3F3F46;margin-top:6px;line-height:1.65;">—</div>
+      <div id="fp-hud-cta" style="margin-top:10px;display:none;">
+        <button style="width:100%;padding:8px 14px;background:#0A0A0A;color:#FFF;border:none;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;">action</button>
+      </div>
+      <style>
+        @keyframes fp-hud-pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.35; } }
+        #fp-ext-hud .pulsing { animation: fp-hud-pulse 1.2s ease-in-out infinite; }
+      </style>`;
+    document.body.appendChild(hud);
+    const $dot = hud.querySelector('#fp-hud-dot');
+    const $title = hud.querySelector('#fp-hud-title');
+    const $body = hud.querySelector('#fp-hud-body');
+    const $cta = hud.querySelector('#fp-hud-cta');
+    const $closeBtn = hud.querySelector('#fp-hud-close');
+    $closeBtn.addEventListener('click', () => { hud.style.display = 'none'; });
+
+    window._fpExtHud = {
+      set(state) {
+        // state = { color, title, body, ctaText, ctaClick, pulse, sticky }
+        hud.style.display = 'block';
+        $dot.style.background = state.color || '#9A9A9A';
+        $dot.classList.toggle('pulsing', !!state.pulse);
+        $title.textContent = state.title || '';
+        $body.innerHTML = state.body || '';
+        if (state.ctaText && state.ctaClick) {
+          $cta.style.display = 'block';
+          const b = $cta.querySelector('button');
+          b.textContent = state.ctaText;
+          b.onclick = state.ctaClick;
+        } else {
+          $cta.style.display = 'none';
+        }
+        // auto-hide after 15s if not sticky
+        if (window._fpHudAutoHide) clearTimeout(window._fpHudAutoHide);
+        if (!state.sticky) {
+          window._fpHudAutoHide = setTimeout(() => { hud.style.display = 'none'; }, 15000);
+        }
+      },
+      hide() { hud.style.display = 'none'; },
+    };
+
+    // 拡張 message listener を HUD 統合版に置き換え
+    window.addEventListener('message', (ev) => {
+      if (ev.source !== window) return;
+      const d = ev.data;
+      if (!d || d.source !== 'fp-tab-recorder') return;
+
+      // 準備完了 (armed) — Zoom タブ open 直後
+      if (d.type === 'ARM_AND_OPEN_RESULT' && d.payload?.ok) {
+        window._fpExtHud.set({
+          color: '#B5530F',
+          title: '🟡 録音準備完了',
+          body: `<b>${escapeHtml(d.payload.armed?.clientName || '(顧客未指定)')}</b> さん の Zoom タブ を 開いています…<br>拡張 が 自動 録音開始 を 試みます。`,
+          pulse: true,
+          sticky: true,
+        });
+      }
+
+      // 録音開始
+      if (d.type === 'RECORDING_STARTED') {
+        window._fpExtHud.set({
+          color: '#DC2B2B',
+          title: '🔴 録音中',
+          body: `<b>${escapeHtml(d.payload?.clientName || '(顧客未指定)')}</b> さん の Zoom 面談 を 録音しています。<br>面談 終了 (Zoom タブ を 閉じる) で 自動 停止 + 議事録生成 が 走ります。`,
+          pulse: true,
+          sticky: true,
+        });
+      }
+
+      // auto-start 失敗 → owner に 拡張アイコン click 案内
+      if (d.type === 'FP_AUTO_START_FAILED') {
+        window._fpExtHud.set({
+          color: '#B5530F',
+          title: '⚠ 自動起動 失敗 → 1 click 必要',
+          body: `<b>${escapeHtml(d.payload?.clientName || '')}</b> さん の 録音 準備 は 完了。<br>Zoom タブ に 切り替えて Chrome 右上 の <b>拡張アイコン (🧩 or ▶ 緑 badge)</b> を <b>1回 click</b> で 録音開始。`,
+          sticky: true,
+        });
+      }
+
+      // 録音終了 → 処理中
+      if (d.type === 'RECORDING_DONE') {
+        const p = d.payload || {};
+        const meta = p.meta || {};
+        const sec = Math.round((p.durationMs || 0) / 1000);
+        window._fpExtHud.set({
+          color: '#B5530F',
+          title: '⏳ 議事録 生成中…',
+          body: `<b>${escapeHtml(meta.clientName || '(顧客未指定)')}</b> さん の 音声 受信 (${Math.round((p.size||0)/1024)}KB, ${sec}秒)。<br>Whisper 文字起こし + Claude 5 section 議事録生成 で <b>約 5〜10 分</b> かかります。<br>完了 したら 顧客カルテ の <b>議事録タブ</b> に 表示 されます。`,
+          pulse: true,
+          sticky: true,
+        });
+      }
+    });
+  })();
+
+  // ★ 議事録 完成 検知 (ai_results に 新規 が 追加 された 瞬間 HUD 更新)
+  //   fetchLiveData 後 に 呼ぶ 前提 で window._fpLastAiResultTs を 保持
+  window._fpNotifyMeetingReady = function(newAi) {
+    if (!newAi || !window._fpExtHud) return;
+    const name = newAi.customerName || newAi.clientName || '(顧客未指定)';
+    window._fpExtHud.set({
+      color: '#047647',
+      title: '✅ 議事録できました',
+      body: `<b>${escapeHtml(name)}</b> さん の 議事録が 生成されました。<br>顧客カルテ → 議事録タブ で 確認 できます。`,
+      ctaText: '顧客カルテ で 開く',
+      ctaClick: () => {
+        try {
+          const cid = newAi.userId || newAi.clientId;
+          if (cid && window.openCustomerDetail) window.openCustomerDetail(cid);
+        } catch(_) {}
+      },
+      sticky: true,
+    });
+  };
+  */
+  // 撤去したので stub 化 (拡張が message 送っても無視、 debug panel 出さない)
+  window._fpNotifyMeetingReady = function() {};
 
   // ★ 2026-06-22 roundG: マイクのみ録音 fallback (カメラ NotFound / 不要 時)
   //   音声 → 同じパイプライン (upload → AI議事録)
@@ -3154,10 +3506,12 @@
       const sh = window.screen.availHeight || screen.height;
       const zoomBrowserUrl = (function() {
         try {
-          const m = (zoomUrl || '').match(/zoom\.us\/j\/(\d+)(\?.*)?/);
+          // ★ 2026-07-18 fix (qa FAIL B): /s/ (startUrl) 対応 追加 → ホスト URL は /wc/{id}/start に (Zoom Web で ホスト権限 保持)
+          const m = (zoomUrl || '').match(/zoom\.us\/(j|s)\/(\d+)(\?.*)?/);
           if (!m) return zoomUrl;
           const host = (zoomUrl.match(/^https?:\/\/([^\/]+)/) || ['', 'zoom.us'])[1];
-          return `https://${host}/wc/join/${m[1]}${m[2] || ''}`;
+          const isStart = m[1] === 's';
+          return `https://${host}/wc/${isStart ? m[2] + '/start' : 'join/' + m[2]}${m[3] || ''}`;
         } catch (_) { return zoomUrl; }
       })();
       let zoomWin = preZoomWin;
@@ -3554,6 +3908,7 @@
       key_concerns: result.key_concerns || [],
       next_meeting_suggestion: result.next_meeting_suggestion || '',
       lifeEventCandidates: result.lifeEventCandidates || [],
+      extractedProfile: result.extractedProfile || {},
       createdAt: new Date().toISOString(),
     };
     // ★ ライフイベント自動抽出: 抽出された 候補 を 該当顧客の customEvents[] に積む
@@ -3586,6 +3941,55 @@
         }
       }
     } catch (e) { console.warn('lifeEventCandidates merge fail:', e); }
+    // ★ AI抽出プロファイル: 空フィールドのみ自動補完 (上書き禁止)
+    try {
+      const ep = result.extractedProfile;
+      if (ep && typeof ep === 'object' && window.DUMMY_CLIENTS) {
+        const c = window.DUMMY_CLIENTS.find(x =>
+          (x.lineFriendId && x.lineFriendId === userId) ||
+          (x.name && (x.name === nameKey || x.name === customerName))
+        );
+        if (c) {
+          const changedFields = [];
+          if (ep.selfBirth && /^\d{4}/.test(ep.selfBirth) && (!c.birth || c.birth === '1985-01-01')) {
+            c.birth = ep.selfBirth.length === 4 ? ep.selfBirth + '-01-01' : ep.selfBirth;
+            changedFields.push('生年月日');
+          }
+          if (ep.selfOccupation && !c.occupation) { c.occupation = ep.selfOccupation; changedFields.push('職業'); }
+          if (Array.isArray(ep.family) && ep.family.length > 0) {
+            if (!Array.isArray(c.family)) c.family = [];
+            ep.family.forEach(member => {
+              if (!member.rel) return;
+              const exists = c.family.some(m => m.rel === member.rel && (m.name === member.name || (!m.name && !member.name)));
+              if (!exists) {
+                c.family.push({ rel: member.rel, name: member.name || '', birth: member.birth || '', note: member.occupation || '', addedByAI: true, aiAddedAt: new Date().toISOString() });
+                changedFields.push('家族:' + (member.name || member.rel));
+              }
+            });
+          }
+          if (changedFields.length > 0) {
+            c.aiExtractedAt = new Date().toISOString();
+            c.aiExtractedFields = changedFields;
+            try { localStorage.setItem('fp-crm-clients-v1', JSON.stringify(window.DUMMY_CLIENTS)); } catch (_) {}
+            const fsDocId = c._fsCustomerId || (typeof c.id === 'string' && /^[A-Za-z0-9]{20}$/.test(c.id) ? c.id : null);
+            if (fsDocId && window.__fp?.db && window.__fp?.tenantId) {
+              (async () => {
+                try {
+                  const { doc, updateDoc } = await import('https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js');
+                  const upd = { aiExtractedAt: c.aiExtractedAt, aiExtractedFields: changedFields };
+                  if (changedFields.includes('生年月日')) upd.birth = c.birth;
+                  if (changedFields.includes('職業')) upd.occupation = c.occupation;
+                  if (changedFields.some(f => f.startsWith('家族'))) upd.family = c.family;
+                  await updateDoc(doc(window.__fp.db, 'tenants', window.__fp.tenantId, 'customers', fsDocId), upd);
+                  console.log('[extractedProfile] Firestore sync OK:', changedFields.join(', '));
+                } catch (e) { console.warn('[extractedProfile] Firestore sync fail:', e.message); }
+              })();
+            }
+            console.log('[extractedProfile] auto-filled:', changedFields.join(', '), 'for', c.name);
+          }
+        }
+      }
+    } catch (e) { console.warn('extractedProfile merge fail:', e); }
     // ★ 「録画されてない可能性」 を 構造的に 排除:
     //   1. 最初に localStorage backup を 確実に保存 (POST失敗しても データ消えない)
     //   2. GAS POST を 3回 retry (3s/6s/12s)

@@ -1955,16 +1955,20 @@
         </div>`;
     }
     if (entry.type === 'ai_minutes') {
-      const sum = String(entry.summary || '').slice(0, 400);
-      const ellipsis = String(entry.summary || '').length > 400 ? '…' : '';
+      const rawSum = String(entry.summary || '');
       const concernChips = (entry.key_concerns || []).slice(0, 5).map(k => `<span style="display:inline-block;background:#FED7AA;color:#7C2D12;padding:2px 8px;border-radius:99px;font-size:10.5px;font-weight:600;margin:2px 3px 2px 0;">${escapeHtml(k)}</span>`).join('');
+      const bodyHtml = rawSum
+        ? (window.renderStructuredSummary
+            ? `<div class="fp-summary-structured" style="font-size:12px;">${window.renderStructuredSummary(rawSum)}</div>`
+            : `<div style="font-size:12px;color:#7C2D12;white-space:pre-wrap;line-height:1.65;">${escapeHtml(rawSum.slice(0, 400))}${rawSum.length > 400 ? '…' : ''}</div>`)
+        : '<div style="font-size:11px;color:#9A3412;opacity:0.7;">議事録 未生成</div>';
       return `
         <details class="cd-line-msg cd-tl-entry cd-tl-minutes" style="align-self:stretch;max-width:100%;background:#FFEDD5;border:1px solid #FED7AA;border-left:4px solid #F97316;border-radius:8px;padding:10px 14px;margin:4px 0;">
           <summary style="cursor:pointer;font-weight:700;font-size:12.5px;color:#9A3412;letter-spacing:0.01em;list-style:none;">
             🎙 議事録 (AI要約)
             <span style="float:right;font-weight:400;font-size:11px;opacity:0.65;">${safeTs}</span>
           </summary>
-          <div style="margin-top:8px;padding-top:8px;border-top:1px dashed #FDBA74;font-size:12px;color:#7C2D12;white-space:pre-wrap;line-height:1.65;">${escapeHtml(sum)}${ellipsis}</div>
+          <div style="margin-top:8px;padding-top:8px;border-top:1px dashed #FDBA74;">${bodyHtml}</div>
           ${concernChips ? `<div style="margin-top:8px;">${concernChips}</div>` : ''}
         </details>`;
     }
@@ -3064,15 +3068,15 @@
           </div>
 
           <!-- ★ オーナーfb 2026-06-20: 「今すぐ Zoom 開始」 + 「日時指定 Zoom 予約」 — 顧客名直下、 Zoom 公式アイコン -->
-          ${c.lineFriendId ? `
-            <div class="cd-zoom-pair" style="margin-top:14px;display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+          <!-- ★ 2026-07-18: LINE 未紐付け 客 でも 表示 (LINE 有→自動送付 / 無→URL コピー or SMS/Email で 手動送付、 拡張自動録音 は 両方 OK) -->
+          <div class="cd-zoom-pair" style="margin-top:14px;display:grid;grid-template-columns:1fr 1fr;gap:8px;">
               <button id="cd-instant-zoom-btn" data-client-id="${escapeHtml(c.id)}" style="background:#fff;color:#0F172A;border:2px solid #2D8CFF;padding:12px 14px;border-radius:14px;font-size:14.5px;font-weight:900;cursor:pointer;font-family:'Noto Sans JP',sans-serif;letter-spacing:0.005em;box-shadow:0 6px 18px rgba(45,140,255,0.22);display:flex;align-items:center;justify-content:flex-start;gap:10px;min-height:66px;transition:transform .12s,box-shadow .12s;">
                 <svg width="34" height="34" viewBox="0 0 100 100" style="flex-shrink:0;border-radius:10px;box-shadow:0 2px 6px rgba(45,140,255,0.30);">
                   <defs><linearGradient id="zg-inst-${escapeHtml(c.id)}" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#4A9BFF"/><stop offset="100%" stop-color="#2D8CFF"/></linearGradient></defs>
                   <rect width="100" height="100" rx="22" fill="url(#zg-inst-${escapeHtml(c.id)})"/>
                   <text x="50" y="62" text-anchor="middle" font-family="Helvetica,Arial,sans-serif" font-weight="700" font-size="28" fill="#fff" letter-spacing="-1">zoom</text>
                 </svg>
-                <span style="text-align:left;line-height:1.3;">⚡ 今すぐ 開始<br><span style="font-size:10.5px;font-weight:700;color:#475569;">LINE 自動送付</span></span>
+                <span style="text-align:left;line-height:1.3;">⚡ 今すぐ 開始<br><span style="font-size:10.5px;font-weight:700;color:#475569;">${c.lineFriendId ? 'LINE 自動送付' : 'URL コピー可'}</span></span>
               </button>
               <button id="cd-schedule-zoom-btn" data-client-id="${escapeHtml(c.id)}" style="background:#fff;color:#0F172A;border:2px solid #2D8CFF;padding:12px 14px;border-radius:14px;font-size:14.5px;font-weight:900;cursor:pointer;font-family:'Noto Sans JP',sans-serif;letter-spacing:0.005em;box-shadow:0 6px 18px rgba(45,140,255,0.22);display:flex;align-items:center;justify-content:flex-start;gap:10px;min-height:66px;transition:transform .12s,box-shadow .12s;">
                 <svg width="34" height="34" viewBox="0 0 100 100" style="flex-shrink:0;border-radius:10px;box-shadow:0 2px 6px rgba(45,140,255,0.30);">
@@ -3084,7 +3088,6 @@
               </button>
             </div>
             <div id="cd-instant-zoom-status" style="font-size:12px;font-weight:700;margin-top:8px;text-align:center;"></div>
-          ` : ''}
 
           <!-- ★ オーナーfb 2026-06-20: タグ管理 を 顧客名 直下、 オリジナル タグ アイコン (ピンク+紺) -->
           <div class="cd-profile-section" id="cd-tags-section" data-client-id="${escapeHtml(c.id)}" style="margin-top:16px;padding:16px 18px;background:#F8FAFC;border:2px solid #E2E8F0;border-radius:12px;">
@@ -3387,7 +3390,7 @@
               }).length;
               return uc > 0 ? `<span style="display:inline-flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#DC2626,#B91C1C);color:#fff;font-size:10px;font-weight:900;min-width:18px;height:18px;padding:0 5px;border-radius:9px;margin-left:5px;box-shadow:0 2px 6px rgba(220,38,38,0.45);animation:fp-unread-pulse 1.6s ease-in-out infinite;letter-spacing:0;">${uc > 99 ? '99+' : uc}</span>` : '';
             })()}</button>
-            <button class="cd-tab" data-cdtab="timeline" style="font-size:15px !important;font-weight:700 !important;">履歴 <span class="cd-tab-count">${events.length}</span></button>
+            <button class="cd-tab" data-cdtab="timeline" style="font-size:15px !important;font-weight:700 !important;">ライフ <span class="cd-tab-count">${events.filter(e => e.kind !== 'meeting' && e.kind !== 'task' && new Date(e.date) >= new Date()).length || events.length}</span></button>
             <button class="cd-tab" data-cdtab="meetings" style="font-size:15px !important;font-weight:700 !important;">議事録 <span class="cd-tab-count" id="cd-meetings-count">…</span></button>
             <button class="cd-tab" data-cdtab="qa" style="font-size:15px !important;font-weight:700 !important;">Q&A <span class="cd-tab-count" id="cd-qa-count">—</span></button>
             <button class="cd-tab" data-cdtab="family" style="font-size:15px !important;font-weight:700 !important;">家族 <span class="cd-tab-count">${(c.family || []).length + 1}</span></button>
@@ -4058,8 +4061,13 @@
           });
           const data = await res.json();
           if (!data.ok) throw new Error(data.error || 'unknown');
-          // UI更新
-          viewEl.textContent = newSummary;
+          // UI更新: 保存直後 も 構造化 render で 表示 (plain text 落ち 防止)
+          if (window.renderStructuredSummary && newSummary) {
+            viewEl.innerHTML = window.renderStructuredSummary(newSummary);
+          } else {
+            viewEl.textContent = newSummary;
+          }
+          viewEl.dataset.rawSummary = newSummary;
           viewEl.style.display = '';
           viewEl.style.color = '';
           viewEl.style.fontStyle = '';
@@ -4418,7 +4426,7 @@ ${ctxText}${surveyTxt}`;
                 if (cntEl) cntEl.textContent = panel.querySelectorAll('.fp-meeting-card').length;
               } catch (_) {}
             } else if (key === 'timeline' && panel.dataset.cacheHasContent !== '1') {
-              panel.innerHTML = `${lifeCtaCard}<div class="cd-tl-list">${timelineHtml2}</div>${events.length > 12 ? `<div class="cd-tl-more">他 ${events.length - 12} 件...</div>` : ''}`;
+              panel.innerHTML = buildLifePlanPanel(c, events, lifeCtaCard);
               panel.dataset.cacheHasContent = '1';
             } else if (key === 'family' && typeof renderFamilyTreeBlock === 'function' && panel.dataset.cacheHasContent !== '1') {
               panel.innerHTML = renderFamilyTreeBlock(c);
@@ -4514,7 +4522,23 @@ ${ctxText}${surveyTxt}`;
           const res = await fn({ customerId: fsCustomerId, lineFriendId: c.lineFriendId || null });
           const data = (res && res.data) || {};
           if (data.startUrl) {
-            window.open(data.startUrl, '_blank');
+            // ★ 2026-07-18 revert: /wc/join/{id} format (急遽ボタン で 動いてた format と 統一)
+            const forceWebUrl = (() => {
+              try {
+                const m = data.startUrl.match(/\/(j|s)\/(\d+)([?&].*)?/);
+                if (!m) return data.startUrl;
+                const u = new URL(data.startUrl);
+                return `https://${u.host}/wc/join/${m[2]}${m[3] || ''}`;
+              } catch (_) { return data.startUrl; }
+            })();
+            // ★ 2026-07-18 bug fix: 拡張機能 に 客名 arm (前客 の 名前 が 残る バグ 対応)
+            //   armAndOpenZoom の auto-open は disable 済 なので、 arm だけ 呼ぶ armTabRecorder を 使う
+            try {
+              if (typeof window.armTabRecorder === 'function') {
+                window.armTabRecorder(fsCustomerId, c.name, window.currentTenantId);
+              }
+            } catch (e) { console.warn('armTabRecorder failed:', e); }
+            window.open(forceWebUrl, '_blank');
             status.style.color = '#059669';
             status.textContent = data.lineSent
               ? '✅ LINE 送付完了 / FP の Zoom を 別タブ で 開きました (Meeting ID: ' + (data.meetingId || '?') + ')'
@@ -5075,6 +5099,201 @@ ${ctxText}${surveyTxt}`;
       delete root.dataset.loaded;
       loadQATabForClient(client);
     });
+  }
+
+  function buildLifePlanPanel(c, events, lifeCtaCard) {
+    const aiResultsForC = ((window.LineAppLiveData && window.LineAppLiveData.ai_results) || [])
+      .filter(r => (r.userId === c.lineFriendId) || (r.customerName === c.name));
+    const TODAY_LP = new Date(); TODAY_LP.setHours(0, 0, 0, 0);
+    const ageOf = (birth) => {
+      if (!birth) return null;
+      const b = new Date(birth); if (isNaN(b.getTime())) return null;
+      let a = TODAY_LP.getFullYear() - b.getFullYear();
+      const m = TODAY_LP.getMonth() - b.getMonth();
+      if (m < 0 || (m === 0 && TODAY_LP.getDate() < b.getDate())) a--;
+      return a;
+    };
+    const fmtY = (d) => d ? new Date(d).getFullYear() : '?';
+
+    // ── Section 1: 家族 & 年齢 ───────────────────────────────────
+    const selfAge = ageOf(c.birth);
+    const spouse = (c.family || []).find(m => m.rel === 'spouse' || m.rel?.includes('spouse'));
+    const spouseAge = ageOf(spouse?.birth);
+    const children = (c.family || []).filter(m => m.rel === 'child' || m.rel?.match(/son_|daughter_|child/));
+
+    // 各子のネクストマイルストーン
+    const CHILD_MILESTONES = [
+      { ageAt: 6, label: '小学校入学', icon: '🎒' },
+      { ageAt: 12, label: '中学校入学', icon: '📚' },
+      { ageAt: 15, label: '高校入学', icon: '🏫' },
+      { ageAt: 18, label: '大学入学 (教育費ピーク)', icon: '🎓' },
+      { ageAt: 22, label: '就職', icon: '💼' },
+    ];
+    const childNextMilestone = (child) => {
+      if (!child.birth) return null;
+      const curAge = ageOf(child.birth);
+      if (curAge == null) return null;
+      const next = CHILD_MILESTONES.find(m => m.ageAt > curAge);
+      if (!next) return null;
+      const yearsUntil = next.ageAt - curAge;
+      const yr = TODAY_LP.getFullYear() + yearsUntil;
+      return { ...next, yr, yearsUntil };
+    };
+
+    const relLabel = (rel) => {
+      const MAP = { spouse:'配偶者', child:'お子様', son_1st:'長男', daughter_1st:'長女', son_2nd:'次男', daughter_2nd:'次女', son_3rd:'三男', daughter_3rd:'三女', child_other:'お子様' };
+      return MAP[rel] || rel || 'ご家族';
+    };
+
+    const familySectionHtml = `
+    <div style="background:#fff;border:1px solid #E2E8F0;border-radius:14px;padding:18px 20px;margin-bottom:14px;">
+      <div style="font-size:11.5px;font-weight:800;color:#475569;letter-spacing:0.1em;margin-bottom:14px;">👨‍👩‍👧‍👦 家族構成 & 年齢</div>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <!-- 本人 -->
+        <div style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:#F1F5FF;border-radius:10px;">
+          <div style="width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,#5B5BF0,#4338CA);display:flex;align-items:center;justify-content:center;font-size:17px;color:#fff;font-weight:800;flex-shrink:0;">${escapeHtml((c.name || '?').slice(0,1))}</div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:13.5px;font-weight:800;color:#0F172A;">${escapeHtml(c.name || 'お客様')}</div>
+            <div style="font-size:11.5px;color:#5B5BF0;font-weight:600;">${selfAge != null ? selfAge + '歳' : ''}${c.occupation ? ' · ' + escapeHtml(c.occupation) : ''}</div>
+          </div>
+          <div style="text-align:right;">
+            <span style="display:inline-block;background:#EEF2FF;color:#5B5BF0;padding:3px 10px;border-radius:99px;font-size:10.5px;font-weight:700;">本人</span>
+          </div>
+        </div>
+        <!-- 配偶者 -->
+        ${spouse ? `
+        <div style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:#FFF1F2;border-radius:10px;">
+          <div style="width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,#EF4444,#DC2626);display:flex;align-items:center;justify-content:center;font-size:17px;color:#fff;font-weight:800;flex-shrink:0;">${escapeHtml((spouse.name || '?').slice(0,1))}</div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:13.5px;font-weight:800;color:#0F172A;">${escapeHtml(spouse.name || '配偶者')}</div>
+            <div style="font-size:11.5px;color:#EF4444;font-weight:600;">${spouseAge != null ? spouseAge + '歳' : '年齢未設定'}${spouse.note ? ' · ' + escapeHtml(spouse.note) : ''}</div>
+          </div>
+          <div style="text-align:right;">
+            <span style="display:inline-block;background:#FFF1F2;border:1px solid #FCA5A5;color:#DC2626;padding:3px 10px;border-radius:99px;font-size:10.5px;font-weight:700;">配偶者</span>
+          </div>
+        </div>` : ''}
+        <!-- 子供 -->
+        ${children.map(child => {
+          const childAge = ageOf(child.birth);
+          const next = childNextMilestone(child);
+          return `
+          <div style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:#FFF7ED;border-radius:10px;">
+            <div style="width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,#EA580C,#C2410C);display:flex;align-items:center;justify-content:center;font-size:17px;color:#fff;font-weight:800;flex-shrink:0;">${escapeHtml((child.name || '?').slice(0,1))}</div>
+            <div style="flex:1;min-width:0;">
+              <div style="font-size:13.5px;font-weight:800;color:#0F172A;">${escapeHtml(child.name || 'お子様')} <span style="font-size:11px;color:#EA580C;font-weight:600;">${childAge != null ? childAge + '歳' : ''}${child.note ? ' · ' + escapeHtml(child.note) : ''}</span></div>
+              ${next ? `<div style="font-size:11px;color:#7C3AED;font-weight:700;margin-top:2px;">${next.icon} ${next.yr}年 → ${next.label} (あと${next.yearsUntil}年)</div>` : ''}
+            </div>
+            <div style="text-align:right;">
+              <span style="display:inline-block;background:#FFF7ED;border:1px solid #FDBA74;color:#EA580C;padding:3px 10px;border-radius:99px;font-size:10.5px;font-weight:700;">${relLabel(child.rel)}</span>
+            </div>
+          </div>`;
+        }).join('')}
+        ${!spouse && children.length === 0 ? `
+        <div style="text-align:center;padding:12px;color:#94A3B8;font-size:12px;">
+          家族情報が未登録です
+          <button type="button" class="cd-tab-jump" data-jump-tab="family" style="display:block;margin:8px auto 0;background:#F8FAFC;border:1px solid #CBD5E1;color:#475569;padding:7px 18px;border-radius:7px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">👨‍👩‍👧 家族タブ で 登録する →</button>
+        </div>` : `
+        <div style="text-align:right;margin-top:4px;">
+          <button type="button" class="cd-tab-jump" data-jump-tab="family" style="background:transparent;border:0;color:#94A3B8;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;">✏ 家族構成を編集 →</button>
+        </div>`}
+      </div>
+    </div>`;
+
+    // ── Section 2: ライフイベント タイムライン ────────────────────
+    const lifeEvents = events.filter(e => e.kind !== 'meeting' && e.kind !== 'task');
+    const futureLife = lifeEvents.filter(e => new Date(e.date) >= TODAY_LP).sort((a,b) => new Date(a.date) - new Date(b.date));
+    const pastLife = lifeEvents.filter(e => new Date(e.date) < TODAY_LP).sort((a,b) => new Date(b.date) - new Date(a.date)).slice(0, 3);
+
+    const catColor = { education:'#7C3AED', retirement:'#059669', health:'#DC2626', family:'#D97706', finance:'#2563EB', inherit:'#475569', business:'#0891B2', meeting:'#6B7280' };
+    const catLabel = { education:'教育', retirement:'退職/年金', health:'医療/介護', family:'家族', finance:'資産/財務', inherit:'相続', business:'事業', meeting:'面談' };
+
+    const evCard = (ev, isPast) => {
+      const color = catColor[ev.cat] || '#6B7280';
+      const yr = new Date(ev.date).getFullYear();
+      const today = TODAY_LP;
+      const diffMs = new Date(ev.date) - today;
+      const diffY = Math.round(diffMs / (365.25 * 86400000));
+      const relStr = isPast ? `${Math.abs(diffY)}年前` : (diffY === 0 ? '今年' : `あと${diffY}年`);
+      return `<div style="display:flex;align-items:flex-start;gap:12px;padding:10px 0;${isPast ? 'opacity:0.5;' : ''}">
+        <div style="width:48px;text-align:center;flex-shrink:0;">
+          <div style="font-size:14px;font-weight:900;color:${color};line-height:1;">${yr}</div>
+          <div style="font-size:10px;color:#94A3B8;margin-top:1px;">${relStr}</div>
+        </div>
+        <div style="flex:1;padding-left:12px;border-left:2px solid ${isPast ? '#E2E8F0' : color}${ev.major ? '' : '66'};">
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+            <span style="background:${color}18;color:${color};padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;">${catLabel[ev.cat] || ev.cat}</span>
+            ${ev.major ? '<span style="background:#FEF3C7;color:#92400E;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;">★ 重要</span>' : ''}
+          </div>
+          <div style="font-size:13.5px;font-weight:${ev.major ? '800' : '700'};color:#0F172A;margin-top:4px;">${escapeHtml(ev.label)}</div>
+          ${ev.who && ev.who !== c.name ? `<div style="font-size:11px;color:#64748B;margin-top:2px;">対象: ${escapeHtml(ev.who)}</div>` : ''}
+        </div>
+      </div>`;
+    };
+
+    const timelineSectionHtml = `
+    <div style="background:#fff;border:1px solid #E2E8F0;border-radius:14px;padding:18px 20px;margin-bottom:14px;">
+      <div style="font-size:11.5px;font-weight:800;color:#475569;letter-spacing:0.1em;margin-bottom:4px;">📅 ライフイベント タイムライン</div>
+      ${lifeCtaCard}
+      ${futureLife.length === 0 && !lifeCtaCard ? `
+        <div style="text-align:center;padding:20px;color:#94A3B8;font-size:12.5px;">
+          生年月日・家族を登録すると<br>向こう30年のイベントが自動で表示されます
+          <button type="button" class="cd-tab-jump" data-jump-tab="family" style="display:block;margin:10px auto 0;background:#5B5BF0;color:#fff;border:none;padding:8px 20px;border-radius:7px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">家族情報を登録 →</button>
+        </div>` :
+        `<div style="margin-top:12px;">
+          ${futureLife.slice(0, 15).map(ev => evCard(ev, false)).join('<hr style="border:none;border-top:1px solid #F1F5F9;margin:0;">')}
+          ${futureLife.length > 15 ? `<div style="text-align:center;padding:10px;font-size:12px;color:#94A3B8;">他 ${futureLife.length - 15} 件 (家族タブ → 生年修正で更新)</div>` : ''}
+          ${pastLife.length > 0 ? `
+            <div style="margin-top:14px;padding-top:14px;border-top:2px dashed #E2E8F0;">
+              <div style="font-size:10.5px;font-weight:700;color:#94A3B8;letter-spacing:0.08em;margin-bottom:8px;">過去 (直近3件)</div>
+              ${pastLife.map(ev => evCard(ev, true)).join('')}
+            </div>` : ''}
+        </div>`
+      }
+    </div>`;
+
+    // ── Section 3: AI自動抽出 (最新meeting result のみ) ──────────
+    const latestWithProfile = (aiResultsForC || [])
+      .filter(r => r.extractedProfile && (Object.keys(r.extractedProfile).length > 0 || (r.extractedProfile.family || []).length > 0))
+      .sort((a, b) => new Date(b.ts || b.createdAt || 0) - new Date(a.ts || a.createdAt || 0))[0];
+
+    const aiSectionHtml = latestWithProfile ? (() => {
+      const ep = latestWithProfile.extractedProfile;
+      const date = latestWithProfile.ts ? new Date(latestWithProfile.ts).toLocaleDateString('ja-JP') : '';
+      const items = [];
+      if (ep.selfBirth) items.push({ label: '生年月日', val: ep.selfBirth });
+      if (ep.selfOccupation) items.push({ label: '職業', val: ep.selfOccupation });
+      if (ep.selfIncomeAnnual) items.push({ label: '年収', val: '¥' + ep.selfIncomeAnnual.toLocaleString() + '万' });
+      if (ep.savingsTotal) items.push({ label: '資産', val: '¥' + ep.savingsTotal.toLocaleString() + '万' });
+      if (Array.isArray(ep.family) && ep.family.length > 0) {
+        ep.family.forEach(m => items.push({ label: relLabel(m.rel), val: (m.name || '—') + (m.birth ? ' (' + m.birth + ')' : '') }));
+      }
+      if (Array.isArray(ep.lifeGoals) && ep.lifeGoals.length > 0) {
+        ep.lifeGoals.forEach(g => items.push({ label: '目標', val: g }));
+      }
+      if (items.length === 0) return '';
+      return `
+      <div style="background:#F0FDF4;border:1px solid #86EFAC;border-radius:14px;padding:16px 20px;margin-bottom:14px;">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+          <span style="font-size:16px;">🤖</span>
+          <div>
+            <div style="font-size:11.5px;font-weight:800;color:#065F46;letter-spacing:0.06em;">AI が議事録から自動抽出</div>
+            ${date ? `<div style="font-size:10.5px;color:#059669;">${date} の面談より</div>` : ''}
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:6px;">
+          ${items.map(it => `
+            <div style="background:#fff;border:1px solid #BBF7D0;border-radius:8px;padding:8px 12px;">
+              <div style="font-size:10px;color:#6B7280;font-weight:700;letter-spacing:0.06em;">${escapeHtml(it.label)}</div>
+              <div style="font-size:12.5px;color:#0F172A;font-weight:700;margin-top:2px;">${escapeHtml(it.val)}</div>
+            </div>`).join('')}
+        </div>
+        <div style="margin-top:10px;text-align:right;">
+          <button type="button" class="cd-tab-jump" data-jump-tab="family" style="background:transparent;border:0;color:#059669;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;">✏ 家族タブで確認・修正 →</button>
+        </div>
+      </div>`;
+    })() : '';
+
+    return familySectionHtml + timelineSectionHtml + aiSectionHtml;
   }
 
   function renderFamilyTreeBlock(client) {
@@ -5671,7 +5890,7 @@ ${ctxText}${surveyTxt}`;
                 ${a.summary ? `
                   <div class="fp-meeting-block">
                     <div class="fp-meeting-block-label">AI 議事録 (Claude)</div>
-                    <div class="fp-meeting-body">${escapeHtml(a.summary)}</div>
+                    <div class="fp-meeting-body fp-minutes-view fp-summary-structured" data-raw-summary="${escapeHtml(a.summary)}">${window.renderStructuredSummary ? window.renderStructuredSummary(a.summary) : escapeHtml(a.summary)}</div>
                   </div>` : ''}
                 ${a.key_concerns && a.key_concerns.length > 0 ? `
                   <div class="fp-meeting-block">
