@@ -15,7 +15,7 @@
     --surface-2: #F5F7FA;
     --ink: #0F1729;
     --ink-2: #334155;
-    --dim: #64748B;
+    --dim: #4B5563;
     --rule: #E5E7EB;
     --primary: #00844A;
     --primary-soft: #ECFDF5;
@@ -113,7 +113,7 @@
 
   /* Checkpoint */
   .checkpoint { background: var(--primary-soft); border: 1.5px solid var(--primary); border-radius: 12px; padding: 20px 24px; margin: 24px 0; }
-  .checkpoint-title { font-family: 'Manrope', sans-serif; font-size: 12px; letter-spacing: 0.18em; font-weight: 800; color: var(--primary); text-transform: uppercase; margin-bottom: 10px; }
+  .checkpoint-title { font-family: 'Manrope', sans-serif; font-size: 12px; letter-spacing: 0.18em; font-weight: 800; color: var(--primary-dark); text-transform: uppercase; margin-bottom: 10px; }
   .checkpoint-body { color: var(--ink); font-size: 14.5px; font-weight: 600; line-height: 1.7; }
 
   /* Scope chip */
@@ -152,11 +152,11 @@
     <div class="kicker">FP Compass · 設定マニュアル</div>
     <h1>Zoom 連携 の 設定 手順</h1>
     <p class="lede">
-      Zoom Marketplace で FP Compass 用 の アクセス権 と 録画完了通知 を 設定 して、 面談 の 議事録 を 自動 で FP Compass に 届く 状態 に する 手順書。 Zoom Pro 契約 を すでに 済ませた 状態 が 前提。
+      Zoom Marketplace で FP Compass 用 の アクセス権 と 録画完了通知 を 設定 して、 面談 の 議事録 を 自動 で FP Compass に 届く 状態 に する 手順書。 直接 リンク で 1 クリック で 該当画面 に 飛ぶ ので、 迷わ ず 3 分 で 終わる。
     </p>
     <div class="head-meta">
-      <span>3 セクション · 全 8 分</span>
-      <span>Zoom Pro 契約 済 の owner 向け</span>
+      <span>3 セクション · 全 5 分</span>
+      <span>Zoom Pro 契約 済 前提</span>
       <span>2026-07-29 更新</span>
     </div>
   </div>
@@ -176,49 +176,42 @@
   <section id="s1">
     <div class="section-head">
       <span class="section-count">Section 01</span>
-      <h2>アクセス権 (スコープ) を 追加 <span class="section-time">3 分</span></h2>
+      <h2>アクセス権 (スコープ) を 追加 <span class="section-time">2 分</span></h2>
     </div>
     <p class="section-lede">
-      FP Compass が Zoom API に データ を 取りに 行く ため の 権限 4 つ を Zoom Marketplace の アプリ に 追加 します。
+      FP Compass が Zoom の データ を 取得 する ため の 権限 4 つ を、 Zoom Marketplace の アプリ に 追加 します。 下 の 直接 リンク で Scopes 画面 に 一発 で 飛べます。
     </p>
 
     <div class="step">
       <div class="step-head">
         <span class="step-num">1</span>
-        <h3 class="step-title">Zoom Marketplace の アプリ 一覧 を 開く</h3>
+        <h3 class="step-title">Scopes 画面 を 直接 開く (Chrome ログイン 必要)</h3>
       </div>
       <div class="step-body">
-        <p>下 の URL を Chrome で 開いて、 Zoom アカウント で ログイン します (2要素認証 まで 完了 させる)。</p>
-        <div class="copy-block" data-copy="https://marketplace.zoom.us/user/build">
+        <p>下 の 「Copy」 を 押して URL を コピー → Chrome の アドレスバー に 貼付 → Zoom アカウント で ログイン (2要素認証 まで 完了 させる)。</p>
+        <div class="copy-block" data-copy="https://marketplace.zoom.us/develop/apps/anOSyfukSYClWMKm1Avf1Q/scope">
           <button class="copy-btn">Copy</button>
-          https://marketplace.zoom.us/user/build
+          https://marketplace.zoom.us/develop/apps/anOSyfukSYClWMKm1Avf1Q/scope
         </div>
-        <p>「作成した アプリ」 一覧 に <code>FP Compass</code> の アプリ が 表示 されて いる こと を 確認。</p>
+        <p style="margin-top:10px;">
+          <a class="cta" href="https://marketplace.zoom.us/develop/apps/anOSyfukSYClWMKm1Avf1Q/scope" target="_blank" rel="noopener">↗ Scopes 画面 を 開く</a>
+        </p>
+        <div class="callout info">
+          <b>これ は owner (FP Compass 本体) の 直接 リンク</b>。 別 会社 で FP Compass 契約 する 場合 は、 各 client 自身 の Zoom アプリ の app ID に 差し替え て 使う。
+        </div>
       </div>
     </div>
 
     <div class="step">
       <div class="step-head">
         <span class="step-num">2</span>
-        <h3 class="step-title">FP Compass アプリ を 選択 → 左メニュー の 「Scopes」</h3>
-      </div>
-      <div class="step-body">
-        <p>
-          「FP Compass」 の 名前 を 押して、 アプリ 詳細 画面 に 入り、 左メニュー の <strong>Scopes</strong> タブ を 押します。
-        </p>
-      </div>
-    </div>
-
-    <div class="step">
-      <div class="step-head">
-        <span class="step-num">3</span>
         <h3 class="step-title">「+ Add Scopes」 で スコープ 4 つ を チェック</h3>
       </div>
       <div class="step-body">
         <p>「+ Add Scopes」 ボタン を 押して 出た モーダル の 検索欄 に 下 の 名前 を 入力 して、 該当 する 権限 に チェック。 4 つ 全部 終わったら <strong>Done</strong> → <strong>Continue</strong> → <strong>Save</strong>。</p>
         <ul class="copy-list">
           <li>
-            <div class="cb-value"><span class="cb-label">録画一覧 の 取得</span>cloud_recording:read:list_user_recordings:admin</div>
+            <div class="cb-value"><span class="cb-label">録画 の 一覧 取得</span>cloud_recording:read:list_user_recordings:admin</div>
             <button class="copy-btn-inline" data-copy="cloud_recording:read:list_user_recordings:admin">Copy</button>
           </li>
           <li>
@@ -240,20 +233,10 @@
       </div>
     </div>
 
-    <div class="step">
-      <div class="step-head">
-        <span class="step-num">4</span>
-        <h3 class="step-title">Activation で グリーン ✓ を 確認</h3>
-      </div>
-      <div class="step-body">
-        <p>Save 後 に 「Activation」 タブ で <strong>Your app is activated on the account</strong> の グリーン ✓ が 出れば、 スコープ 追加 は 完了。</p>
-      </div>
-    </div>
-
     <div class="checkpoint">
       <div class="checkpoint-title">Section 01 完了 確認</div>
       <div class="checkpoint-body">
-        Scopes タブ に <span class="scope-chip">cloud_recording:read:list_user_recordings</span> <span class="scope-chip">cloud_recording:read:recording</span> <span class="scope-chip">user:read:user</span> <span class="scope-chip">billing:read:plan_information</span> の 4 つ が 表示 されて いれば OK。
+        Save 後、 Scopes タブ に <span class="scope-chip">cloud_recording:read:list_user_recordings</span> <span class="scope-chip">cloud_recording:read:recording</span> <span class="scope-chip">user:read:user</span> <span class="scope-chip">billing:read:plan_information</span> の 4 つ が 表示 されて いれば OK。
       </div>
     </div>
   </section>
@@ -261,45 +244,45 @@
   <section id="s2">
     <div class="section-head">
       <span class="section-count">Section 02</span>
-      <h2>録画完了通知 を 登録 <span class="section-time">4 分</span></h2>
+      <h2>録画完了通知 を 登録 <span class="section-time">3 分</span></h2>
     </div>
     <p class="section-lede">
-      Zoom で 会議 の 録画 が 終わったら、 FP Compass に 自動 で 通知 が 届く 設定 (Event Subscription) を 追加 します。
+      Zoom で 会議 の 録画 が 終わったら、 FP Compass に 自動 で 通知 が 届く 設定 を 追加 します。 下 の 直接 リンク で Feature 画面 に 一発 で 飛べます。
     </p>
 
     <div class="step">
       <div class="step-head">
         <span class="step-num">1</span>
-        <h3 class="step-title">アプリ 詳細 の 「Feature」 タブ を 開く</h3>
+        <h3 class="step-title">Feature 画面 を 直接 開く</h3>
       </div>
       <div class="step-body">
-        <p>Section 01 と 同じ FP Compass アプリ の 中 で、 左メニュー の <strong>Feature</strong> タブ を 押します。 直接 URL で 開く なら 下:</p>
-        <div class="copy-block" data-copy="https://marketplace.zoom.us/develop/apps">
+        <div class="copy-block" data-copy="https://marketplace.zoom.us/develop/apps/anOSyfukSYClWMKm1Avf1Q/feature">
           <button class="copy-btn">Copy</button>
-          https://marketplace.zoom.us/develop/apps
+          https://marketplace.zoom.us/develop/apps/anOSyfukSYClWMKm1Avf1Q/feature
         </div>
-        <p>から 該当 アプリ を 選び、 Feature タブ へ。</p>
+        <p style="margin-top:10px;">
+          <a class="cta" href="https://marketplace.zoom.us/develop/apps/anOSyfukSYClWMKm1Avf1Q/feature" target="_blank" rel="noopener">↗ Feature 画面 を 開く</a>
+        </p>
       </div>
     </div>
 
     <div class="step">
       <div class="step-head">
         <span class="step-num">2</span>
-        <h3 class="step-title">Event Subscriptions を ON に する</h3>
+        <h3 class="step-title">Event Subscriptions を ON → 「+ Add Event Subscription」</h3>
       </div>
       <div class="step-body">
-        <p>「General Features」 の 中 の <strong>Event Subscriptions</strong> の トグルスイッチ を 押して、 グリーン に 変える。</p>
-        <p>直後 に <strong>「+ Add Event Subscription」</strong> ボタン が 出現 します。</p>
+        <p>ページ の 中央 の 「General Features」 に ある <strong>Event Subscriptions</strong> の トグル スイッチ を 押して グリーン に する。 直後 に <strong>「+ Add Event Subscription」</strong> ボタン が 現れる ので 押す。</p>
       </div>
     </div>
 
     <div class="step">
       <div class="step-head">
         <span class="step-num">3</span>
-        <h3 class="step-title">サブスクリプション を 追加 (名前 + URL 貼付)</h3>
+        <h3 class="step-title">名前 + 通知先 URL を 貼付</h3>
       </div>
       <div class="step-body">
-        <p>「+ Add Event Subscription」 を 押して フォーム に:</p>
+        <p>開いた フォーム に、 下 の 値 を そのまま Copy して 貼付:</p>
         <ul class="copy-list">
           <li>
             <div class="cb-value"><span class="cb-label">Subscription Name</span>Recording Completed</div>
@@ -316,14 +299,15 @@
     <div class="step">
       <div class="step-head">
         <span class="step-num">4</span>
-        <h3 class="step-title">「+ Add Events」 → Recording → All Recordings have completed</h3>
+        <h3 class="step-title">「+ Add Events」 → Recording → All Recordings have completed → Done → Save</h3>
       </div>
       <div class="step-body">
-        <p>フォーム 内 の <strong>「+ Add Events」</strong> を 押す と Event Types モーダル が 開く。 手順:</p>
+        <p>フォーム 内 の <strong>「+ Add Events」</strong> を 押す と モーダル が 開く。 続けて 4 動作:</p>
         <ol>
           <li>左サイドバー で <strong>Recording</strong> を 押す</li>
-          <li>右側 で <strong>All Recordings have completed</strong> の チェックボックス に チェック</li>
-          <li>右下 の <strong>Done</strong> を 押す</li>
+          <li>右側 で <strong>All Recordings have completed</strong> の チェックボックス を 押す</li>
+          <li>右下 の <strong>Done</strong> を 押す (モーダル 閉じる)</li>
+          <li>フォーム 下部 の <strong>Save</strong> を 押す</li>
         </ol>
       </div>
     </div>
@@ -331,23 +315,20 @@
     <div class="step">
       <div class="step-head">
         <span class="step-num">5</span>
-        <h3 class="step-title">「Save」 で サブスクリプション を 保存</h3>
+        <h3 class="step-title">「Validate」 を 押して グリーン ✓ を 確認</h3>
       </div>
       <div class="step-body">
-        <p>フォーム 下部 の <strong>Save</strong> ボタン を 押す。 「Recording Completed」 という サブスクリプション が 一覧 に 追加 される。</p>
+        <p>保存 された URL 欄 の 下 に <strong>「Validate」</strong> ボタン が 現れる ので 押す。 Zoom が Skeleton の サーバー に 確認 を 送り、 <strong>グリーン ✓ (Validated)</strong> に なれば 登録完了。</p>
+        <div class="callout warn">
+          <b>もし Validate が 失敗 したら</b>: URL に 余分 な スペース / 全角 文字 が 入って ない か 確認。 それ でも 失敗 する なら Skeleton の Jobs に 連絡 (裏 の Secret Token の 反映 状況 を 実測 確認 する)。
+        </div>
       </div>
     </div>
 
-    <div class="step">
-      <div class="step-head">
-        <span class="step-num">6</span>
-        <h3 class="step-title">「Validate」 で URL 検証 → グリーン ✓</h3>
-      </div>
-      <div class="step-body">
-        <p>保存 された サブスクリプション の URL 欄 の 下 に <strong>「Validate」</strong> ボタン が 出る。 押す と Zoom が Skeleton の エンドポイント に テスト リクエスト を 送信 → HMAC 応答 を 検証 → <strong>グリーン ✓ (Validated)</strong> に なれば 登録完了。</p>
-        <div class="callout warn">
-          <b>もし Validate が 失敗 したら</b>: URL に 余分 な スペース / 全角 文字 が 入って ない か 確認。 それ でも 失敗 する なら Skeleton サポート に 連絡 (Secret Token 側 の 反映 状況 を 実測 確認 する)。
-        </div>
+    <div class="checkpoint">
+      <div class="checkpoint-title">Section 02 完了 確認</div>
+      <div class="checkpoint-body">
+        Feature タブ の Event Subscriptions 一覧 に 「Recording Completed」 サブスクリプション が グリーン ✓ で 表示 されて いれば OK。
       </div>
     </div>
   </section>
