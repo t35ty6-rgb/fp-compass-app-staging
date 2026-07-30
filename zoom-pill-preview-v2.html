@@ -38,7 +38,7 @@
   /* Common bar structure */
   .bar-base { padding: 11px 18px 11px 20px; border-radius: 12px; display: flex; align-items: center; gap: 16px; font-size: 13px; box-shadow: 0 12px 32px rgba(15,23,41,0.16); font-family: 'Noto Sans JP', sans-serif; }
   .bar-lbl { font-weight: 800; white-space: nowrap; line-height: 1.35; }
-  .bar-sub { font-size: 11.5px; font-weight: 500; margin-top: 1px; opacity: 0.72; }
+  .bar-sub { font-size: 12px; font-weight: 500; margin-top: 1px; opacity: 0.75; }
   .bar-icon { width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 900; flex-shrink: 0; font-family: 'Manrope', sans-serif; font-size: 13px; }
   .bar-track { flex: 1; height: 4px; background: rgba(0,0,0,0.08); border-radius: 999px; overflow: hidden; min-width: 100px; }
   .bar-fill { height: 100%; border-radius: 999px; }
@@ -107,9 +107,10 @@
 <header class="head">
   <div class="head-wrap">
     <div class="head-kicker">FP COMPASS · UI PROPOSAL v2</div>
-    <h1>CASE 04 決定 → 完成 状態 の カラー 5 案</h1>
+    <h1>CASE 04 決定 → 完成 状態 の カラー 4 案</h1>
     <p class="lede">
-      前 の 「濃 ink + 緑 グラデ」 が 背景 と 被って いた ので、 完成 状態 の 色 だけ 差替 5 案。 「処理中」 状態 (ink dark) は 変更 なし。
+      前 の 「濃 ink + 緑 グラデ」 が 背景 と 被って いた ので、 完成 状態 の 色 だけ 差替 4 案。 「処理中」 状態 (ink dark) は 変更 なし。
+      <br><span style="color:#93C5FD;font-weight:700;">Jobs 推薦: 04-B (白 × 緑パネル、 状態 分離) or 04-C (全面 緑、 視認 速度 No.1)</span>
     </p>
   </div>
 </header>
@@ -200,37 +201,15 @@
     </div>
   </section>
 
-  <!-- D -->
+  <!-- D (旧 E: White + Green Pulse Glow — 静か。 動き あり な ので 実物 確認 推奨) -->
   <section class="section">
     <div class="section-head">
       <span class="section-num">04-D</span>
-      <h2 class="section-title">Emerald → Teal Gradient · 完了 の 祝い 感</h2>
+      <h2 class="section-title">White + Green Pulse Glow · 静か に 気付かせる (動き あり)</h2>
     </div>
-    <p class="section-lede">緑 から teal に 横 グラデ。 完了 の celebration 感 を さりげ なく。 button は 白 で 反転。</p>
+    <p class="section-lede">白 本体、 色 の 主張 なし。 外側 に 淡緑 の 光 が 呼吸 する ように 明滅。 静止 スクショ だと 04-A に 見える が、 実物 は 縁 が 明滅 する。 <b>実 URL で 見て 判断 して 欲しい</b>。</p>
     <div class="demo-cell">
-      <span class="demo-label">完成</span>
-      <div class="bar-base v-d">
-        <div class="bar-icon">✓</div>
-        <div>
-          <div class="bar-lbl">テスト 様 の 議事録 が 完成 しました</div>
-          <div class="bar-sub">Meeting 82816151665 · 14 分前 の 面談</div>
-        </div>
-        <div class="bar-track" style="background: rgba(255,255,255,0.22);"><div class="bar-fill" style="width: 100%; background: #fff;"></div></div>
-        <button class="bar-cta">面談履歴 を 開く</button>
-        <button class="bar-close" style="color: rgba(255,255,255,0.65);">×</button>
-      </div>
-    </div>
-  </section>
-
-  <!-- E -->
-  <section class="section">
-    <div class="section-head">
-      <span class="section-num">04-E</span>
-      <h2 class="section-title">White + Green Pulse Glow · 静か に 気付かせる</h2>
-    </div>
-    <p class="section-lede">白 本体、 色 の 主張 なし。 でも 外側 に 淡緑 の 光 が 呼吸 する ように 明滅。 「うるさく ない けど 気付ける」 の バランス。</p>
-    <div class="demo-cell">
-      <span class="demo-label">完成</span>
+      <span class="demo-label">完成 (動きあり)</span>
       <div class="bar-base v-e">
         <div class="bar-icon">✓</div>
         <div>
@@ -247,7 +226,9 @@
   <div class="choice-bar">
     <div class="choice-title">SELECT · 完成 状態 の 案 を 選ぶ</div>
     <div class="choice-body">
-      04-A 〜 04-E の 番号 で 教えて。 選ばれたら 即 実装 → 現行 pill を 差替 → PROD 反映 する。
+      04-A / 04-B / 04-C / 04-D の 番号 で 教えて。 選ばれたら 即 実装 → 現行 pill を 差替 → PROD 反映 する。<br>
+      <b>Jobs 推薦: 04-B (状態 分離 の 白×緑) or 04-C (全面 緑、 見逃さない)</b>。 04-A は 淡すぎ リスク、 04-D は 動き ある ので 実 URL 確認 必須。
+      <br><span style="font-size:12px;font-weight:600;color:var(--ink-3);">旧 04-D (grad) は AI reject 該当 で 削除 済。</span>
     </div>
   </div>
 
